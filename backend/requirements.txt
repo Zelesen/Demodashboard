@@ -7,3 +7,4 @@ sqlalchemy
 httpx
 python-jose[cryptography]
 python-dotenv
+PyJWT==2.10.1
