@@ -124,6 +124,175 @@ function MethodDonutChart({ data }) {
   );
 }
 
+function MethodCountChart({ data }) {
+  if (!data || !data.methods || data.methods.length === 0) {
+    return <div className="text-center py-8 text-slate-400 text-xs">No method data available</div>;
+  }
+  const methods = data.methods.slice(0, 8);
+  const maxCount = Math.max(...methods.map(m => m.count), 1);
+  return (
+    <div className="space-y-1 px-1">
+      {methods.map((item) => {
+        const pct = (item.count / maxCount) * 100;
+        return (
+          <div key={item.method} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+            <span className="w-24 text-[10px] font-semibold text-slate-700 truncate text-right shrink-0">{item.method}</span>
+            <div className="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+            </div>
+            <span className="text-[10px] font-bold text-slate-600 w-14 text-right shrink-0 tabular-nums">{item.count.toLocaleString()}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SiteRevenueDonutChart({ data }) {
+  if (!data || !data.sites || data.sites.length === 0) {
+    return <div className="text-center py-8 text-slate-400 text-xs">No site data available</div>;
+  }
+  const colors = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#94a3b8', '#06b6d4'];
+  const sites = data.sites.slice(0, 6);
+  const totalAmount = sites.reduce((s, m) => s + m.total, 0);
+  const siteOptions = {
+    series: sites.map(m => m.total),
+    chart: { type: "donut", height: 260, fontFamily: "Inter, sans-serif", animations: { enabled: true, easing: "easeinout", speed: 1000 } },
+    colors: colors,
+    labels: sites.map(m => m.name),
+    plotOptions: { pie: { donut: { size: "62%", labels: { show: true, name: { show: true, fontSize: "10px", fontWeight: 600, color: "#64748b", offsetY: -3 }, value: { show: true, fontSize: "13px", fontWeight: 700, color: "#1e293b", offsetY: 5, formatter: (val) => formatUKCurrency(parseFloat(val), 0) }, total: { show: true, label: "Total", fontSize: "9px", fontWeight: 500, color: "#64748b", offsetY: 15, formatter: () => formatUKCurrency(totalAmount, 0) } } } } },
+    stroke: { width: 2, colors: ["#ffffff"] },
+    dataLabels: { enabled: false },
+    legend: { position: "bottom", horizontalAlign: "center", fontSize: "9px", fontFamily: "Inter, sans-serif", markers: { radius: 10, width: 8, height: 8 }, itemMargin: { horizontal: 6, vertical: 3 } },
+    tooltip: { theme: "light", style: { fontSize: "11px", fontFamily: "Inter, sans-serif" }, y: { formatter: (val) => formatUKCurrency(val, 0) } },
+    responsive: [{ breakpoint: 480, options: { chart: { height: 220 }, legend: { position: "bottom", fontSize: "8px" } } }]
+  };
+  return (
+    <div className="flex flex-col items-center">
+      <ReactApexChart options={siteOptions} series={siteOptions.series} type="donut" height={260} />
+    </div>
+  );
+}
+
+function PractitionerRevenueDonutChart({ data }) {
+  if (!data || !data.practitioners || data.practitioners.length === 0) {
+    return <div className="text-center py-8 text-slate-400 text-xs">No practitioner data available</div>;
+  }
+  const colors = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#94a3b8', '#06b6d4'];
+  const practitioners = data.practitioners.slice(0, 6);
+  const totalAmount = practitioners.reduce((s, m) => s + m.total, 0);
+  const pracOptions = {
+    series: practitioners.map(m => m.total),
+    chart: { type: "donut", height: 260, fontFamily: "Inter, sans-serif", animations: { enabled: true, easing: "easeinout", speed: 1000 } },
+    colors: colors,
+    labels: practitioners.map(m => m.name),
+    plotOptions: { pie: { donut: { size: "62%", labels: { show: true, name: { show: true, fontSize: "10px", fontWeight: 600, color: "#64748b", offsetY: -3 }, value: { show: true, fontSize: "13px", fontWeight: 700, color: "#1e293b", offsetY: 5, formatter: (val) => formatUKCurrency(parseFloat(val), 0) }, total: { show: true, label: "Total", fontSize: "9px", fontWeight: 500, color: "#64748b", offsetY: 15, formatter: () => formatUKCurrency(totalAmount, 0) } } } } },
+    stroke: { width: 2, colors: ["#ffffff"] },
+    dataLabels: { enabled: false },
+    legend: { position: "bottom", horizontalAlign: "center", fontSize: "9px", fontFamily: "Inter, sans-serif", markers: { radius: 10, width: 8, height: 8 }, itemMargin: { horizontal: 6, vertical: 3 } },
+    tooltip: { theme: "light", style: { fontSize: "11px", fontFamily: "Inter, sans-serif" }, y: { formatter: (val) => formatUKCurrency(val, 0) } },
+    responsive: [{ breakpoint: 480, options: { chart: { height: 220 }, legend: { position: "bottom", fontSize: "8px" } } }]
+  };
+  return (
+    <div className="flex flex-col items-center">
+      <ReactApexChart options={pracOptions} series={pracOptions.series} type="donut" height={260} />
+    </div>
+  );
+}
+
+function CumulativeRevenueChart({ trendData }) {
+  if (!trendData || !trendData.chart_data || trendData.chart_data.length < 2) {
+    return <div className="text-center py-8 text-slate-400 text-xs">Insufficient trend data</div>;
+  }
+  const cumulative = [];
+  let runningTotal = 0;
+  for (const d of trendData.chart_data) {
+    runningTotal += d.total;
+    cumulative.push({ ...d, cumulativeTotal: runningTotal });
+  }
+  const chartOptions = {
+    series: [{ name: "Cumulative Revenue", data: cumulative.map(d => d.cumulativeTotal) }],
+    chart: { type: "area", height: 200, fontFamily: "Inter, sans-serif", toolbar: { show: false }, animations: { enabled: true, easing: "easeinout", speed: 600 } },
+    colors: ["#8b5cf6"],
+    fill: { type: "gradient", gradient: { shade: "light", type: "vertical", shadeIntensity: 0.1, opacityFrom: 0.8, opacityTo: 0.9, stops: [0, 90, 100] } },
+    stroke: { width: 1.5, curve: "smooth" },
+    xaxis: { categories: cumulative.map(d => d.date), labels: { style: { colors: "#94a3b8", fontSize: "9px", fontWeight: 500 } }, axisBorder: { show: false }, axisTicks: { show: false } },
+    yaxis: { labels: { style: { colors: "#94a3b8", fontSize: "9px", fontWeight: 500 }, formatter: (val) => formatUKCurrency(val, 0) } },
+    tooltip: { theme: "light", style: { fontSize: "10px", fontFamily: "Inter, sans-serif" }, y: { formatter: (val) => formatUKCurrency(val, 0) } },
+    grid: { borderColor: "#f1f5f9", strokeDasharray: 3 },
+    legend: { position: "top", horizontalAlign: "right", fontSize: "10px", fontFamily: "Inter, sans-serif", markers: { radius: 8, width: 8, height: 8 }, itemMargin: { horizontal: 8 } },
+    dataLabels: { enabled: false }
+  };
+  return <ReactApexChart options={chartOptions} series={chartOptions.series} type="area" height={200} />;
+}
+
+function AverageBySiteChart({ data }) {
+  if (!data || !data.sites || data.sites.length === 0) {
+    return <div className="text-center py-8 text-slate-400 text-xs">No site data available</div>;
+  }
+  const sites = data.sites.slice(0, 6).map(s => ({ ...s, avg: s.count > 0 ? s.total / s.count : 0 }));
+  const maxAvg = Math.max(...sites.map(s => s.avg), 1);
+  return (
+    <div className="space-y-1">
+      {sites.map((item, i) => {
+        const pct = (item.avg / maxAvg) * 100;
+        return (
+          <div key={item.name} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+            <span className="w-20 text-[10px] font-semibold text-slate-700 truncate text-right shrink-0">{item.name}</span>
+            <div className="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+            </div>
+            <span className="text-[10px] font-bold text-slate-600 w-16 text-right shrink-0 tabular-nums">{formatUKCurrency(item.avg, 0)}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function AverageByPractitionerChart({ data }) {
+  if (!data || !data.practitioners || data.practitioners.length === 0) {
+    return <div className="text-center py-8 text-slate-400 text-xs">No practitioner data available</div>;
+  }
+  const practitioners = data.practitioners.slice(0, 8).map(p => ({ ...p, avg: p.count > 0 ? p.total / p.count : 0 }));
+  const maxAvg = Math.max(...practitioners.map(p => p.avg), 1);
+  return (
+    <div className="space-y-1">
+      {practitioners.map((item, i) => {
+        const pct = (item.avg / maxAvg) * 100;
+        return (
+          <div key={item.name} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+            <span className="w-24 text-[10px] font-semibold text-slate-700 truncate text-right shrink-0">{item.name}</span>
+            <div className="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+            </div>
+            <span className="text-[10px] font-bold text-slate-600 w-16 text-right shrink-0 tabular-nums">{formatUKCurrency(item.avg, 0)}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function PaymentCountTrendChart({ trendData }) {
+  if (!trendData || !trendData.chart_data || trendData.chart_data.length < 2) {
+    return <div className="text-center py-8 text-slate-400 text-xs">Insufficient trend data</div>;
+  }
+  const chartOptions = {
+    series: [{ name: "Payment Count", data: trendData.chart_data.map(d => d.count) }],
+    chart: { type: "bar", height: 200, fontFamily: "Inter, sans-serif", toolbar: { show: false }, animations: { enabled: true, easing: "easeinout", speed: 600 } },
+    colors: ["#06b6d4"],
+    plotOptions: { bar: { borderRadius: 3, columnWidth: "60%", dataLabels: { position: "top" } } },
+    xaxis: { categories: trendData.chart_data.map(d => d.date), labels: { style: { colors: "#94a3b8", fontSize: "9px", fontWeight: 500 } }, axisBorder: { show: false }, axisTicks: { show: false } },
+    yaxis: { labels: { style: { colors: "#94a3b8", fontSize: "9px", fontWeight: 500 } } },
+    tooltip: { theme: "light", style: { fontSize: "10px", fontFamily: "Inter, sans-serif" } },
+    grid: { borderColor: "#f1f5f9", strokeDasharray: 3 },
+    legend: { position: "top", horizontalAlign: "right", fontSize: "10px", fontFamily: "Inter, sans-serif", markers: { radius: 8, width: 8, height: 8 }, itemMargin: { horizontal: 8 } },
+    dataLabels: { enabled: false }
+  };
+  return <ReactApexChart options={chartOptions} series={chartOptions.series} type="bar" height={200} />;
+}
+
 export default function Payments() {
   const [activeFilter, setActiveFilter] = useState('Last 7 days');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -291,6 +460,7 @@ export default function Payments() {
       case "Top Method": return 'Most frequently used payment method.';
       case "Cash Payments": return 'Count of payments made with cash.';
       case "Card Payments": return 'Count of debit and credit card payments.';
+      case "Unexplained Amount": return 'Sum of amount_unexplained where the payment allocation has not been fully explained.';
       default: return 'Calculated from payment records in the selected period.';
     }
   };
@@ -303,6 +473,7 @@ export default function Payments() {
       case "Top Method": return [{ field: 'method', role: 'Grouped and counted' }];
       case "Cash Payments": return [{ field: 'method', role: 'Filtered to cash' }];
       case "Card Payments": return [{ field: 'method', role: 'Filtered to debit/credit card' }];
+      case "Unexplained Amount": return [{ field: 'amount_unexplained', role: 'Summed' }];
       default: return [];
     }
   };
@@ -385,6 +556,7 @@ export default function Payments() {
     { title: "Top Method", value: (kpiData?.topMethod || "N/A").charAt(0).toUpperCase() + (kpiData?.topMethod || "N/A").slice(1), change: null, positive: true, sparklineField: null, footer: "most used method", icon: CreditCard, tooltip: "Most frequently used payment method" },
     { title: "Cash Payments", value: (kpiData?.cashCount || 0).toLocaleString(), change: "-1.5%", positive: false, sparklineField: null, footer: "cash transactions", icon: Banknote, tooltip: "Number of cash payments" },
     { title: "Card Payments", value: (kpiData?.cardCount || 0).toLocaleString(), change: "+9.1%", positive: true, sparklineField: null, footer: "debit & credit", icon: PiggyBank, tooltip: "Number of debit and credit card payments" },
+    { title: "Unexplained Amount", value: formatUKCurrency(kpiData?.unexplained || 0, 0), change: null, positive: false, sparklineField: null, footer: "unallocated revenue", icon: Activity, tooltip: "Sum of payment amounts not yet explained or allocated" },
   ];
 
   return (
@@ -447,8 +619,8 @@ export default function Payments() {
       {/* KPI Metrics Strip */}
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 divide-x divide-slate-100">
+            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
               <div key={i} className="p-3.5 flex flex-col justify-between">
                 <div className="flex items-center gap-1.5 mb-2"><div className="w-6 h-6 rounded-lg bg-slate-200 animate-pulse" /><div className="h-2.5 w-14 bg-slate-200 rounded animate-pulse" /></div>
                 <div className="h-7 w-16 bg-slate-200 rounded animate-pulse mb-1.5" /><div className="h-2.5 w-12 bg-slate-200 rounded animate-pulse" />
@@ -458,7 +630,7 @@ export default function Payments() {
         </div>
       ) : kpiData && (
         <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 divide-x divide-slate-100">
             {kpiMetrics.map((m, index) => {
               const Icon = m.icon;
               const bgAccent = m.positive ? "bg-emerald-50" : "bg-rose-50";
@@ -586,6 +758,62 @@ export default function Payments() {
         </div>
       )}
 
+      {/* Method Count & Site Distribution */}
+      {loading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
+            <div className="p-3 space-y-2">{[1, 2, 3, 4, 5].map((i) => (<div key={i} className="h-6 bg-slate-100 rounded-xl animate-pulse" />))}</div>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
+            <div className="p-3"><div className="w-full h-[220px] bg-slate-100 rounded-lg animate-pulse" /></div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {/* Method Count Breakdown */}
+          {methodData && (
+            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">66</span>
+                  <CreditCard size={12} className="text-slate-400" />
+                  Method Volume
+                  <InfoIcon title="Method Volume" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'method', role: 'Grouped and counted' }, { field: 'count', role: 'Number of payments per method' }]} databaseTables={['dentally_payments']} calculations="Groups payments by method and counts transactions. Shows which payment methods are most frequently used." additionalInfo="Payment transaction count by method" />
+                </h3>
+                <p className="text-[9px] text-slate-400 font-medium">Transaction count by payment method</p>
+              </div>
+              <div className="p-3">
+                <MethodCountChart data={methodData} />
+              </div>
+            </div>
+          )}
+
+          {/* Site Revenue Distribution */}
+          {siteData && (
+            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">67</span>
+                      <Building2 size={12} className="text-slate-400" />
+                      Site Revenue Split
+                      <InfoIcon title="Site Revenue Split" apiEndpoint="https://api.dentally.co/v1/payments , https://api.dentally.co/v1/sites" apiFields={[{ field: 'site_id', role: 'Links to sites table' }, { field: 'amount', role: 'Summed per site' }, { field: 'name', role: 'Site name (dentally_sites)' }]} databaseTables={['dentally_payments', 'dentally_sites']} calculations="Joins payments with sites on site_id = dentally_id. Sums amount per site and shows as percentage of total." additionalInfo="How total revenue is distributed across practice locations" />
+                    </h3>
+                    <p className="text-[9px] text-slate-400 font-medium">Revenue share by practice location</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3">
+                <SiteRevenueDonutChart data={siteData} />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Payments by Practitioner */}
       {loading ? (
         <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
@@ -610,6 +838,126 @@ export default function Payments() {
           <div className="p-3">
             <PaymentsByPractitionerChart data={practitionerData} />
           </div>
+        </div>
+      )}
+
+      {/* Practitioner Distribution & Average */}
+      {loading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
+            <div className="p-3"><div className="w-full h-[220px] bg-slate-100 rounded-lg animate-pulse" /></div>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
+            <div className="p-3 space-y-2">{[1, 2, 3, 4, 5, 6].map((i) => (<div key={i} className="h-6 bg-slate-100 rounded-xl animate-pulse" />))}</div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {/* Practitioner Revenue Distribution */}
+          {practitionerData && (
+            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">68</span>
+                      <ArrowDownUp size={12} className="text-slate-400" />
+                      Practitioner Revenue Split
+                      <InfoIcon title="Practitioner Revenue Split" apiEndpoint="https://api.dentally.co/v1/payments , https://api.dentally.co/v1/practitioners" apiFields={[{ field: 'practitioner_id', role: 'Links to practitioners table' }, { field: 'amount', role: 'Summed per practitioner' }, { field: 'first_name', role: 'Practitioner first name' }, { field: 'last_name', role: 'Practitioner last name' }]} databaseTables={['dentally_payments', 'dentally_practitioners']} calculations="Joins payments with practitioners on practitioner_id = dentally_id. Sums amount per practitioner and shows proportional share." additionalInfo="Revenue distribution across clinicians" />
+                    </h3>
+                    <p className="text-[9px] text-slate-400 font-medium">Revenue share by clinician</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3">
+                <PractitionerRevenueDonutChart data={practitionerData} />
+              </div>
+            </div>
+          )}
+
+          {/* Average Payment by Practitioner */}
+          {practitionerData && (
+            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">69</span>
+                      <TrendingUp size={12} className="text-slate-400" />
+                      Avg Payment by Practitioner
+                      <InfoIcon title="Avg Payment by Practitioner" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'amount', role: 'Summed per practitioner' }, { field: 'count', role: 'Count of payments' }]} databaseTables={['dentally_payments']} calculations="For each practitioner, divides total amount by payment count to get average transaction value." additionalInfo="Average payment value per clinician" />
+                    </h3>
+                    <p className="text-[9px] text-slate-400 font-medium">Average transaction value per clinician</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3">
+                <AverageByPractitionerChart data={practitionerData} />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Trend Analysis: Cumulative & Count */}
+      {loading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
+            <div className="p-3"><div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" /></div>
+          </div>
+          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
+            <div className="p-3"><div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" /></div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {/* Cumulative Revenue */}
+          {trendData && (
+            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">70</span>
+                      <TrendingUp size={12} className="text-slate-400" />
+                      Cumulative Revenue
+                      <InfoIcon title="Cumulative Revenue" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'amount', role: 'Summed per day/month and accumulated' }, { field: 'dated_on', role: 'Grouped by date' }]} databaseTables={['dentally_payments']} calculations="Running total of payment amounts over the selected period. Each data point adds the current period's total to the running sum." additionalInfo="Running total of revenue over time" />
+                    </h3>
+                    <p className="text-[9px] text-slate-400 font-medium">Running total of payments collected</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3">
+                <CumulativeRevenueChart trendData={trendData} />
+              </div>
+            </div>
+          )}
+
+          {/* Payment Count Trend */}
+          {trendData && (
+            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">71</span>
+                      <Activity size={12} className="text-slate-400" />
+                      Payment Count Trend
+                      <InfoIcon title="Payment Count Trend" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'count', role: 'Count of payments per period' }, { field: 'dated_on', role: 'Grouped by date' }]} databaseTables={['dentally_payments']} calculations="Counts payment transactions grouped by day (short periods) or month (long periods)." additionalInfo="Number of payment transactions over time" />
+                    </h3>
+                    <p className="text-[9px] text-slate-400 font-medium">Transaction volume over time</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3">
+                <PaymentCountTrendChart trendData={trendData} />
+              </div>
+            </div>
+          )}
         </div>
       )}
 

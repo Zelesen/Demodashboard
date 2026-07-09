@@ -34,8 +34,8 @@ const menuItems = [
         { label: "Treatment Plans", href: "/treatment-plans" },
         { label: "Invoices", href: "/invoices" },
         { label: "Invoices (Dated On)", href: "/invoices-datedon" },
-        {/* { label: "Payments", href: "/payments" },
-        { label: "Clinicians", href: "/clinicians" },
+        { label: "Payments", href: "/payments" },
+        {/*{ label: "Clinicians", href: "/clinicians" },
         { label: "Finance", href: "/finance" },
         { label: "Sales & Marketing", href: "/sales" },*/}
         
