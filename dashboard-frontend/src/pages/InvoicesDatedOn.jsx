@@ -811,7 +811,7 @@ export default function InvoicesDatedOn() {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 overflow-x-auto max-w-full lg:self-start shadow-sm sticky top-16 z-30">
+        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
           {filters.map((filter) => {
             const isSelected = activeFilter === filter;
             return (
@@ -831,7 +831,7 @@ export default function InvoicesDatedOn() {
 
           {/* Custom Date Range Picker */}
         {activeFilter === "Custom" && (
-          <div className="flex-wrap sm:flex-nowrap items-center gap-2 bg-transparent  rounded-lg p-2">
+          <div className="flex items-center gap-2 bg-transparent  rounded-lg p-2 ">
             <div className="flex items-center gap-2">
               <label className="text-[10px] font-semibold text-slate-600">From:</label>
               <input

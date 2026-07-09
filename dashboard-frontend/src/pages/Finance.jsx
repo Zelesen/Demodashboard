@@ -406,7 +406,7 @@ export default function Finance() {
         </div>
 
         {/* Date Filter */}
-        <div className="overflow-x-auto max-w-full lg:inline-flex p-1 bg-white border border-slate-200/60 rounded-xl shadow-sm sticky top-16 z-30">
+        <div className="inline-flex p-1 bg-white border border-slate-200/60 rounded-xl shadow-sm sticky top-16 z-30">
           <div className="flex gap-0.5 relative min-w-max">
             {filters.map((filter) => {
               const isSelected = activeFilter === filter;
@@ -429,7 +429,7 @@ export default function Finance() {
 
         {/* Custom Date Range Picker */}
         {activeFilter === "Custom" && (
-          <div className="flex-wrap sm:flex-nowrap items-center gap-2 bg-white border border-slate-200/60 rounded-lg p-2 shadow-sm">
+          <div className="flex items-center gap-2 bg-white border border-slate-200/60 rounded-lg p-2 shadow-sm">
             <div className="flex items-center gap-2">
               <label className="text-[10px] font-semibold text-slate-600">From:</label>
               <input
