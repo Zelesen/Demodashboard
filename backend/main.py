@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from psycopg2.pool import ThreadedConnectionPool
 from datetime import datetime, timedelta, timezone
 import os
 import json
@@ -10,6 +11,9 @@ import jwt
 from dotenv import load_dotenv
 from pydantic import BaseModel
 import httpx
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -41,15 +45,25 @@ JWT_EXPIRY_HOURS = 24
 SUPABASE_URL = os.getenv("SUPABASE_URL", "http://127.0.0.1:54321")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
+db_pool = None
+
+def get_pool():
+    global db_pool
+    if db_pool is None:
+        db_pool = ThreadedConnectionPool(
+            minconn=2, maxconn=20,
+            host=DB_HOST, port=DB_PORT,
+            database=DB_NAME, user=DB_USER,
+            password=DB_PASSWORD
+        )
+    return db_pool
+
 def get_db_connection():
-    conn = psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
-    )
-    return conn
+    return get_pool().getconn()
+
+def close_db_connection(conn):
+    if conn:
+        get_pool().putconn(conn)
 
 def ts(col):
     """Return column reference for timestamp (columns are now properly typed)"""
@@ -243,6 +257,7 @@ def get_metrics(period: str = "7d", start_date: str = None, end_date: str = None
         cached = get_cache("dashboard_metrics", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -296,8 +311,6 @@ def get_metrics(period: str = "7d", start_date: str = None, end_date: str = None
         """, p_cash)
         cash_position = cursor.fetchone()['cash_position'] or 0
         
-        conn.close()
-        
         return {
             "group_production": {
                 "value": f"£{float(production_7d)/1000:.1f}k",
@@ -337,7 +350,11 @@ def get_metrics(period: str = "7d", start_date: str = None, end_date: str = None
             }
         }
     except Exception as e:
+        logger.error(f"Error in metrics: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 @app.get("/api/dashboard/ai-insights")
 def get_ai_insights(period: str = "7d", start_date: str = None, end_date: str = None):
@@ -346,6 +363,7 @@ def get_ai_insights(period: str = "7d", start_date: str = None, end_date: str = 
         cached = get_cache("dashboard_ai_insights", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -356,7 +374,7 @@ def get_ai_insights(period: str = "7d", start_date: str = None, end_date: str = 
                    COUNT(DISTINCT a.id) as total_appointments,
                    SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed_appointments
             FROM dentally_sites s
-            LEFT JOIN dentally_appointments a ON s.dentally_id = a.practitioner_id
+            LEFT JOIN dentally_appointments a ON s.dentally_id = a.site_id
             WHERE {w_ai}
             GROUP BY s.name
             ORDER BY completed_appointments ASC
@@ -373,11 +391,13 @@ def get_ai_insights(period: str = "7d", start_date: str = None, end_date: str = 
                 f"{site['site_name']} is {100 - completion_rate:.1f}% behind target completion rate."
             ])
         
-        conn.close()
-        
         return {"insights": insights[:3]}
     except Exception as e:
+        logger.error(f"Error in ai-insights: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 @app.get("/api/dashboard/health-score")
 def get_health_score(period: str = "30d", start_date: str = None, end_date: str = None):
@@ -386,6 +406,7 @@ def get_health_score(period: str = "30d", start_date: str = None, end_date: str 
         cached = get_cache("dashboard_health_score", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -432,8 +453,6 @@ def get_health_score(period: str = "30d", start_date: str = None, end_date: str 
         new_patients = cursor.fetchone()['total'] or 0
         reputation_score = min(100, int(new_patients / 5))
         
-        conn.close()
-        
         pillars = [production_score, nhs_score, private_score, recall_score, reputation_score]
         overall_score = int(sum(pillars) / len(pillars))
         
@@ -442,7 +461,11 @@ def get_health_score(period: str = "30d", start_date: str = None, end_date: str 
             "health_pillars": pillars
         }
     except Exception as e:
+        logger.error(f"Error in health-score: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 @app.get("/api/dashboard/nhs-chart")
 def get_nhs_chart():
@@ -489,32 +512,45 @@ def get_league(period: str = "30d", start_date: str = None, end_date: str = None
         cached = get_cache("dashboard_league", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
         w_league, p_league = build_date_clause(period, start_date, end_date, ts('a.start_time'))
+        cursor.execute("SELECT id, name FROM dentally_sites WHERE active = 1")
+        all_sites = {r['id']: r['name'] for r in cursor.fetchall()}
+
         cursor.execute(f"""
-            SELECT s.name as site_name,
+            SELECT s.id, s.name,
                    COUNT(DISTINCT a.id) as total_appointments,
-                   SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed,
-                   COALESCE(SUM(i.amount::numeric), 0) as revenue
+                   SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed
             FROM dentally_sites s
-            LEFT JOIN dentally_appointments a ON s.id::text = a.site_id
-            LEFT JOIN dentally_invoices i ON s.id::text = i.site_id
-            WHERE {w_league}
-            GROUP BY s.name
-            ORDER BY revenue DESC
+            LEFT JOIN dentally_appointments a ON s.dentally_id = a.site_id AND {w_league}
+            GROUP BY s.id, s.name
         """, p_league)
+        appt_data = {r['id']: {'total': r['total_appointments'] or 0, 'completed': r['completed'] or 0} for r in cursor.fetchall()}
+
+        cursor.execute("""
+            SELECT s.id, s.name, COALESCE(SUM(i.amount), 0) as revenue
+            FROM dentally_sites s
+            LEFT JOIN dentally_invoices i ON s.dentally_id = i.site_id
+            GROUP BY s.id, s.name
+        """)
+        inv_data = {r['id']: float(r['revenue'] or 0) for r in cursor.fetchall()}
         
         practices = []
-        for row in cursor.fetchall():
-            completion_rate = (row['completed'] / row['total_appointments'] * 100) if row['total_appointments'] > 0 else 0
-            score = min(100, int(completion_rate + float(row['revenue'] or 0) / 1000))
+        for sid, name in all_sites.items():
+            appts = appt_data.get(sid, {})
+            total_appts = appts.get('total', 0)
+            completed = appts.get('completed', 0)
+            revenue = inv_data.get(sid, 0)
+            completion_rate = (completed / total_appts * 100) if total_appts > 0 else 0
+            score = min(100, int(completion_rate + revenue / 1000))
             
             practices.append({
-                "name": row['site_name'],
-                "revenue": f"£{float(row['revenue'] or 0)/1000:.1f}k",
+                "name": name,
+                "revenue": f"£{revenue/1000:.1f}k",
                 "nhs": f"{completion_rate:.1f}% NHS",
                 "plan": "+0 plan",
                 "rating": "4.0",
@@ -522,12 +558,15 @@ def get_league(period: str = "30d", start_date: str = None, end_date: str = None
                 "status": "good" if score >= 80 else "warn" if score >= 60 else "bad",
                 "scoreVal": score
             })
-        
-        conn.close()
+        practices.sort(key=lambda x: x['scoreVal'], reverse=True)
         
         return {"practices": practices}
     except Exception as e:
+        logger.error(f"Error in league: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 @app.get("/api/dashboard/sites")
 def get_sites():
@@ -535,6 +574,7 @@ def get_sites():
     cached = get_cache("dashboard_sites")
     if cached:
         return cached
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -554,11 +594,13 @@ def get_sites():
                 "active": row['active']
             })
         
-        conn.close()
-        
         return {"sites": sites}
     except Exception as e:
+        logger.error(f"Error in sites: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 @app.get("/api/dashboard/finance-metrics")
 def get_finance_metrics(period: str = "7d", start_date: str = None, end_date: str = None):
@@ -567,6 +609,7 @@ def get_finance_metrics(period: str = "7d", start_date: str = None, end_date: st
         cached = get_cache("dashboard_finance_metrics", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -611,8 +654,6 @@ def get_finance_metrics(period: str = "7d", start_date: str = None, end_date: st
         """, p_fcash)
         cash = cursor.fetchone()['total'] or 0
         
-        conn.close()
-        
         return {
             "group_production": {"value": float(production), "positive": True},
             "nhs_delivery": {"value": nhs_delivery, "positive": nhs_delivery >= 100},
@@ -622,7 +663,11 @@ def get_finance_metrics(period: str = "7d", start_date: str = None, end_date: st
             "cash_position": {"value": float(cash), "positive": True}
         }
     except Exception as e:
+        logger.error(f"Error in finance-metrics: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 @app.get("/api/dashboard/clinicians-league")
 def get_clinicians_league(period: str = "7d", start_date: str = None, end_date: str = None):
@@ -631,13 +676,10 @@ def get_clinicians_league(period: str = "7d", start_date: str = None, end_date: 
         cached = get_cache("dashboard_clinicians_league", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
-
-        cursor.execute("SELECT COUNT(*) as count FROM dentally_practitioners WHERE active = true")
-        count_result = cursor.fetchone()
-        print(f"Active practitioners count: {count_result['count']}")
 
         w_cl_appt, p_cl_appt = build_date_clause(period, start_date, end_date, ts('a.start_time'))
         w_cl_inv, p_cl_inv = build_date_clause(period, start_date, end_date, ts('i.created_at'))
@@ -648,10 +690,10 @@ def get_clinicians_league(period: str = "7d", start_date: str = None, end_date: 
                    COALESCE(SUM(i.amount::numeric), 0) as production,
                    COALESCE(SUM(CASE WHEN a.did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END), 0) as fta_count
             FROM dentally_practitioners p
-            LEFT JOIN dentally_sites s ON p.site_id = s.id::text
-            LEFT JOIN dentally_appointments a ON p.id = a.practitioner_id 
+            LEFT JOIN dentally_sites s ON p.site_id = s.dentally_id
+            LEFT JOIN dentally_appointments a ON p.dentally_id = a.practitioner_id 
                 AND {w_cl_appt}
-            LEFT JOIN dentally_invoices i ON s.id::text = i.site_id
+            LEFT JOIN dentally_invoices i ON s.dentally_id = i.site_id OR s.id::text = i.site_id
                 AND {w_cl_inv}
             WHERE p.active = true
             GROUP BY p.id, p.first_name, p.last_name, p.role, s.name
@@ -683,12 +725,13 @@ def get_clinicians_league(period: str = "7d", start_date: str = None, end_date: 
                 "index": 60 + idx
             })
         
-        conn.close()
-        print(f"Returning {len(clinicians)} clinicians")
         return {"clinicians": clinicians}
     except Exception as e:
-        print(f"Error in clinicians-league: {str(e)}")
+        logger.error(f"Error in clinicians-league: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 @app.get("/api/dashboard/operations-kpis")
 def get_operations_kpis(period: str = "7d", start_date: str = None, end_date: str = None):
@@ -697,6 +740,7 @@ def get_operations_kpis(period: str = "7d", start_date: str = None, end_date: st
         cached = get_cache("dashboard_operations_kpis", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -713,7 +757,6 @@ def get_operations_kpis(period: str = "7d", start_date: str = None, end_date: st
         appt_stats = cursor.fetchone()
         avg_minutes = float(appt_stats['total_minutes'] or 0)
         total_booked = appt_stats['total_appointments'] or 0
-        # Use period to determine available minutes
         if start_date and end_date:
             start = datetime.strptime(start_date, "%Y-%m-%d")
             end = datetime.strptime(end_date, "%Y-%m-%d")
@@ -721,7 +764,6 @@ def get_operations_kpis(period: str = "7d", start_date: str = None, end_date: st
         else:
             period_map = {"today": 1, "7d": 7, "30d": 30, "90d": 90, "1y": 365, "all": None}
             period_days = period_map.get(period, 7) or 365
-        # Assume 8 chairs x 8 hours x 60 min per day
         available_minutes = 8 * 8 * 60 * period_days
         utilisation = (avg_minutes / available_minutes * 100) if available_minutes > 0 else 0
         
@@ -743,11 +785,7 @@ def get_operations_kpis(period: str = "7d", start_date: str = None, end_date: st
         uda_delivered = cursor.fetchone()['delivered'] or 0
         uda_pace = (uda_delivered / max(period_days, 1) * 100 / 7) * 100 if period_days > 0 else 0
         
-        cursor.execute(f"""
-            SELECT COUNT(*) as overdue
-            FROM dentally_recalls
-            WHERE {ts('recall_date')} < CURRENT_DATE
-        """)
+        cursor.execute("SELECT COUNT(*) as overdue FROM dentally_recalls WHERE recall_date < CURRENT_DATE")
         recalls_overdue = cursor.fetchone()['overdue'] or 0
         
         cursor.execute(f"""
@@ -766,8 +804,6 @@ def get_operations_kpis(period: str = "7d", start_date: str = None, end_date: st
         new_patients = cursor.fetchone()['total'] or 0
         new_patient_rate = (new_patients / 50) * 100 if period_days <= 30 else (new_patients / max(period_days, 1) * 30) / 50 * 100
         
-        conn.close()
-        
         return {
             "utilisation": round(utilisation, 1),
             "utilisationChange": -0.6,
@@ -783,7 +819,11 @@ def get_operations_kpis(period: str = "7d", start_date: str = None, end_date: st
             "newPatientChange": 0.8
         }
     except Exception as e:
+        logger.error(f"Error in operations-kpis: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 @app.get("/api/dashboard/practice-league")
 def get_practice_league(period: str = "7d", start_date: str = None, end_date: str = None):
@@ -2523,6 +2563,7 @@ def get_appointments_kpis(period: str = "7d", start_date: str = None, end_date: 
         cached = get_cache("dashboard_appointments_kpis", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2540,7 +2581,6 @@ def get_appointments_kpis(period: str = "7d", start_date: str = None, end_date: 
         avg_duration = round(total_minutes / total, 0) if total > 0 else 0
         fta_rate = round((fta / total) * 100, 1) if total > 0 else 0
         completion_rate = round((completed / total) * 100, 1) if total > 0 else 0
-        conn.close()
         result = {
             "totalAppointments": total, "completedAppointments": completed,
             "cancelledAppointments": cancelled, "dnaCount": fta, "dnaRate": fta_rate,
@@ -2551,7 +2591,11 @@ def get_appointments_kpis(period: str = "7d", start_date: str = None, end_date: 
             save_cache("dashboard_appointments_kpis", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-kpis: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/appointments-trend")
@@ -2561,29 +2605,32 @@ def get_appointments_trend(period: str = "7d", start_date: str = None, end_date:
         cached = get_cache("dashboard_appointments_trend", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         if start_date and end_date:
             cur.execute(f"SELECT start_time::date as appt_date, COUNT(*) as total, SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN LOWER(status) = 'cancelled' THEN 1 ELSE 0 END) as cancelled, SUM(CASE WHEN did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END) as fta FROM dentally_appointments WHERE {build_date_clause(period, start_date, end_date, ts('start_time'))[0]} GROUP BY appt_date ORDER BY appt_date", build_date_clause(period, start_date, end_date, ts('start_time'))[1])
             rows = cur.fetchall()
+            chart_data = [{"date": str(r["appt_date"]), "total": r["total"] or 0, "completed": r["completed"] or 0, "cancelled": r["cancelled"] or 0, "fta": r["fta"] or 0} for r in rows]
         else:
             period_map = {"today": 0, "7d": 6, "30d": 29, "90d": 89, "1y": 364, "all": 364}
             days_back = period_map.get(period, 6)
             date_points = [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(days_back, -1, -1)]
-            rows = []
-            for date_str in date_points:
-                cur.execute("SELECT COUNT(*) as total, SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN LOWER(status) = 'cancelled' THEN 1 ELSE 0 END) as cancelled, SUM(CASE WHEN did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END) as fta FROM dentally_appointments WHERE start_time::date = %s::date", (date_str,))
-                row = cur.fetchone()
-                rows.append({"date": date_str, "total": row["total"] or 0, "completed": row["completed"] or 0, "cancelled": row["cancelled"] or 0, "fta": row["fta"] or 0})
-        conn.close()
-        chart_data = rows if start_date and end_date else [{"date": r["date"], "total": r["total"], "completed": r["completed"], "cancelled": r["cancelled"], "fta": r["fta"]} for r in rows]
+            w_trend, p_trend = build_date_clause(period, start_date, end_date, ts('start_time'))
+            cur.execute(f"SELECT start_time::date as appt_date, COUNT(*) as total, SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN LOWER(status) = 'cancelled' THEN 1 ELSE 0 END) as cancelled, SUM(CASE WHEN did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END) as fta FROM dentally_appointments WHERE {w_trend} GROUP BY appt_date ORDER BY appt_date", p_trend)
+            db_rows = {str(r["appt_date"]): r for r in cur.fetchall()}
+            chart_data = [{"date": d, "total": db_rows.get(d, {}).get("total") or 0, "completed": db_rows.get(d, {}).get("completed") or 0, "cancelled": db_rows.get(d, {}).get("cancelled") or 0, "fta": db_rows.get(d, {}).get("fta") or 0} for d in date_points]
         result = {"chart_data": chart_data}
         if not start_date and not end_date:
             save_cache("dashboard_appointments_trend", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-trend: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/appointments-by-site")
@@ -2593,19 +2640,23 @@ def get_appointments_by_site(period: str = "7d", start_date: str = None, end_dat
         cached = get_cache("dashboard_appointments_by_site", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("a.start_time"))
         cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.dentally_id = a.site_id AND {w} WHERE s.active = 1 GROUP BY s.id, s.name ORDER BY total_appointments DESC", p)
         sites = [{"name": r["site_name"], "appointments": r["total_appointments"] or 0, "completed": r["completed"] or 0} for r in cur.fetchall()]
-        conn.close()
         result = {"sites": sites}
         if not start_date and not end_date:
             save_cache("dashboard_appointments_by_site", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-by-site: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/appointments-by-practitioner")
@@ -2615,6 +2666,7 @@ def get_appointments_by_practitioner(period: str = "7d", start_date: str = None,
         cached = get_cache("dashboard_appointments_by_practitioner", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2629,13 +2681,16 @@ def get_appointments_by_practitioner(period: str = "7d", start_date: str = None,
                 "appointments": total_a, "completed": compl, "fta": row["fta"] or 0,
                 "completionRate": round((compl / total_a) * 100, 1) if total_a > 0 else 0,
             })
-        conn.close()
         result = {"practitioners": practitioners}
         if not start_date and not end_date:
             save_cache("dashboard_appointments_by_practitioner", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-by-practitioner: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/recent-appointments")
@@ -2645,6 +2700,7 @@ def get_recent_appointments(period: str = "7d", start_date: str = None, end_date
         cached = get_cache("dashboard_recent_appointments", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2674,13 +2730,16 @@ def get_recent_appointments(period: str = "7d", start_date: str = None, end_date
                 "reason": row["reason"] or "N/A", "startTime": formatted_start,
                 "duration": row["duration"] or row["length_minutes"], "status": display_status, "statusRaw": status,
             })
-        conn.close()
         result = {"appointments": appointments}
         if not start_date and not end_date:
             save_cache("dashboard_recent_appointments", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in recent-appointments: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/appointments-by-reason")
@@ -2690,19 +2749,23 @@ def get_appointments_by_reason(period: str = "7d", start_date: str = None, end_d
         cached = get_cache("dashboard_appointments_by_reason", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
         cur.execute(f"SELECT reason, COUNT(*) as count FROM dentally_appointments WHERE {w} AND reason IS NOT NULL AND reason != '' GROUP BY reason ORDER BY count DESC", p)
         reasons = [{"reason": r["reason"], "count": r["count"]} for r in cur.fetchall()]
-        conn.close()
         result = {"reasons": reasons}
         if not start_date and not end_date:
             save_cache("dashboard_appointments_by_reason", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-by-reason: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/appointments-by-hour")
@@ -2712,19 +2775,23 @@ def get_appointments_by_hour(period: str = "7d", start_date: str = None, end_dat
         cached = get_cache("dashboard_appointments_by_hour", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
         cur.execute(f"SELECT EXTRACT(HOUR FROM start_time)::int as hour, COUNT(*) as count FROM dentally_appointments WHERE {w} GROUP BY hour ORDER BY hour", p)
         hours = [{"hour": r["hour"], "count": r["count"]} for r in cur.fetchall()]
-        conn.close()
         result = {"hours": hours}
         if not start_date and not end_date:
             save_cache("dashboard_appointments_by_hour", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-by-hour: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/appointments-by-day")
@@ -2734,19 +2801,23 @@ def get_appointments_by_day(period: str = "7d", start_date: str = None, end_date
         cached = get_cache("dashboard_appointments_by_day", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
         cur.execute(f"SELECT TO_CHAR(start_time, 'Day') as day, COUNT(*) as count FROM dentally_appointments WHERE {w} GROUP BY day ORDER BY MIN(EXTRACT(DOW FROM start_time))", p)
         days = [{"day": r["day"].strip(), "count": r["count"]} for r in cur.fetchall()]
-        conn.close()
         result = {"days": days}
         if not start_date and not end_date:
             save_cache("dashboard_appointments_by_day", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-by-day: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/appointments-cancellation-by-day")
@@ -2756,19 +2827,23 @@ def get_appointments_cancellation_by_day(period: str = "7d", start_date: str = N
         cached = get_cache("dashboard_appointments_cancellation_by_day", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
         cur.execute(f"SELECT TO_CHAR(start_time, 'Day') as day, COUNT(*) as total, COUNT(*) FILTER (WHERE status = 'Cancelled') as cancelled, ROUND(COUNT(*) FILTER (WHERE status = 'Cancelled') * 100.0 / GREATEST(COUNT(*), 1), 1) as rate FROM dentally_appointments WHERE {w} GROUP BY day ORDER BY MIN(EXTRACT(DOW FROM start_time))", p)
         days = [{"day": r["day"].strip(), "total": r["total"], "cancelled": r["cancelled"], "rate": r["rate"]} for r in cur.fetchall()]
-        conn.close()
         result = {"days": days}
         if not start_date and not end_date:
             save_cache("dashboard_appointments_cancellation_by_day", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-cancellation-by-day: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/appointments-lifecycle")
@@ -2778,19 +2853,23 @@ def get_appointments_lifecycle(period: str = "7d", start_date: str = None, end_d
         cached = get_cache("dashboard_appointments_lifecycle", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
         cur.execute(f"SELECT EXTRACT(HOUR FROM start_time)::int as hour, ROUND(MIN(EXTRACT(EPOCH FROM (completed_at - start_time)) / 60), 1) as min_min, ROUND(AVG(EXTRACT(EPOCH FROM (completed_at - start_time)) / 60), 1) as avg_min, ROUND(MAX(EXTRACT(EPOCH FROM (completed_at - start_time)) / 60), 1) as max_min, COUNT(*) as count FROM dentally_appointments WHERE {w} AND completed_at IS NOT NULL  AND start_time IS NOT NULL GROUP BY hour ORDER BY hour", p)
         hours = [{"hour": r["hour"], "min": r["min_min"], "avg": r["avg_min"], "max": r["max_min"], "count": r["count"]} for r in cur.fetchall()]
-        conn.close()
         result = {"hours": hours}
         if not start_date and not end_date:
             save_cache("dashboard_appointments_lifecycle", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-lifecycle: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/appointments-duration")
@@ -2800,19 +2879,23 @@ def get_appointments_duration(period: str = "7d", start_date: str = None, end_da
         cached = get_cache("dashboard_appointments_duration", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
         cur.execute(f"SELECT CASE WHEN completed_at - start_time <= INTERVAL '15 minutes' THEN '<15 min' WHEN completed_at - start_time <= INTERVAL '30 minutes' THEN '15-30 min' WHEN completed_at - start_time <= INTERVAL '45 minutes' THEN '30-45 min' WHEN completed_at - start_time <= INTERVAL '60 minutes' THEN '45-60 min' ELSE '60+ min' END as bucket, COUNT(*) as count FROM dentally_appointments WHERE {w} AND completed_at IS NOT NULL  AND start_time IS NOT NULL GROUP BY bucket ORDER BY MIN(completed_at - start_time)", p)
         buckets = [{"bucket": r["bucket"], "count": r["count"]} for r in cur.fetchall()]
-        conn.close()
         result = {"buckets": buckets}
         if not start_date and not end_date:
             save_cache("dashboard_appointments_duration", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-duration: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 @app.get("/api/dashboard/appointments-heatmap")
@@ -2822,6 +2905,7 @@ def get_appointments_heatmap(period: str = "7d", start_date: str = None, end_dat
         cached = get_cache("dashboard_appointments_heatmap", period)
         if cached:
             return cached
+    conn = None
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2835,13 +2919,16 @@ def get_appointments_heatmap(period: str = "7d", start_date: str = None, end_dat
                 heatmap.append({"day": dn, "data": []})
                 current_day = dn
             heatmap[-1]["data"].append({"hour": r["hour"], "count": r["count"]})
-        conn.close()
         result = {"heatmap": heatmap}
         if not start_date and not end_date:
             save_cache("dashboard_appointments_heatmap", result, period)
         return result
     except Exception as e:
+        logger.error(f"Error in appointments-heatmap: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn:
+            close_db_connection(conn)
 
 
 # ==================== CACHE MANAGEMENT ====================
