@@ -86,7 +86,10 @@ export default function TreatmentPlans() {
   };
 
   useEffect(() => {
-    fetchData('7d');
+    (async () => {
+      await syncPageCache();
+      fetchData('7d');
+    })();
   }, []);
 
   useEffect(() => {
@@ -98,9 +101,9 @@ export default function TreatmentPlans() {
     }
   }, [activeFilter, customStartDate, customEndDate]);
 
-  const refreshPageCache = async () => {
+  const syncPageCache = async () => {
     try {
-      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=treatment-plans', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/sync/page?page=treatment-plans', { method: 'POST' });
     } catch (e) {
       console.error('Page cache refresh error:', e);
     }
@@ -108,7 +111,7 @@ export default function TreatmentPlans() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refreshPageCache();
+    await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
       await fetchData('all', customStartDate, customEndDate);
     } else {

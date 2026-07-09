@@ -102,6 +102,7 @@ export default function Clinicians() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      await syncPageCache();
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
         if (data) dataCache.current.set(period, data);
@@ -148,9 +149,9 @@ export default function Clinicians() {
     return () => clearInterval(id);
   }, [refreshCooldownUntil]);
 
-  const refreshPageCache = async () => {
+  const syncPageCache = async () => {
     try {
-      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=clinicians', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/sync/page?page=clinicians', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing page cache:', error);
     }
@@ -158,7 +159,7 @@ export default function Clinicians() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refreshPageCache();
+    await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
       const data = await fetchCustomCliniciansData(customStartDate, customEndDate);
       if (data) {

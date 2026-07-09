@@ -64,7 +64,10 @@ export default function Operations() {
   };
   
   useEffect(() => {
-    fetchOperationsData('7d');
+    (async () => {
+      await syncPageCache();
+      fetchOperationsData('7d');
+    })();
   }, []);
   
   useEffect(() => {
@@ -76,9 +79,9 @@ export default function Operations() {
     }
   }, [activeFilter, customStartDate, customEndDate]);
 
-  const refreshPageCache = async () => {
+  const syncPageCache = async () => {
     try {
-      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=operations', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/sync/page?page=operations', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing page cache:', error);
     }
@@ -86,7 +89,7 @@ export default function Operations() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refreshPageCache();
+    await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
       await fetchOperationsData('all', customStartDate, customEndDate);
     } else {

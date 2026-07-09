@@ -104,6 +104,7 @@ export default function Finance() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      await syncPageCache();
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
         if (data) dataCache.current.set(period, data);
@@ -148,9 +149,9 @@ export default function Finance() {
     return () => clearInterval(id);
   }, [refreshCooldownUntil]);
 
-  const refreshPageCache = async () => {
+  const syncPageCache = async () => {
     try {
-      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=finance', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/sync/page?page=finance', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing cache:', error);
     }
@@ -173,7 +174,7 @@ export default function Finance() {
       await Promise.all(fetches);
       applyCachedData(periodMap[activeFilter]);
     }
-    await refreshPageCache();
+    await syncPageCache();
     const cooldownUntil = Date.now() + 5 * 60 * 1000;
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('finance_refresh_cooldown', String(cooldownUntil));

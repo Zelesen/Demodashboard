@@ -72,6 +72,7 @@ export default function Sales() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      await syncPageCache();
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchMetricsForPeriod(period);
         if (data) metricsCache.current.set(period, data);
@@ -121,9 +122,9 @@ export default function Sales() {
     return () => clearInterval(id);
   }, [refreshCooldownUntil]);
 
-  const refreshPageCache = async () => {
+  const syncPageCache = async () => {
     try {
-      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=sales', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/sync/page?page=sales', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing cache:', error);
     }
@@ -149,7 +150,7 @@ export default function Sales() {
       if (cached) setMetrics(cached);
     }
     await fetchStaticData();
-    await refreshPageCache();
+    await syncPageCache();
     const cooldownUntil = Date.now() + 5 * 60 * 1000;
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('sales_refresh_cooldown', String(cooldownUntil));

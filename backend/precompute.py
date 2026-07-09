@@ -1282,15 +1282,15 @@ STATIC_ENDPOINTS = [
 ]
 
 PAGE_ENDPOINTS = {
-    "dashboard": ["dashboard_metrics", "dashboard_ai_insights", "dashboard_health_score", "dashboard_league"],
+    "dashboard": ["dashboard_metrics", "dashboard_ai_insights", "dashboard_health_score", "dashboard_league", "dashboard_sites", "dashboard_nhs_chart"],
     "appointments": ["dashboard_appointments_kpis", "dashboard_appointments_trend", "dashboard_appointments_by_site", "dashboard_appointments_by_practitioner", "dashboard_recent_appointments", "dashboard_appointments_by_reason", "dashboard_appointments_by_hour", "dashboard_appointments_by_day", "dashboard_appointments_cancellation_by_day", "dashboard_appointments_lifecycle", "dashboard_appointments_duration", "dashboard_appointments_heatmap"],
     "invoices": ["dashboard_invoices_kpis", "dashboard_invoices_trend", "dashboard_revenue_by_site", "dashboard_revenue_by_treatment", "dashboard_top_patients_by_revenue", "dashboard_invoices_kpis_datedon", "dashboard_invoices_trend_datedon", "dashboard_revenue_by_site_datedon", "dashboard_top_patients_by_revenue_datedon", "dashboard_treatment_frequency", "dashboard_treatment_mix_by_practice", "dashboard_revenue_by_account", "dashboard_outstanding_by_account"],
     "treatment-plans": ["dashboard_treatment_plan_kpis", "dashboard_treatment_plans_by_practitioner", "dashboard_treatment_plan_items", "dashboard_treatment_plans_by_treatment", "dashboard_treatment_plan_trends", "dashboard_treatment_trends"],
-    "clinicians": ["dashboard_clinicians_league", "dashboard_practice_league"],
-    "finance": ["dashboard_finance_metrics", "dashboard_revenue_by_stream"],
+    "clinicians": ["dashboard_clinicians_league", "dashboard_case_acceptance", "dashboard_hygiene_utilization"],
+    "finance": ["dashboard_finance_metrics", "dashboard_revenue_by_stream", "dashboard_profit_per_practice"],
     "sales": ["dashboard_revenue_by_stream", "dashboard_case_acceptance", "dashboard_hygiene_utilization", "dashboard_operations_kpis"],
     "payments": ["dashboard_payments_kpis", "dashboard_payments_trend", "dashboard_payments_by_method", "dashboard_payments_by_site", "dashboard_payments_by_practitioner", "dashboard_recent_payments"],
-    "operations": ["dashboard_operations_kpis", "dashboard_practice_league"],
+    "operations": ["dashboard_operations_kpis", "dashboard_practice_league", "dashboard_capacity_data", "dashboard_recall_backlog"],
 }
 
 

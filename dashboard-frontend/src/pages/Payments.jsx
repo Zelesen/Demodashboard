@@ -224,6 +224,7 @@ export default function Payments() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      await syncPageCache();
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
         if (data) dataCache.current.set(period, data);
@@ -286,9 +287,9 @@ export default function Payments() {
 
   const filters = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "All time", "Custom"];
 
-  const refreshPageCache = async () => {
+  const syncPageCache = async () => {
     try {
-      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=payments', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/sync/page?page=payments', { method: 'POST' });
     } catch (e) {
       console.error('Page cache refresh error:', e);
     }
@@ -296,7 +297,7 @@ export default function Payments() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refreshPageCache();
+    await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
       const data = await fetchCustomData(customStartDate, customEndDate);
       if (data) {

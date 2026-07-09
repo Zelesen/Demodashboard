@@ -216,6 +216,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      await syncPageCache();
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
         if (data) dataCache.current.set(period, data);
@@ -263,9 +264,9 @@ export default function Dashboard() {
     return () => clearInterval(id);
   }, [refreshCooldownUntil]);
 
-  const refreshPageCache = async () => {
+  const syncPageCache = async () => {
     try {
-      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=dashboard', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/sync/page?page=dashboard', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing page cache:', error);
     }
@@ -273,7 +274,7 @@ export default function Dashboard() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await refreshPageCache();
+    await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
       const data = await fetchCustomData(customStartDate, customEndDate);
       if (data) {

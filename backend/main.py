@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta, timezone
@@ -2838,6 +2840,24 @@ def get_appointments_heatmap(period: str = "7d", start_date: str = None, end_dat
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ==================== PAGE SYNC ====================
+
+from precompute import cache_page as precompute_cache_page, PERIODS as PRECOMPUTE_PERIODS
+
+@app.post("/api/sync/page")
+def sync_page_cache(request: Request):
+    """Precompute all cache files for a given page (all periods)."""
+    page = request.query_params.get("page", "dashboard")
+    try:
+        success = precompute_cache_page(page)
+        if success:
+            return {"status": "success", "message": f"Cache synced for page '{page}'"}
+        else:
+            raise HTTPException(status_code=500, detail="Cache sync completed with errors")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ==================== CACHE MANAGEMENT ====================
 
 @app.post("/api/admin/cache/refresh-page")
@@ -2918,6 +2938,30 @@ def refresh_page_cache(request: Request):
             return {"status": "success", "message": f"Cleared {cleared} cache files for {page}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ==================== SPA FALLBACK (for Railway deployment) ====================
+
+FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "..", "dashboard-frontend", "dist")
+if os.path.isdir(FRONTEND_DIST):
+    # Mount assets subdirectory
+    assets_dir = os.path.join(FRONTEND_DIST, "assets")
+    if os.path.isdir(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        # Let FastAPI handle API and docs routes normally
+        if full_path.startswith("api/") or full_path.startswith("docs") or full_path.startswith("openapi"):
+            raise HTTPException(status_code=404)
+        # Serve static files that exist in dist root (favicon, etc.)
+        file_path = os.path.join(FRONTEND_DIST, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        # SPA fallback - serve index.html for all other routes
+        index_path = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path, media_type="text/html")
+        raise HTTPException(status_code=404)
 
 if __name__ == "__main__":
     import uvicorn
