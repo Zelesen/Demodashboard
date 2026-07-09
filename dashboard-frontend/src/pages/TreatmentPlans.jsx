@@ -87,7 +87,6 @@ export default function TreatmentPlans() {
 
   useEffect(() => {
     (async () => {
-      await syncPageCache();
       fetchData('7d');
     })();
   }, []);

@@ -65,7 +65,6 @@ export default function Operations() {
   
   useEffect(() => {
     (async () => {
-      await syncPageCache();
       fetchOperationsData('7d');
     })();
   }, []);

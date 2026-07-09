@@ -72,7 +72,6 @@ export default function Sales() {
 
   useEffect(() => {
     const preFetchAll = async () => {
-      await syncPageCache();
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchMetricsForPeriod(period);
         if (data) metricsCache.current.set(period, data);

@@ -102,7 +102,6 @@ export default function Clinicians() {
 
   useEffect(() => {
     const preFetchAll = async () => {
-      await syncPageCache();
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
         if (data) dataCache.current.set(period, data);
