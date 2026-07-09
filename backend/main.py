@@ -25,7 +25,7 @@ security = HTTPBearer(auto_error=False)
 # CORS middleware for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173", "https://demodashboard-wheat.vercel.app", "https://demodashboard-git-main-amanmaurya917-gmailcoms-projects.vercel.app/"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
