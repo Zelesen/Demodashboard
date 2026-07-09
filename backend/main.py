@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 import httpx
 import logging
+import threading
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -46,16 +47,19 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "http://127.0.0.1:54321")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
 db_pool = None
+pool_lock = threading.Lock()
 
 def get_pool():
     global db_pool
     if db_pool is None:
-        db_pool = ThreadedConnectionPool(
-            minconn=2, maxconn=20,
-            host=DB_HOST, port=DB_PORT,
-            database=DB_NAME, user=DB_USER,
-            password=DB_PASSWORD
-        )
+        with pool_lock:
+            if db_pool is None:
+                db_pool = ThreadedConnectionPool(
+                    minconn=1, maxconn=10,
+                    host=DB_HOST, port=DB_PORT,
+                    database=DB_NAME, user=DB_USER,
+                    password=DB_PASSWORD
+                )
     return db_pool
 
 def get_db_connection():
