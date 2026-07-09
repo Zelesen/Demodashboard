@@ -23,7 +23,7 @@ CACHE_DIR = os.path.join(os.path.dirname(__file__), "cache")
 PERIODS = ["today", "7d", "30d", "90d", "1y", "all"]
 
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
-DB_PORT = os.getenv("DB_PORT", "54322")
+DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "postgres")
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")

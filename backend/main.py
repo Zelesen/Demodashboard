@@ -50,9 +50,10 @@ app = FastAPI(title="Dental Dashboard API", lifespan=lifespan)
 security = HTTPBearer(auto_error=False)
 
 # CORS middleware for frontend
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "https://demodashboard-wheat.vercel.app,http://localhost:5173,http://localhost:3000").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -60,7 +61,7 @@ app.add_middleware(
 
 # Database connection
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
-DB_PORT = os.getenv("DB_PORT", "54322")
+DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "postgres")
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
