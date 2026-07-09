@@ -2950,6 +2950,171 @@ def refresh_page_cache(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# ==================== PAYMENTS API ENDPOINTS ====================
+
+@app.get("/api/dashboard/payments-kpis")
+def get_payments_kpis(period: str = "7d", start_date: str = None, end_date: str = None):
+    """Get payments page KPI metrics"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_payments_kpis", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, "dated_on")
+
+        cursor.execute(f"SELECT COUNT(*) as total, COALESCE(SUM(amount), 0) as total_amount FROM dentally_payments WHERE {w}", p)
+        s = cursor.fetchone()
+
+        cursor.execute(f"SELECT ROUND(AVG(amount)::numeric, 2) as avg FROM dentally_payments WHERE {w}", p)
+        avg = float(cursor.fetchone()["avg"] or 0)
+
+        cursor.execute(f"SELECT method, COUNT(*) as cnt FROM dentally_payments WHERE {w} AND method IS NOT NULL AND method != '' GROUP BY method ORDER BY cnt DESC LIMIT 1", p)
+        top = cursor.fetchone()
+
+        cursor.execute(f"SELECT COUNT(*) as c FROM dentally_payments WHERE {w} AND LOWER(method) = 'cash'", p)
+        cash = cursor.fetchone()["c"] or 0
+
+        cursor.execute(f"SELECT COUNT(*) as c FROM dentally_payments WHERE {w} AND LOWER(method) IN ('debit card', 'credit card')", p)
+        card = cursor.fetchone()["c"] or 0
+
+        cursor.execute(f"SELECT COALESCE(SUM(amount_unexplained), 0) as ue FROM dentally_payments WHERE {w}", p)
+        ue = float(cursor.fetchone()["ue"] or 0)
+
+        conn.close()
+        return {
+            "totalPayments": s["total"] or 0,
+            "totalAmount": round(float(s["total_amount"] or 0), 2),
+            "avgPayment": avg,
+            "topMethod": top["method"] if top else "N/A",
+            "cashCount": cash,
+            "cardCount": card,
+            "unexplained": round(ue, 2),
+        }
+    except Exception as e:
+        print(f"Error in payments-kpis: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/dashboard/payments-trend")
+def get_payments_trend(period: str = "7d", start_date: str = None, end_date: str = None):
+    """Get payment trend chart data"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_payments_trend", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, "dated_on")
+
+        if period in ("today", "7d", "30d", "90d"):
+            cursor.execute(f"SELECT dated_on as day, COUNT(*) as count, COALESCE(SUM(amount), 0) as total FROM dentally_payments WHERE {w} GROUP BY day ORDER BY day", p)
+        else:
+            cursor.execute(f"SELECT TO_CHAR(dated_on, 'YYYY-MM') as month, COUNT(*) as count, COALESCE(SUM(amount), 0) as total FROM dentally_payments WHERE {w} GROUP BY month ORDER BY month", p)
+
+        chart = []
+        for r in cursor.fetchall():
+            d = r.get("day") or r.get("month") or ""
+            label = d.strftime("%d %b") if hasattr(d, "strftime") else str(d)
+            chart.append({"date": label, "count": r["count"] or 0, "total": float(r["total"] or 0)})
+
+        conn.close()
+        return {"chart_data": chart}
+    except Exception as e:
+        print(f"Error in payments-trend: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/dashboard/payments-by-method")
+def get_payments_by_method(period: str = "7d", start_date: str = None, end_date: str = None):
+    """Get payments grouped by payment method"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_payments_by_method", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, "dated_on")
+
+        cursor.execute(f"SELECT COALESCE(NULLIF(method, ''), 'Unknown') as method, COUNT(*) as count, COALESCE(SUM(amount), 0) as total FROM dentally_payments WHERE {w} GROUP BY method ORDER BY total DESC", p)
+        methods = [{"method": r["method"], "count": r["count"] or 0, "total": float(r["total"] or 0)} for r in cursor.fetchall()]
+
+        conn.close()
+        return {"methods": methods}
+    except Exception as e:
+        print(f"Error in payments-by-method: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/dashboard/payments-by-site")
+def get_payments_by_site(period: str = "7d", start_date: str = None, end_date: str = None):
+    """Get payments grouped by site/practice"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_payments_by_site", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, "p.dated_on")
+
+        cursor.execute(f"SELECT COALESCE(s.name, 'Unknown') as site_name, COUNT(*) as payment_count, COALESCE(SUM(p.amount), 0) as total FROM dentally_payments p LEFT JOIN dentally_sites s ON s.dentally_id = p.site_id WHERE {w} GROUP BY s.name ORDER BY total DESC", p)
+        sites = [{"name": r["site_name"], "count": r["payment_count"] or 0, "total": float(r["total"] or 0)} for r in cursor.fetchall()]
+
+        conn.close()
+        return {"sites": sites}
+    except Exception as e:
+        print(f"Error in payments-by-site: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/dashboard/payments-by-practitioner")
+def get_payments_by_practitioner(period: str = "7d", start_date: str = None, end_date: str = None):
+    """Get payments grouped by practitioner"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_payments_by_practitioner", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, "p.dated_on")
+
+        cursor.execute(f"SELECT p.practitioner_id, COALESCE(pr.first_name || ' ' || pr.last_name, 'Unknown') as practitioner_name, COUNT(*) as payment_count, COALESCE(SUM(p.amount), 0) as total FROM dentally_payments p LEFT JOIN dentally_practitioners pr ON pr.dentally_id = p.practitioner_id WHERE {w} GROUP BY p.practitioner_id, pr.first_name, pr.last_name ORDER BY total DESC LIMIT 15", p)
+        practitioners = [{"id": r["practitioner_id"], "name": r["practitioner_name"], "count": r["payment_count"] or 0, "total": float(r["total"] or 0)} for r in cursor.fetchall()]
+
+        conn.close()
+        return {"practitioners": practitioners}
+    except Exception as e:
+        print(f"Error in payments-by-practitioner: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/dashboard/recent-payments")
+def get_recent_payments(period: str = "7d", start_date: str = None, end_date: str = None):
+    """Get recent payment transactions"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_recent_payments", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, "p.dated_on")
+
+        cursor.execute(f"SELECT p.id, p.dentally_id, p.amount, p.method, p.dated_on, p.reference, p.transaction_number, COALESCE(pt.first_name || ' ' || pt.last_name, 'Unknown') as patient_name, COALESCE(pr.first_name || ' ' || pr.last_name, 'Unknown') as practitioner_name, COALESCE(s.name, 'Unknown') as site_name FROM dentally_payments p LEFT JOIN dentally_patients pt ON pt.dentally_id = p.patient_id LEFT JOIN dentally_practitioners pr ON pr.dentally_id = p.practitioner_id LEFT JOIN dentally_sites s ON s.dentally_id = p.site_id WHERE {w} ORDER BY p.dated_on DESC, p.dentally_id DESC LIMIT 20", p)
+        payments = [{"id": r["id"], "ref": r["dentally_id"], "amount": float(r["amount"] or 0), "method": r["method"] or "Unknown", "datedOn": str(r["dated_on"] or "")[:10], "reference": r["reference"] or "", "transactionNumber": r["transaction_number"] or "", "patientName": r["patient_name"], "practitionerName": r["practitioner_name"], "siteName": r["site_name"]} for r in cursor.fetchall()]
+
+        conn.close()
+        return {"payments": payments}
+    except Exception as e:
+        print(f"Error in recent-payments: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ==================== SPA FALLBACK (for Railway deployment) ====================
 
 FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "..", "dashboard-frontend", "dist")
