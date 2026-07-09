@@ -744,7 +744,7 @@ export default function Appointments() {
         </div>
 
         {/* ======= FILTERS ======= */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
+        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 overflow-x-auto max-w-full lg:self-start shadow-sm sticky top-16 z-30">
           {filters.map((f) => {
             const sel = activeFilter === f;
             return (
@@ -755,7 +755,7 @@ export default function Appointments() {
             );
           })}
           {activeFilter === "Custom" && (
-            <div className="flex items-center gap-2 px-2">
+            <div className="flex-wrap sm:flex-nowrap items-center gap-2 px-2 flex">
               <input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)}
                 className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300" />
               <span className="text-[10px] text-slate-400">–</span>
