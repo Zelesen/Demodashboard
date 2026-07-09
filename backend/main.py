@@ -57,7 +57,7 @@ def get_pool():
         with pool_lock:
             if db_pool is None:
                 db_pool = ThreadedConnectionPool(
-                    minconn=2, maxconn=60,
+                    minconn=2, maxconn=40,
                     host=DB_HOST, port=DB_PORT,
                     database=DB_NAME, user=DB_USER,
                     password=DB_PASSWORD
