@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --color-brand: #3b82f6;
+  --color-brand-dark: #2563eb;
+  --color-brand-deep: #1d4ed8;
+  --color-brand-tint: #eff6ff;
+  --color-page: #f8fafc;
+  --color-card: #ffffff;
+  --color-card-border: #e2e8f0;
+  --color-inner: #f1f5f9;
+  --color-drill: #f8fafc;
+  --color-heading: #0f172a;
+  --color-body: #475569;
+  --color-muted: #94a3b8;
+  --color-axis: #64748b;
+  --color-grid: #e2e8f0;
+  --color-up: #10b981;
+  --color-near: #f59e0b;
+  --color-down: #ef4444;
+  --color-flat: #94a3b8;
+  --color-gold: #f5c50a;
+  --color-gold-text: #8a6d00;
+  --color-gold-tint: #fdf6dd;
+}
+
+:root {
+  --c-page: #f6f8fc;
+  --c-card: #fff;
+  --c-card-border: #e6eaf1;
+  --c-inner: #f4f6fb;
+  --c-drill: #eef2f8;
+  --c-heading: #0e1a2b;
+  --c-body: #51607a;
+  --c-axis: #67748b;
+  --c-muted: #94a0b4;
+  --c-grid: #ebeef4;
+  --c-up: #15a34a;
+  --c-near: #ea8c2e;
+  --c-down: #dc3545;
+  --c-flat: #94a3b8;
+  --c-brand: #1479c9;
+  --c-brand-dark: #0f5fa0;
+  --c-brand-deep: #0a4a7f;
+  --c-brand-tint: #e7f1fb;
+  --c-gold: #f5c50a;
+  --c-gold-strong: #b8910a;
+  --c-gold-text: #8a6d00;
+  --c-gold-tint: #fdf6dd;
+  --c-on-accent: #fff;
+  --c-scrollbar-track: #eef2f8;
+  --c-scrollbar-thumb: #cbd3e1;
+  --c-scrollbar-thumb-hover: #aab6c9;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--c-page);
+  color: var(--c-heading);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--c-scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--c-scrollbar-thumb);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--c-scrollbar-thumb-hover);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+.animate-slideDown {
+  animation: slideDown 0.5s ease-out;
+}
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out;
+}
+.animate-scaleIn {
+  animation: scaleIn 0.4s ease-out;
+}
+.animate-pulse-dot {
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+.stagger-9 { animation-delay: 0.45s; }
+.stagger-10 { animation-delay: 0.5s; }

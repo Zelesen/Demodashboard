@@ -1,0 +1,58 @@
+# ===========================
+# Environment
+# ===========================
+.env
+.env.*
+backend/.env
+dashboard-frontend/.env
+*.env
+
+# ===========================
+# Python
+# ===========================
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+
+# ===========================
+# Node / React
+# ===========================
+node_modules/
+dashboard-frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vite
+dashboard-frontend/dist/
+
+# ===========================
+# Backend cache
+# ===========================
+backend/cache/
+
+# ===========================
+# IDE
+# ===========================
+.vscode/
+.idea/
+
+# ===========================
+# OS
+# ===========================
+.DS_Store
+Thumbs.db
+
+# ===========================
+# Large local database dumps
+# ===========================
+*.sql
+*.sqlite
+*.db
+*.gz
