@@ -12,6 +12,7 @@ import jwt
 from dotenv import load_dotenv
 from pydantic import BaseModel
 import httpx
+import glob
 
 load_dotenv()
 
@@ -84,24 +85,34 @@ def build_date_clause(period, start_date=None, end_date=None, column_expr="creat
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "cache")
 
 def get_cache(endpoint_name: str, period: str = None):
-    """Read precomputed data from JSON cache. Returns None if not found."""
-    filename = f"{endpoint_name}_{period}.json" if period else f"{endpoint_name}.json"
-    path = os.path.join(CACHE_DIR, filename)
-    if os.path.exists(path):
-        try:
-            with open(path, "r") as f:
-                return json.load(f)
-        except (json.JSONDecodeError, IOError):
-            pass
-    return None
+    """Read most recent precomputed data from JSON cache. Returns None if not found."""
+    pattern = f"{endpoint_name}_{period}_*.json" if period else f"{endpoint_name}_*.json"
+    files = glob.glob(os.path.join(CACHE_DIR, pattern))
+    if not files:
+        old = f"{endpoint_name}_{period}.json" if period else f"{endpoint_name}.json"
+        old_path = os.path.join(CACHE_DIR, old)
+        if os.path.exists(old_path):
+            files = [old_path]
+        else:
+            return None
+    newest = max(files, key=os.path.getmtime)
+    try:
+        with open(newest, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return None
 
 def cache_exists(endpoint_name: str, period: str = None):
-    filename = f"{endpoint_name}_{period}.json" if period else f"{endpoint_name}.json"
-    return os.path.exists(os.path.join(CACHE_DIR, filename))
+    pattern = f"{endpoint_name}_{period}_*.json" if period else f"{endpoint_name}_*.json"
+    if glob.glob(os.path.join(CACHE_DIR, pattern)):
+        return True
+    old = f"{endpoint_name}_{period}.json" if period else f"{endpoint_name}.json"
+    return os.path.exists(os.path.join(CACHE_DIR, old))
 
 def save_cache(endpoint_name: str, data, period: str = None):
-    """Save data to JSON cache"""
-    filename = f"{endpoint_name}_{period}.json" if period else f"{endpoint_name}.json"
+    """Save data to JSON cache with timestamp"""
+    now = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{endpoint_name}_{period}_{now}.json" if period else f"{endpoint_name}_{now}.json"
     path = os.path.join(CACHE_DIR, filename)
     os.makedirs(CACHE_DIR, exist_ok=True)
     with open(path, "w") as f:

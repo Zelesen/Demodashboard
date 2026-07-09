@@ -265,7 +265,17 @@ export default function Payments() {
         applyCachedData(customKey);
       }
     } else {
-      applyCachedData(getPeriodParam());
+      const period = getPeriodParam();
+      if (dataCache.current.has(period)) {
+        applyCachedData(period);
+      } else {
+        fetchDataForPeriod(period).then(data => {
+          if (data) {
+            dataCache.current.set(period, data);
+            applyCachedData(period);
+          }
+        });
+      }
     }
   }, [activeFilter, customStartDate, customEndDate, applyCachedData]);
 

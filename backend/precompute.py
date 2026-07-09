@@ -11,6 +11,7 @@ Usage:
 import json
 import os
 import sys
+import glob
 from datetime import datetime, timedelta, timezone
 
 import psycopg2
@@ -52,7 +53,8 @@ def get_db():
 
 def save_cache(name, data, period=None):
     os.makedirs(CACHE_DIR, exist_ok=True)
-    filename = f"{name}_{period}.json" if period else f"{name}.json"
+    now = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{name}_{period}_{now}.json" if period else f"{name}_{now}.json"
     path = os.path.join(CACHE_DIR, filename)
     with open(path, "w") as f:
         json.dump(data, f, default=str, indent=2)
@@ -61,12 +63,18 @@ def save_cache(name, data, period=None):
 
 
 def load_cache(name, period=None):
-    filename = f"{name}_{period}.json" if period else f"{name}.json"
-    path = os.path.join(CACHE_DIR, filename)
-    if os.path.exists(path):
-        with open(path) as f:
-            return json.load(f)
-    return None
+    pattern = f"{name}_{period}_*.json" if period else f"{name}_*.json"
+    files = glob.glob(os.path.join(CACHE_DIR, pattern))
+    if not files:
+        old = f"{name}_{period}.json" if period else f"{name}.json"
+        old_path = os.path.join(CACHE_DIR, old)
+        if os.path.exists(old_path):
+            files = [old_path]
+        else:
+            return None
+    newest = max(files, key=os.path.getmtime)
+    with open(newest) as f:
+        return json.load(f)
 
 
 # ==================== DASHBOARD METRICS ====================

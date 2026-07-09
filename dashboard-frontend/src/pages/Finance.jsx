@@ -143,7 +143,17 @@ export default function Finance() {
         applyCachedData(customKey);
       }
     } else {
-      applyCachedData(periodMap[activeFilter]);
+      const period = periodMap[activeFilter];
+      if (dataCache.current.has(period)) {
+        applyCachedData(period);
+      } else {
+        fetchDataForPeriod(period).then(data => {
+          if (data) {
+            dataCache.current.set(period, data);
+            applyCachedData(period);
+          }
+        });
+      }
     }
   }, [activeFilter, customStartDate, customEndDate, applyCachedData]);
 
