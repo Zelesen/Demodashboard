@@ -13,58 +13,30 @@ from pydantic import BaseModel
 import httpx
 import logging
 import threading
-import subprocess
-import sys
 from contextlib import contextmanager
-from contextlib import asynccontextmanager
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-
-def run_precompute():
-    try:
-        backend_dir = os.path.dirname(__file__)
-        subprocess.run(
-            [sys.executable, "precompute.py"],
-            cwd=backend_dir,
-            capture_output=True,
-            timeout=300
-        )
-        logger.info("Precompute completed successfully")
-    except subprocess.TimeoutExpired:
-        logger.warning("Precompute timed out after 300s")
-    except Exception as e:
-        logger.error(f"Precompute failed: {e}")
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    thread = threading.Thread(target=run_precompute, daemon=True)
-    thread.start()
-    yield
-
-
-app = FastAPI(title="Dental Dashboard API", lifespan=lifespan)
+app = FastAPI(title="Dental Dashboard API")
 security = HTTPBearer(auto_error=False)
 
 # CORS middleware for frontend
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "https://demodashboard-wheat.vercel.app,http://localhost:5173,http://localhost:3000").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Database connection
-DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
+DB_HOST = os.getenv("DB_HOST", )
 DB_PORT = os.getenv("DB_PORT", "5432")
-DB_NAME = os.getenv("DB_NAME", "postgres")
-DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
+DB_NAME = os.getenv("DB_NAME", )
+DB_USER = os.getenv("DB_USER", )
+DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 # JWT config
 JWT_SECRET = os.getenv("JWT_SECRET", "brightsmiles-demo-secret-key-2026")
@@ -72,7 +44,7 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRY_HOURS = 24
 
 # Supabase config
-SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "http://127.0.0.1:54321")
 SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
 db_pool = None
@@ -88,7 +60,9 @@ def get_pool():
                     minconn=2, maxconn=40,
                     host=DB_HOST, port=DB_PORT,
                     database=DB_NAME, user=DB_USER,
-                    password=DB_PASSWORD
+                    password=DB_PASSWORD,
+                    connect_timeout=5,
+                    options="-c statement_timeout=15000"
                 )
     return db_pool
 
@@ -126,6 +100,30 @@ def db_connection():
 # finish and populate the cache, instead of all hitting the DB at once.
 _cache_locks_guard = threading.Lock()
 _cache_locks = {}
+LOCK_WAIT_TIMEOUT = 20  # seconds a request will wait for the cache-computing lock
+
+class _TimedLock:
+    """Wraps a threading.Lock so `with` never blocks forever. If the
+    lock can't be acquired within LOCK_WAIT_TIMEOUT (e.g. because the
+    request holding it is stuck on a slow/dead DB connection), fail
+    fast with a 503 instead of piling up behind it until the client or
+    edge proxy times out."""
+    __slots__ = ("_lock",)
+
+    def __init__(self, lock):
+        self._lock = lock
+
+    def __enter__(self):
+        if not self._lock.acquire(timeout=LOCK_WAIT_TIMEOUT):
+            raise HTTPException(
+                status_code=503,
+                detail="Server is busy refreshing this data, please retry shortly."
+            )
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self._lock.release()
+        return False
 
 def _lock_for(endpoint_name: str, period: str = None):
     key = f"{endpoint_name}_{period}" if period else endpoint_name
@@ -134,7 +132,7 @@ def _lock_for(endpoint_name: str, period: str = None):
         if lock is None:
             lock = threading.Lock()
             _cache_locks[key] = lock
-        return lock
+    return _TimedLock(lock)
 
 def ts(col):
     """Return column reference for timestamp (columns are now properly typed)"""
