@@ -49,6 +49,7 @@ SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 
 db_pool = None
 pool_lock = threading.Lock()
+POOL_TIMEOUT = 30
 
 def get_pool():
     global db_pool
@@ -56,7 +57,7 @@ def get_pool():
         with pool_lock:
             if db_pool is None:
                 db_pool = ThreadedConnectionPool(
-                    minconn=1, maxconn=10,
+                    minconn=1, maxconn=25,
                     host=DB_HOST, port=DB_PORT,
                     database=DB_NAME, user=DB_USER,
                     password=DB_PASSWORD
