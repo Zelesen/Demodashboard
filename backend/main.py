@@ -57,7 +57,7 @@ def get_pool():
         with pool_lock:
             if db_pool is None:
                 db_pool = ThreadedConnectionPool(
-                    minconn=1, maxconn=25,
+                    minconn=2, maxconn=60,
                     host=DB_HOST, port=DB_PORT,
                     database=DB_NAME, user=DB_USER,
                     password=DB_PASSWORD
@@ -76,8 +76,37 @@ def db_connection():
     conn = get_pool().getconn()
     try:
         yield conn
+        conn.commit()
+    except Exception:
+        # Roll back so a failed query never returns a "dirty"/aborted
+        # transaction to the pool for the next request to inherit.
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+        raise
     finally:
         get_pool().putconn(conn)
+
+
+# --- Cache-stampede protection ---
+# When the JSON cache is cold, many concurrent requests for the SAME
+# endpoint+period can arrive at once (e.g. on initial dashboard load).
+# Without coalescing, each one opens its own DB connection and runs the
+# same queries, which is what exhausts the connection pool. This makes
+# concurrent callers for the same cache key wait for the first one to
+# finish and populate the cache, instead of all hitting the DB at once.
+_cache_locks_guard = threading.Lock()
+_cache_locks = {}
+
+def _lock_for(endpoint_name: str, period: str = None):
+    key = f"{endpoint_name}_{period}" if period else endpoint_name
+    with _cache_locks_guard:
+        lock = _cache_locks.get(key)
+        if lock is None:
+            lock = threading.Lock()
+            _cache_locks[key] = lock
+        return lock
 
 def ts(col):
     """Return column reference for timestamp (columns are now properly typed)"""
@@ -270,6 +299,14 @@ def get_metrics(period: str = "7d", start_date: str = None, end_date: str = None
         cached = get_cache("dashboard_metrics", period)
         if cached:
             return cached
+        with _lock_for("dashboard_metrics", period):
+            cached = get_cache("dashboard_metrics", period)
+            if cached:
+                return cached
+            return _get_metrics_from_db(period, start_date, end_date)
+    return _get_metrics_from_db(period, start_date, end_date)
+
+def _get_metrics_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -372,6 +409,14 @@ def get_ai_insights(period: str = "7d", start_date: str = None, end_date: str = 
         cached = get_cache("dashboard_ai_insights", period)
         if cached:
             return cached
+        with _lock_for("dashboard_ai_insights", period):
+            cached = get_cache("dashboard_ai_insights", period)
+            if cached:
+                return cached
+            return _get_ai_insights_from_db(period, start_date, end_date)
+    return _get_ai_insights_from_db(period, start_date, end_date)
+
+def _get_ai_insights_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -411,6 +456,14 @@ def get_health_score(period: str = "30d", start_date: str = None, end_date: str 
         cached = get_cache("dashboard_health_score", period)
         if cached:
             return cached
+        with _lock_for("dashboard_health_score", period):
+            cached = get_cache("dashboard_health_score", period)
+            if cached:
+                return cached
+            return _get_health_score_from_db(period, start_date, end_date)
+    return _get_health_score_from_db(period, start_date, end_date)
+
+def _get_health_score_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -474,6 +527,13 @@ def get_nhs_chart():
     cached = get_cache("dashboard_nhs_chart")
     if cached:
         return cached
+    with _lock_for("dashboard_nhs_chart"):
+        cached = get_cache("dashboard_nhs_chart")
+        if cached:
+            return cached
+        return _get_nhs_chart_from_db()
+
+def _get_nhs_chart_from_db():
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -512,6 +572,14 @@ def get_league(period: str = "30d", start_date: str = None, end_date: str = None
         cached = get_cache("dashboard_league", period)
         if cached:
             return cached
+        with _lock_for("dashboard_league", period):
+            cached = get_cache("dashboard_league", period)
+            if cached:
+                return cached
+            return _get_league_from_db(period, start_date, end_date)
+    return _get_league_from_db(period, start_date, end_date)
+
+def _get_league_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -570,6 +638,15 @@ def get_sites():
     cached = get_cache("dashboard_sites")
     if cached:
         return cached
+    with _lock_for("dashboard_sites"):
+        # Re-check: another thread may have populated the cache while we
+        # were waiting for the lock, so we can skip hitting the DB.
+        cached = get_cache("dashboard_sites")
+        if cached:
+            return cached
+        return _get_sites_from_db()
+
+def _get_sites_from_db():
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -601,6 +678,14 @@ def get_finance_metrics(period: str = "7d", start_date: str = None, end_date: st
         cached = get_cache("dashboard_finance_metrics", period)
         if cached:
             return cached
+        with _lock_for("dashboard_finance_metrics", period):
+            cached = get_cache("dashboard_finance_metrics", period)
+            if cached:
+                return cached
+            return _get_finance_metrics_from_db(period, start_date, end_date)
+    return _get_finance_metrics_from_db(period, start_date, end_date)
+
+def _get_finance_metrics_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -664,6 +749,14 @@ def get_clinicians_league(period: str = "7d", start_date: str = None, end_date: 
         cached = get_cache("dashboard_clinicians_league", period)
         if cached:
             return cached
+        with _lock_for("dashboard_clinicians_league", period):
+            cached = get_cache("dashboard_clinicians_league", period)
+            if cached:
+                return cached
+            return _get_clinicians_league_from_db(period, start_date, end_date)
+    return _get_clinicians_league_from_db(period, start_date, end_date)
+
+def _get_clinicians_league_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -724,6 +817,14 @@ def get_operations_kpis(period: str = "7d", start_date: str = None, end_date: st
         cached = get_cache("dashboard_operations_kpis", period)
         if cached:
             return cached
+        with _lock_for("dashboard_operations_kpis", period):
+            cached = get_cache("dashboard_operations_kpis", period)
+            if cached:
+                return cached
+            return _get_operations_kpis_from_db(period, start_date, end_date)
+    return _get_operations_kpis_from_db(period, start_date, end_date)
+
+def _get_operations_kpis_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -812,6 +913,14 @@ def get_practice_league(period: str = "7d", start_date: str = None, end_date: st
         cached = get_cache("dashboard_practice_league", period)
         if cached:
             return cached
+        with _lock_for("dashboard_practice_league", period):
+            cached = get_cache("dashboard_practice_league", period)
+            if cached:
+                return cached
+            return _get_practice_league_from_db(period, start_date, end_date)
+    return _get_practice_league_from_db(period, start_date, end_date)
+
+def _get_practice_league_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -850,6 +959,14 @@ def get_revenue_by_stream(period: str = "7d", start_date: str = None, end_date: 
         cached = get_cache("dashboard_revenue_by_stream", period)
         if cached:
             return cached
+        with _lock_for("dashboard_revenue_by_stream", period):
+            cached = get_cache("dashboard_revenue_by_stream", period)
+            if cached:
+                return cached
+            return _get_revenue_by_stream_from_db(period, start_date, end_date)
+    return _get_revenue_by_stream_from_db(period, start_date, end_date)
+
+def _get_revenue_by_stream_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -907,6 +1024,13 @@ def get_profit_per_practice():
     cached = get_cache("dashboard_profit_per_practice")
     if cached:
         return cached
+    with _lock_for("dashboard_profit_per_practice"):
+        cached = get_cache("dashboard_profit_per_practice")
+        if cached:
+            return cached
+        return _get_profit_per_practice_from_db()
+
+def _get_profit_per_practice_from_db():
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -945,6 +1069,13 @@ def get_capacity_data():
     cached = get_cache("dashboard_capacity_data")
     if cached:
         return cached
+    with _lock_for("dashboard_capacity_data"):
+        cached = get_cache("dashboard_capacity_data")
+        if cached:
+            return cached
+        return _get_capacity_data_from_db()
+
+def _get_capacity_data_from_db():
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -983,6 +1114,13 @@ def get_recall_backlog():
     cached = get_cache("dashboard_recall_backlog")
     if cached:
         return cached
+    with _lock_for("dashboard_recall_backlog"):
+        cached = get_cache("dashboard_recall_backlog")
+        if cached:
+            return cached
+        return _get_recall_backlog_from_db()
+
+def _get_recall_backlog_from_db():
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1016,6 +1154,14 @@ def get_case_acceptance(period: str = "7d", start_date: str = None, end_date: st
         cached = get_cache("dashboard_case_acceptance", period)
         if cached:
             return cached
+        with _lock_for("dashboard_case_acceptance", period):
+            cached = get_cache("dashboard_case_acceptance", period)
+            if cached:
+                return cached
+            return _get_case_acceptance_from_db(period, start_date, end_date)
+    return _get_case_acceptance_from_db(period, start_date, end_date)
+
+def _get_case_acceptance_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1054,6 +1200,14 @@ def get_invoices_kpis(period: str = "7d", start_date: str = None, end_date: str 
         cached = get_cache("dashboard_invoices_kpis", period)
         if cached:
             return cached
+        with _lock_for("dashboard_invoices_kpis", period):
+            cached = get_cache("dashboard_invoices_kpis", period)
+            if cached:
+                return cached
+            return _get_invoices_kpis_from_db(period, start_date, end_date)
+    return _get_invoices_kpis_from_db(period, start_date, end_date)
+
+def _get_invoices_kpis_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1145,6 +1299,14 @@ def get_invoices_trend(period: str = "30d", start_date: str = None, end_date: st
         cached = get_cache("dashboard_invoices_trend", period)
         if cached:
             return cached
+        with _lock_for("dashboard_invoices_trend", period):
+            cached = get_cache("dashboard_invoices_trend", period)
+            if cached:
+                return cached
+            return _get_invoices_trend_from_db(period, start_date, end_date)
+    return _get_invoices_trend_from_db(period, start_date, end_date)
+
+def _get_invoices_trend_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1222,6 +1384,14 @@ def get_invoices_kpis_datedon(period: str = "7d", start_date: str = None, end_da
         cached = get_cache("dashboard_invoices_kpis_datedon", period)
         if cached:
             return cached
+        with _lock_for("dashboard_invoices_kpis_datedon", period):
+            cached = get_cache("dashboard_invoices_kpis_datedon", period)
+            if cached:
+                return cached
+            return _get_invoices_kpis_datedon_from_db(period, start_date, end_date)
+    return _get_invoices_kpis_datedon_from_db(period, start_date, end_date)
+
+def _get_invoices_kpis_datedon_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1306,6 +1476,14 @@ def get_revenue_by_treatment(period: str = "7d", start_date: str = None, end_dat
         cached = get_cache("dashboard_revenue_by_treatment", period)
         if cached:
             return cached
+        with _lock_for("dashboard_revenue_by_treatment", period):
+            cached = get_cache("dashboard_revenue_by_treatment", period)
+            if cached:
+                return cached
+            return _get_revenue_by_treatment_from_db(period, start_date, end_date)
+    return _get_revenue_by_treatment_from_db(period, start_date, end_date)
+
+def _get_revenue_by_treatment_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1354,6 +1532,14 @@ def get_top_patients_by_revenue(period: str = "7d", start_date: str = None, end_
         cached = get_cache("dashboard_top_patients_by_revenue", period)
         if cached:
             return cached
+        with _lock_for("dashboard_top_patients_by_revenue", period):
+            cached = get_cache("dashboard_top_patients_by_revenue", period)
+            if cached:
+                return cached
+            return _get_top_patients_by_revenue_from_db(period, start_date, end_date)
+    return _get_top_patients_by_revenue_from_db(period, start_date, end_date)
+
+def _get_top_patients_by_revenue_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1406,6 +1592,14 @@ def get_revenue_by_site(period: str = "7d", start_date: str = None, end_date: st
         cached = get_cache("dashboard_revenue_by_site", period)
         if cached:
             return cached
+        with _lock_for("dashboard_revenue_by_site", period):
+            cached = get_cache("dashboard_revenue_by_site", period)
+            if cached:
+                return cached
+            return _get_revenue_by_site_from_db(period, start_date, end_date)
+    return _get_revenue_by_site_from_db(period, start_date, end_date)
+
+def _get_revenue_by_site_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1464,6 +1658,14 @@ def get_invoices_trend_datedon(period: str = "30d", start_date: str = None, end_
         cached = get_cache("dashboard_invoices_trend_datedon", period)
         if cached:
             return cached
+        with _lock_for("dashboard_invoices_trend_datedon", period):
+            cached = get_cache("dashboard_invoices_trend_datedon", period)
+            if cached:
+                return cached
+            return _get_invoices_trend_datedon_from_db(period, start_date, end_date)
+    return _get_invoices_trend_datedon_from_db(period, start_date, end_date)
+
+def _get_invoices_trend_datedon_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1547,6 +1749,14 @@ def get_top_patients_by_revenue_datedon(period: str = "7d", start_date: str = No
         cached = get_cache("dashboard_top_patients_by_revenue_datedon", period)
         if cached:
             return cached
+        with _lock_for("dashboard_top_patients_by_revenue_datedon", period):
+            cached = get_cache("dashboard_top_patients_by_revenue_datedon", period)
+            if cached:
+                return cached
+            return _get_top_patients_by_revenue_datedon_from_db(period, start_date, end_date)
+    return _get_top_patients_by_revenue_datedon_from_db(period, start_date, end_date)
+
+def _get_top_patients_by_revenue_datedon_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1599,6 +1809,14 @@ def get_revenue_by_site_datedon(period: str = "7d", start_date: str = None, end_
         cached = get_cache("dashboard_revenue_by_site_datedon", period)
         if cached:
             return cached
+        with _lock_for("dashboard_revenue_by_site_datedon", period):
+            cached = get_cache("dashboard_revenue_by_site_datedon", period)
+            if cached:
+                return cached
+            return _get_revenue_by_site_datedon_from_db(period, start_date, end_date)
+    return _get_revenue_by_site_datedon_from_db(period, start_date, end_date)
+
+def _get_revenue_by_site_datedon_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1659,6 +1877,14 @@ def get_treatment_plan_kpis(period: str = "7d", start_date: str = None, end_date
         cached = get_cache("dashboard_treatment_plan_kpis", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_kpis", period):
+            cached = get_cache("dashboard_treatment_plan_kpis", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_kpis_from_db(period, start_date, end_date)
+    return _get_treatment_plan_kpis_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_kpis_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1713,6 +1939,14 @@ def get_treatment_plans_by_practitioner(period: str = "7d", start_date: str = No
         cached = get_cache("dashboard_treatment_plans_by_practitioner", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plans_by_practitioner", period):
+            cached = get_cache("dashboard_treatment_plans_by_practitioner", period)
+            if cached:
+                return cached
+            return _get_treatment_plans_by_practitioner_from_db(period, start_date, end_date)
+    return _get_treatment_plans_by_practitioner_from_db(period, start_date, end_date)
+
+def _get_treatment_plans_by_practitioner_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1769,6 +2003,14 @@ def get_treatment_plan_items(limit: int = 20, period: str = "7d", start_date: st
         cached = get_cache("dashboard_treatment_plan_items", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_items", period):
+            cached = get_cache("dashboard_treatment_plan_items", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_items_from_db(limit, period, start_date, end_date)
+    return _get_treatment_plan_items_from_db(limit, period, start_date, end_date)
+
+def _get_treatment_plan_items_from_db(limit, period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1827,6 +2069,14 @@ def get_treatment_plans_by_treatment(period: str = "7d", start_date: str = None,
         cached = get_cache("dashboard_treatment_plans_by_treatment", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plans_by_treatment", period):
+            cached = get_cache("dashboard_treatment_plans_by_treatment", period)
+            if cached:
+                return cached
+            return _get_treatment_plans_by_treatment_from_db(period, start_date, end_date)
+    return _get_treatment_plans_by_treatment_from_db(period, start_date, end_date)
+
+def _get_treatment_plans_by_treatment_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1859,6 +2109,14 @@ def get_treatment_plan_trends(period: str = "7d", start_date: str = None, end_da
         cached = get_cache("dashboard_treatment_plan_trends", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_trends", period):
+            cached = get_cache("dashboard_treatment_plan_trends", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_trends_from_db(period, start_date, end_date)
+    return _get_treatment_plan_trends_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_trends_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1898,6 +2156,14 @@ def get_treatment_plan_duration(period: str = "30d", start_date: str = None, end
         cached = get_cache("dashboard_treatment_plan_duration", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_duration", period):
+            cached = get_cache("dashboard_treatment_plan_duration", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_duration_from_db(period, start_date, end_date)
+    return _get_treatment_plan_duration_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_duration_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1940,6 +2206,14 @@ def get_treatment_plan_patients(period: str = "30d", start_date: str = None, end
         cached = get_cache("dashboard_treatment_plan_patients", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_patients", period):
+            cached = get_cache("dashboard_treatment_plan_patients", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_patients_from_db(period, start_date, end_date)
+    return _get_treatment_plan_patients_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_patients_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -1998,6 +2272,14 @@ def get_treatment_plan_velocity(period: str = "30d", start_date: str = None, end
         cached = get_cache("dashboard_treatment_plan_velocity", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_velocity", period):
+            cached = get_cache("dashboard_treatment_plan_velocity", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_velocity_from_db(period, start_date, end_date)
+    return _get_treatment_plan_velocity_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_velocity_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2065,6 +2347,14 @@ def get_treatment_plan_value_distribution(period: str = "30d", start_date: str =
         cached = get_cache("dashboard_treatment_plan_value_distribution", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_value_distribution", period):
+            cached = get_cache("dashboard_treatment_plan_value_distribution", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_value_distribution_from_db(period, start_date, end_date)
+    return _get_treatment_plan_value_distribution_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_value_distribution_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2120,6 +2410,14 @@ def get_treatment_plan_completion_heatmap(period: str = "90d", start_date: str =
         cached = get_cache("dashboard_treatment_plan_completion_heatmap", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_completion_heatmap", period):
+            cached = get_cache("dashboard_treatment_plan_completion_heatmap", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_completion_heatmap_from_db(period, start_date, end_date)
+    return _get_treatment_plan_completion_heatmap_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_completion_heatmap_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2171,6 +2469,14 @@ def get_treatment_plan_nhs_vs_private(period: str = "30d", start_date: str = Non
         cached = get_cache("dashboard_treatment_plan_nhs_vs_private", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_nhs_vs_private", period):
+            cached = get_cache("dashboard_treatment_plan_nhs_vs_private", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_nhs_vs_private_from_db(period, start_date, end_date)
+    return _get_treatment_plan_nhs_vs_private_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_nhs_vs_private_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2224,6 +2530,14 @@ def get_treatment_plan_funnel(period: str = "30d", start_date: str = None, end_d
         cached = get_cache("dashboard_treatment_plan_funnel", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_funnel", period):
+            cached = get_cache("dashboard_treatment_plan_funnel", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_funnel_from_db(period, start_date, end_date)
+    return _get_treatment_plan_funnel_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_funnel_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2292,6 +2606,14 @@ def get_treatment_plan_dow_creation(period: str = "30d", start_date: str = None,
         cached = get_cache("dashboard_treatment_plan_dow_creation", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_dow_creation", period):
+            cached = get_cache("dashboard_treatment_plan_dow_creation", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_dow_creation_from_db(period, start_date, end_date)
+    return _get_treatment_plan_dow_creation_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_dow_creation_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2321,6 +2643,14 @@ def get_treatment_plan_hour_completion(period: str = "90d", start_date: str = No
         cached = get_cache("dashboard_treatment_plan_hour_completion", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_hour_completion", period):
+            cached = get_cache("dashboard_treatment_plan_hour_completion", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_hour_completion_from_db(period, start_date, end_date)
+    return _get_treatment_plan_hour_completion_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_hour_completion_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2349,6 +2679,14 @@ def get_treatment_plan_backlog(period: str = "1y", start_date: str = None, end_d
         cached = get_cache("dashboard_treatment_plan_backlog", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_backlog", period):
+            cached = get_cache("dashboard_treatment_plan_backlog", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_backlog_from_db(period, start_date, end_date)
+    return _get_treatment_plan_backlog_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_backlog_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2388,6 +2726,14 @@ def get_treatment_plan_aging(period: str = "30d", start_date: str = None, end_da
         cached = get_cache("dashboard_treatment_plan_aging", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_aging", period):
+            cached = get_cache("dashboard_treatment_plan_aging", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_aging_from_db(period, start_date, end_date)
+    return _get_treatment_plan_aging_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_aging_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2425,6 +2771,14 @@ def get_treatment_plan_nhs_delivery_rate(period: str = "30d", start_date: str = 
         cached = get_cache("dashboard_treatment_plan_nhs_delivery_rate", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_nhs_delivery_rate", period):
+            cached = get_cache("dashboard_treatment_plan_nhs_delivery_rate", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_nhs_delivery_rate_from_db(period, start_date, end_date)
+    return _get_treatment_plan_nhs_delivery_rate_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_nhs_delivery_rate_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2469,6 +2823,14 @@ def get_treatment_plan_duration_distribution(period: str = "90d", start_date: st
         cached = get_cache("dashboard_treatment_plan_duration_distribution", period)
         if cached:
             return cached
+        with _lock_for("dashboard_treatment_plan_duration_distribution", period):
+            cached = get_cache("dashboard_treatment_plan_duration_distribution", period)
+            if cached:
+                return cached
+            return _get_treatment_plan_duration_distribution_from_db(period, start_date, end_date)
+    return _get_treatment_plan_duration_distribution_from_db(period, start_date, end_date)
+
+def _get_treatment_plan_duration_distribution_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -2510,6 +2872,14 @@ def get_appointments_kpis(period: str = "7d", start_date: str = None, end_date: 
         cached = get_cache("dashboard_appointments_kpis", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_kpis", period):
+            cached = get_cache("dashboard_appointments_kpis", period)
+            if cached:
+                return cached
+            return _get_appointments_kpis_from_db(period, start_date, end_date)
+    return _get_appointments_kpis_from_db(period, start_date, end_date)
+
+def _get_appointments_kpis_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2548,6 +2918,14 @@ def get_appointments_trend(period: str = "7d", start_date: str = None, end_date:
         cached = get_cache("dashboard_appointments_trend", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_trend", period):
+            cached = get_cache("dashboard_appointments_trend", period)
+            if cached:
+                return cached
+            return _get_appointments_trend_from_db(period, start_date, end_date)
+    return _get_appointments_trend_from_db(period, start_date, end_date)
+
+def _get_appointments_trend_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2579,6 +2957,14 @@ def get_appointments_by_site(period: str = "7d", start_date: str = None, end_dat
         cached = get_cache("dashboard_appointments_by_site", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_by_site", period):
+            cached = get_cache("dashboard_appointments_by_site", period)
+            if cached:
+                return cached
+            return _get_appointments_by_site_from_db(period, start_date, end_date)
+    return _get_appointments_by_site_from_db(period, start_date, end_date)
+
+def _get_appointments_by_site_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2601,6 +2987,14 @@ def get_appointments_by_practitioner(period: str = "7d", start_date: str = None,
         cached = get_cache("dashboard_appointments_by_practitioner", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_by_practitioner", period):
+            cached = get_cache("dashboard_appointments_by_practitioner", period)
+            if cached:
+                return cached
+            return _get_appointments_by_practitioner_from_db(period, start_date, end_date)
+    return _get_appointments_by_practitioner_from_db(period, start_date, end_date)
+
+def _get_appointments_by_practitioner_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2631,6 +3025,14 @@ def get_recent_appointments(period: str = "7d", start_date: str = None, end_date
         cached = get_cache("dashboard_recent_appointments", period)
         if cached:
             return cached
+        with _lock_for("dashboard_recent_appointments", period):
+            cached = get_cache("dashboard_recent_appointments", period)
+            if cached:
+                return cached
+            return _get_recent_appointments_from_db(period, start_date, end_date, limit)
+    return _get_recent_appointments_from_db(period, start_date, end_date, limit)
+
+def _get_recent_appointments_from_db(period, start_date, end_date, limit):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2676,6 +3078,14 @@ def get_appointments_by_reason(period: str = "7d", start_date: str = None, end_d
         cached = get_cache("dashboard_appointments_by_reason", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_by_reason", period):
+            cached = get_cache("dashboard_appointments_by_reason", period)
+            if cached:
+                return cached
+            return _get_appointments_by_reason_from_db(period, start_date, end_date)
+    return _get_appointments_by_reason_from_db(period, start_date, end_date)
+
+def _get_appointments_by_reason_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2698,6 +3108,14 @@ def get_appointments_by_hour(period: str = "7d", start_date: str = None, end_dat
         cached = get_cache("dashboard_appointments_by_hour", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_by_hour", period):
+            cached = get_cache("dashboard_appointments_by_hour", period)
+            if cached:
+                return cached
+            return _get_appointments_by_hour_from_db(period, start_date, end_date)
+    return _get_appointments_by_hour_from_db(period, start_date, end_date)
+
+def _get_appointments_by_hour_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2720,6 +3138,14 @@ def get_appointments_by_day(period: str = "7d", start_date: str = None, end_date
         cached = get_cache("dashboard_appointments_by_day", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_by_day", period):
+            cached = get_cache("dashboard_appointments_by_day", period)
+            if cached:
+                return cached
+            return _get_appointments_by_day_from_db(period, start_date, end_date)
+    return _get_appointments_by_day_from_db(period, start_date, end_date)
+
+def _get_appointments_by_day_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2742,6 +3168,14 @@ def get_appointments_cancellation_by_day(period: str = "7d", start_date: str = N
         cached = get_cache("dashboard_appointments_cancellation_by_day", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_cancellation_by_day", period):
+            cached = get_cache("dashboard_appointments_cancellation_by_day", period)
+            if cached:
+                return cached
+            return _get_appointments_cancellation_by_day_from_db(period, start_date, end_date)
+    return _get_appointments_cancellation_by_day_from_db(period, start_date, end_date)
+
+def _get_appointments_cancellation_by_day_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2764,6 +3198,14 @@ def get_appointments_lifecycle(period: str = "7d", start_date: str = None, end_d
         cached = get_cache("dashboard_appointments_lifecycle", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_lifecycle", period):
+            cached = get_cache("dashboard_appointments_lifecycle", period)
+            if cached:
+                return cached
+            return _get_appointments_lifecycle_from_db(period, start_date, end_date)
+    return _get_appointments_lifecycle_from_db(period, start_date, end_date)
+
+def _get_appointments_lifecycle_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2786,6 +3228,14 @@ def get_appointments_duration(period: str = "7d", start_date: str = None, end_da
         cached = get_cache("dashboard_appointments_duration", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_duration", period):
+            cached = get_cache("dashboard_appointments_duration", period)
+            if cached:
+                return cached
+            return _get_appointments_duration_from_db(period, start_date, end_date)
+    return _get_appointments_duration_from_db(period, start_date, end_date)
+
+def _get_appointments_duration_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -2808,6 +3258,14 @@ def get_appointments_heatmap(period: str = "7d", start_date: str = None, end_dat
         cached = get_cache("dashboard_appointments_heatmap", period)
         if cached:
             return cached
+        with _lock_for("dashboard_appointments_heatmap", period):
+            cached = get_cache("dashboard_appointments_heatmap", period)
+            if cached:
+                return cached
+            return _get_appointments_heatmap_from_db(period, start_date, end_date)
+    return _get_appointments_heatmap_from_db(period, start_date, end_date)
+
+def _get_appointments_heatmap_from_db(period, start_date, end_date):
     try:
         with db_connection() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
