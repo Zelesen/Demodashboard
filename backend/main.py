@@ -71,8 +71,8 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRY_HOURS = 24
 
 # Supabase config
-SUPABASE_URL = os.getenv("VITE_SUPABASE_URL", "http://127.0.0.1:54321")
-SUPABASE_ANON_KEY = os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY", "")
+SUPABASE_URL = os.getenv("VITE_SUPABASE_URL")
+SUPABASE_ANON_KEY = os.getenv("VITE_SUPABASE_PUBLISHABLE_KEY")
 
 db_pool = None
 pool_lock = threading.Lock()
