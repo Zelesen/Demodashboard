@@ -13,13 +13,40 @@ from pydantic import BaseModel
 import httpx
 import logging
 import threading
+import subprocess
+import sys
 from contextlib import contextmanager
+from contextlib import asynccontextmanager
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-app = FastAPI(title="Dental Dashboard API")
+
+def run_precompute():
+    try:
+        backend_dir = os.path.dirname(__file__)
+        subprocess.run(
+            [sys.executable, "precompute.py"],
+            cwd=backend_dir,
+            capture_output=True,
+            timeout=300
+        )
+        logger.info("Precompute completed successfully")
+    except subprocess.TimeoutExpired:
+        logger.warning("Precompute timed out after 300s")
+    except Exception as e:
+        logger.error(f"Precompute failed: {e}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    thread = threading.Thread(target=run_precompute, daemon=True)
+    thread.start()
+    yield
+
+
+app = FastAPI(title="Dental Dashboard API", lifespan=lifespan)
 security = HTTPBearer(auto_error=False)
 
 # CORS middleware for frontend
