@@ -62,17 +62,18 @@ def dt(col):
 def build_date_clause(period, start_date=None, end_date=None, column_expr="created_at"):
     """Returns (where_sql, params) for date filtering.
     If no filtering needed, returns ('TRUE', ()).
+    All columns are text type, so we cast them to date/timestamp for comparison.
     """
     if start_date and end_date:
         return (
-            f"{column_expr} >= %s AND {column_expr} < %s::date + INTERVAL '1 day'",
+            f"{column_expr}::date >= %s AND {column_expr}::date < %s::date + INTERVAL '1 day'",
             (start_date, end_date)
         )
     period_map = {"today": 1, "7d": 7, "30d": 30, "90d": 90, "1y": 365, "all": None}
     days = period_map.get(period, 7)
     if days:
         return (
-            f"{column_expr} >= CURRENT_DATE - INTERVAL %s",
+            f"{column_expr}::date >= CURRENT_DATE - INTERVAL %s",
             (f"{days} days",)
         )
     return ("TRUE", ())
@@ -224,6 +225,11 @@ def login(request: LoginRequest):
 
 @app.get("/api/auth/me")
 def get_me(current_user: dict = Depends(get_current_user)):
+    return {"user": current_user}
+
+@app.get("/api/auth/user")
+def get_user(current_user: dict = Depends(get_current_user)):
+    """Alias for /api/auth/me to match frontend expectation"""
     return {"user": current_user}
 
 @app.get("/")
