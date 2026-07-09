@@ -371,15 +371,20 @@ export default function InvoicesDatedOn() {
     }
   };
 
+  const populateFromData = useCallback((data) => {
+    setInvoiceData(data.invoiceData);
+    setTrendData(data.trendData);
+    setTreatmentRevenueData(data.treatmentRevenueData);
+    setTopPatientsData(data.topPatientsData);
+    setRevenueBySiteData(data.revenueBySiteData);
+  }, []);
+
   const applyCachedData = useCallback((period) => {
     const cached = dataCache.current.get(period);
     if (!cached) return;
-    setInvoiceData(cached.invoiceData);
-    setTrendData(cached.trendData);
-    setTreatmentRevenueData(cached.treatmentRevenueData);
-    setTopPatientsData(cached.topPatientsData);
-    setRevenueBySiteData(cached.revenueBySiteData);
-  }, []);
+    populateFromData(cached);
+    sessionStorage.setItem('invdo_data', JSON.stringify(cached));
+  }, [populateFromData]);
 
   const fetchCustomInvoiceDatedOnData = async (startDate, endDate) => {
     try {
@@ -405,6 +410,14 @@ export default function InvoicesDatedOn() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      const stored = sessionStorage.getItem('invdo_data');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        populateFromData(parsed);
+        setLoading(false);
+        isMounted.current = true;
+        return;
+      }
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
         if (data) dataCache.current.set(period, data);
@@ -525,6 +538,7 @@ export default function InvoicesDatedOn() {
   };
 
   const handleRefresh = async () => {
+    sessionStorage.removeItem('invdo_data');
     setIsRefreshing(true);
     await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
@@ -546,7 +560,6 @@ export default function InvoicesDatedOn() {
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('invoices_refresh_cooldown', String(cooldownUntil));
     setIsRefreshing(false);
-    window.location.reload();
   };
 
   const dateLabel = (() => {

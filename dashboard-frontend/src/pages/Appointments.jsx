@@ -205,22 +205,27 @@ export default function Appointments() {
     }
   };
 
+  const populateFromData = useCallback((data) => {
+    setKpiData(data.kpiData);
+    setTrendData(data.trendData);
+    setSiteData(data.siteData);
+    setPractitionerData(data.practitionerData);
+    setRecentAppointments(data.recentAppointments);
+    setReasonData(data.reasonData);
+    setHourData(data.hourData);
+    setDayData(data.dayData);
+    setCancelByDay(data.cancelByDay);
+    setLifecycleData(data.lifecycleData);
+    setDurationData(data.durationData);
+    setHeatmapData(data.heatmapData);
+  }, []);
+
   const applyCachedData = useCallback((period) => {
     const cached = dataCache.current.get(period);
     if (!cached) return;
-    setKpiData(cached.kpiData);
-    setTrendData(cached.trendData);
-    setSiteData(cached.siteData);
-    setPractitionerData(cached.practitionerData);
-    setRecentAppointments(cached.recentAppointments);
-    setReasonData(cached.reasonData);
-    setHourData(cached.hourData);
-    setDayData(cached.dayData);
-    setCancelByDay(cached.cancelByDay);
-    setLifecycleData(cached.lifecycleData);
-    setDurationData(cached.durationData);
-    setHeatmapData(cached.heatmapData);
-  }, []);
+    populateFromData(cached);
+    sessionStorage.setItem('appt_data', JSON.stringify(cached));
+  }, [populateFromData]);
 
   const fetchCustomData = async (startDate, endDate) => {
     try {
@@ -261,6 +266,14 @@ export default function Appointments() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      const stored = sessionStorage.getItem('appt_data');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        populateFromData(parsed);
+        setLoading(false);
+        isMounted.current = true;
+        return;
+      }
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
         if (data) dataCache.current.set(period, data);
@@ -271,6 +284,7 @@ export default function Appointments() {
       isMounted.current = true;
     };
     preFetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -303,6 +317,7 @@ export default function Appointments() {
   };
 
   const handleRefresh = async () => {
+    sessionStorage.removeItem('appt_data');
     setIsRefreshing(true);
     await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
@@ -324,7 +339,6 @@ export default function Appointments() {
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('appointments_refresh_cooldown', String(cooldownUntil));
     setIsRefreshing(false);
-    window.location.reload();
   };
 
   const dateLabel = (() => {

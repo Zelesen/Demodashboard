@@ -21,6 +21,16 @@ export default function Sales() {
   });
   const [cooldownSecs, setCooldownSecs] = useState(0);
 
+  const populateFromData = useCallback((data) => {
+    setMetrics(data.metrics);
+    setSources(data.sources);
+    setFunnel(data.funnel);
+    setCosmetic(data.cosmetic);
+    setPlanGrowth(data.planGrowth);
+    setRecall(data.recall);
+    setReputation(data.reputation);
+  }, []);
+
   const periodMap = {
     'Today': 'today', 'Last 7 days': '7d', 'Last 30 days': '30d',
     'Last 90 days': '90d', 'Last year': '1y', 'All time': 'all', 'Custom': 'all'
@@ -39,14 +49,24 @@ export default function Sales() {
         fetch(`https://demodashboard-production.up.railway.app/api/sales/recall-reactivation`),
         fetch(`https://demodashboard-production.up.railway.app/api/sales/reputation`)
       ]);
-      setSources(await sourcesRes.json());
-      setFunnel(await funnelRes.json());
-      setCosmetic(await cosmeticRes.json());
-      setPlanGrowth(await planRes.json());
-      setRecall(await recallRes.json());
-      setReputation(await repRes.json());
+      const staticData = {
+        sources: await sourcesRes.json(),
+        funnel: await funnelRes.json(),
+        cosmetic: await cosmeticRes.json(),
+        planGrowth: await planRes.json(),
+        recall: await recallRes.json(),
+        reputation: await repRes.json(),
+      };
+      setSources(staticData.sources);
+      setFunnel(staticData.funnel);
+      setCosmetic(staticData.cosmetic);
+      setPlanGrowth(staticData.planGrowth);
+      setRecall(staticData.recall);
+      setReputation(staticData.reputation);
+      return staticData;
     } catch (error) {
       console.error('Error fetching static sales data:', error);
+      return null;
     }
   };
 
@@ -72,16 +92,29 @@ export default function Sales() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      const stored = sessionStorage.getItem('sales_data');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        populateFromData(parsed);
+        isMounted.current = true;
+        return;
+      }
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchMetricsForPeriod(period);
         if (data) metricsCache.current.set(period, data);
       });
       await Promise.all(fetches);
-      await fetchStaticData();
+      const staticData = await fetchStaticData();
       const period = periodMap[activeFilter] || '7d';
       const cached = metricsCache.current.get(period);
       if (cached) setMetrics(cached);
       isMounted.current = true;
+      if (cached && staticData) {
+        sessionStorage.setItem('sales_data', JSON.stringify({
+          metrics: cached,
+          ...staticData,
+        }));
+      }
     };
     preFetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -130,6 +163,7 @@ export default function Sales() {
   };
 
   const handleRefresh = async () => {
+    sessionStorage.removeItem('sales_data');
     setIsRefreshing(true);
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
       const data = await fetchCustomSalesMetrics(customStartDate, customEndDate);
@@ -154,7 +188,6 @@ export default function Sales() {
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('sales_refresh_cooldown', String(cooldownUntil));
     setIsRefreshing(false);
-    window.location.reload();
   };
 
   const filters = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "All time", "Custom"];

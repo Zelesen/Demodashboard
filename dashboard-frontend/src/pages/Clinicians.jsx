@@ -74,13 +74,18 @@ export default function Clinicians() {
     }
   };
 
+  const populateFromData = useCallback((data) => {
+    setCliniciansData(data.cliniciansData);
+    setCaseAcceptanceData(data.caseAcceptanceData);
+    setHygieneData(data.hygieneData);
+  }, []);
+
   const applyCachedData = useCallback((period) => {
     const cached = dataCache.current.get(period);
     if (!cached) return;
-    setCliniciansData(cached.cliniciansData);
-    setCaseAcceptanceData(cached.caseAcceptanceData);
-    setHygieneData(cached.hygieneData);
-  }, []);
+    populateFromData(cached);
+    sessionStorage.setItem('clin_data', JSON.stringify(cached));
+  }, [populateFromData]);
 
   const fetchCustomCliniciansData = async (startDate, endDate) => {
     try {
@@ -102,6 +107,13 @@ export default function Clinicians() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      const stored = sessionStorage.getItem('clin_data');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        populateFromData(parsed);
+        isMounted.current = true;
+        return;
+      }
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
         if (data) dataCache.current.set(period, data);
@@ -157,6 +169,7 @@ export default function Clinicians() {
   };
 
   const handleRefresh = async () => {
+    sessionStorage.removeItem('clin_data');
     setIsRefreshing(true);
     await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
@@ -178,7 +191,6 @@ export default function Clinicians() {
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('clinicians_refresh_cooldown', String(cooldownUntil));
     setIsRefreshing(false);
-    window.location.reload();
   };
 
   const filters = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "All time", "Custom"];

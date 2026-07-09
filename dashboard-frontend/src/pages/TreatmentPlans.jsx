@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { RefreshCw, TrendingUp, Activity, FileText, CheckCircle2, Clock, DollarSign, Target, UserCheck, Layers, Calendar, BarChart3, PieChart, ArrowRight } from 'lucide-react';
 import InfoIcon from '../components/InfoIcon';
@@ -59,6 +59,15 @@ export default function TreatmentPlans() {
     'Last 90 days': '90d', 'Last year': '1y', 'All time': 'all', 'Custom': 'all'
   };
 
+  const populateFromData = useCallback((data) => {
+    setKpiData(data.kpiData);
+    setPractitionerData(data.practitionerData);
+    setTrendsData(data.trendsData);
+    setValueDistribution(data.valueDistribution);
+    setCompletionHeatmap(data.completionHeatmap);
+    setFunnelData(data.funnelData);
+  }, []);
+
   const fetchData = async (period = '30d', startDate = null, endDate = null) => {
     try {
       const baseUrl = 'https://demodashboard-production.up.railway.app/api/dashboard';
@@ -74,21 +83,32 @@ export default function TreatmentPlans() {
         fetch(`${baseUrl}/treatment-plan-completion-heatmap?${periodQuery}`),
         fetch(`${baseUrl}/treatment-plan-funnel?${periodQuery}`)
       ]);
-      setKpiData(await kpiRes.json());
-      setPractitionerData(await pracRes.json());
-      setTrendsData(await trendsRes.json());
-      setValueDistribution(await distributionRes.json());
-      setCompletionHeatmap(await heatmapRes.json());
-      setFunnelData(await funnelRes.json());
+      const data = {
+        kpiData: await kpiRes.json(),
+        practitionerData: await pracRes.json(),
+        trendsData: await trendsRes.json(),
+        valueDistribution: await distributionRes.json(),
+        completionHeatmap: await heatmapRes.json(),
+        funnelData: await funnelRes.json(),
+      };
+      populateFromData(data);
+      sessionStorage.setItem('tp_data', JSON.stringify(data));
     } catch (error) {
       console.error('Error fetching treatment plan data:', error);
     }
   };
 
   useEffect(() => {
-    (async () => {
+    const preFetch = async () => {
+      const stored = sessionStorage.getItem('tp_data');
+      if (stored) {
+        populateFromData(JSON.parse(stored));
+        return;
+      }
       fetchData('7d');
-    })();
+    };
+    preFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -109,6 +129,7 @@ export default function TreatmentPlans() {
   };
 
   const handleRefresh = async () => {
+    sessionStorage.removeItem('tp_data');
     setIsRefreshing(true);
     await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
@@ -121,7 +142,6 @@ export default function TreatmentPlans() {
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('treatment_plans_refresh_cooldown', String(cooldownUntil));
     setIsRefreshing(false);
-    window.location.reload();
   };
 
   const filters = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "All time", "Custom"];

@@ -182,15 +182,21 @@ export default function Dashboard() {
     }
   };
 
+  const populateFromData = useCallback((data) => {
+    if (!data) return;
+    setMetrics(data.metrics);
+    setAiInsights(data.insights);
+    setHealthScore(data.health);
+    if (data.practices?.length) setPractices(data.practices);
+    if (data.sites?.length) setSites(data.sites);
+  }, []);
+
   const applyCachedData = useCallback((period) => {
     const cached = dataCache.current.get(period);
     if (!cached) return;
-    setMetrics(cached.metrics);
-    setAiInsights(cached.insights);
-    setHealthScore(cached.health);
-    if (cached.practices?.length) setPractices(cached.practices);
-    if (cached.sites?.length) setSites(cached.sites);
-  }, []);
+    populateFromData(cached);
+    sessionStorage.setItem('dash_data', JSON.stringify(cached));
+  }, [populateFromData]);
 
   const fetchCustomData = async (startDate, endDate) => {
     try {
@@ -215,6 +221,15 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    const saved = sessionStorage.getItem('dash_data');
+    if (saved) {
+      try {
+        populateFromData(JSON.parse(saved));
+        setLoading(false);
+        isMounted.current = true;
+        return;
+      } catch (_) {}
+    }
     const preFetchAll = async () => {
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
@@ -273,6 +288,7 @@ export default function Dashboard() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    sessionStorage.removeItem('dash_data');
     await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
       const data = await fetchCustomData(customStartDate, customEndDate);
@@ -293,7 +309,6 @@ export default function Dashboard() {
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('dashboard_refresh_cooldown', String(cooldownUntil));
     setIsRefreshing(false);
-    window.location.reload();
   };
 
   const currentData = loading ? {

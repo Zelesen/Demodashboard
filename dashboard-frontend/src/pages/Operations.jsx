@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useCallback } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { RefreshCw, TrendingUp, TrendingDown, Activity, Building2, CalendarRange, AlertCircle, CheckCircle2, Cpu, MapPin, Layers, Target } from 'lucide-react';
 import InfoIcon from '../components/InfoIcon';
@@ -37,6 +37,13 @@ export default function Operations() {
     'Last 90 days': '90d', 'Last year': '1y', 'All time': 'all', 'Custom': 'all'
   };
 
+  const populateFromData = useCallback((data) => {
+    setOperationsData(data.operationsData);
+    setPracticeLeague(data.practiceLeague);
+    setCapacityData(data.capacityData);
+    setRecallData(data.recallData);
+  }, []);
+
   const fetchOperationsData = async (period = '7d', startDate = null, endDate = null) => {
     try {
       const baseUrl = 'https://demodashboard-production.up.railway.app/api/dashboard';
@@ -50,23 +57,30 @@ export default function Operations() {
         fetch(`${baseUrl}/capacity-data`),
         fetch(`${baseUrl}/recall-backlog`)
       ]);
-      const kpiData = await kpiRes.json();
-      const leagueData = await leagueRes.json();
-      const capacity = await capacityRes.json();
-      const recall = await recallRes.json();
-      setOperationsData(kpiData);
-      setPracticeLeague(leagueData);
-      setCapacityData(capacity);
-      setRecallData(recall);
+      const data = {
+        operationsData: await kpiRes.json(),
+        practiceLeague: await leagueRes.json(),
+        capacityData: await capacityRes.json(),
+        recallData: await recallRes.json(),
+      };
+      populateFromData(data);
+      sessionStorage.setItem('ops_data', JSON.stringify(data));
     } catch (error) {
       console.error('Error fetching operations data:', error);
     }
   };
   
   useEffect(() => {
-    (async () => {
+    const preFetch = async () => {
+      const stored = sessionStorage.getItem('ops_data');
+      if (stored) {
+        populateFromData(JSON.parse(stored));
+        return;
+      }
       fetchOperationsData('7d');
-    })();
+    };
+    preFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   useEffect(() => {
@@ -87,6 +101,7 @@ export default function Operations() {
   };
 
   const handleRefresh = async () => {
+    sessionStorage.removeItem('ops_data');
     setIsRefreshing(true);
     await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
@@ -99,7 +114,6 @@ export default function Operations() {
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('operations_refresh_cooldown', String(cooldownUntil));
     setIsRefreshing(false);
-    window.location.reload();
   };
 
   const filters = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "All time", "Custom"];

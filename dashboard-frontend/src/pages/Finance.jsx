@@ -76,13 +76,18 @@ export default function Finance() {
     }
   };
 
+  const populateFromData = useCallback((data) => {
+    setFinanceData(data.financeData);
+    setRevenueData(data.revenueData);
+    setProfitData(data.profitData);
+  }, []);
+
   const applyCachedData = useCallback((period) => {
     const cached = dataCache.current.get(period);
     if (!cached) return;
-    setFinanceData(cached.financeData);
-    setRevenueData(cached.revenueData);
-    setProfitData(cached.profitData);
-  }, []);
+    populateFromData(cached);
+    sessionStorage.setItem('fin_data', JSON.stringify(cached));
+  }, [populateFromData]);
 
   const fetchCustomFinanceData = async (startDate, endDate) => {
     try {
@@ -104,6 +109,13 @@ export default function Finance() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      const stored = sessionStorage.getItem('fin_data');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        populateFromData(parsed);
+        isMounted.current = true;
+        return;
+      }
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
         if (data) dataCache.current.set(period, data);
@@ -157,6 +169,7 @@ export default function Finance() {
   };
 
   const handleRefresh = async () => {
+    sessionStorage.removeItem('fin_data');
     setIsRefreshing(true);
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
       const data = await fetchCustomFinanceData(customStartDate, customEndDate);
@@ -178,7 +191,6 @@ export default function Finance() {
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('finance_refresh_cooldown', String(cooldownUntil));
     setIsRefreshing(false);
-    window.location.reload();
   };
 
   const filters = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "All time", "Custom"];

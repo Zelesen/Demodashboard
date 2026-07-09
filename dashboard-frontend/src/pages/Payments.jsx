@@ -187,16 +187,21 @@ export default function Payments() {
     }
   };
 
+  const populateFromData = useCallback((data) => {
+    setKpiData(data.kpiData);
+    setTrendData(data.trendData);
+    setMethodData(data.methodData);
+    setSiteData(data.siteData);
+    setPractitionerData(data.practitionerData);
+    setRecentPayments(data.recentPayments);
+  }, []);
+
   const applyCachedData = useCallback((period) => {
     const cached = dataCache.current.get(period);
     if (!cached) return;
-    setKpiData(cached.kpiData);
-    setTrendData(cached.trendData);
-    setMethodData(cached.methodData);
-    setSiteData(cached.siteData);
-    setPractitionerData(cached.practitionerData);
-    setRecentPayments(cached.recentPayments);
-  }, []);
+    populateFromData(cached);
+    sessionStorage.setItem('pay_data', JSON.stringify(cached));
+  }, [populateFromData]);
 
   const fetchCustomData = async (startDate, endDate) => {
     try {
@@ -224,6 +229,14 @@ export default function Payments() {
 
   useEffect(() => {
     const preFetchAll = async () => {
+      const stored = sessionStorage.getItem('pay_data');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        populateFromData(parsed);
+        setLoading(false);
+        isMounted.current = true;
+        return;
+      }
       const fetches = allPeriods.map(async (period) => {
         const data = await fetchDataForPeriod(period);
         if (data) dataCache.current.set(period, data);
@@ -295,6 +308,7 @@ export default function Payments() {
   };
 
   const handleRefresh = async () => {
+    sessionStorage.removeItem('pay_data');
     setIsRefreshing(true);
     await syncPageCache();
     if (activeFilter === 'Custom' && customStartDate && customEndDate) {
@@ -316,7 +330,6 @@ export default function Payments() {
     setRefreshCooldownUntil(cooldownUntil);
     sessionStorage.setItem('payments_refresh_cooldown', String(cooldownUntil));
     setIsRefreshing(false);
-    window.location.reload();
   };
 
   const dateLabel = (() => {
