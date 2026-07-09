@@ -59,9 +59,9 @@ export default function Clinicians() {
   const fetchDataForPeriod = async (period) => {
     try {
       const [cliniciansRes, caseAcceptanceRes, hygieneRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/dashboard/clinicians-league?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/case-acceptance?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/hygiene-utilization?period=${period}`)
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/clinicians-league?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/case-acceptance?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/hygiene-utilization?period=${period}`)
       ]);
       return {
         cliniciansData: await cliniciansRes.json(),
@@ -85,9 +85,9 @@ export default function Clinicians() {
   const fetchCustomCliniciansData = async (startDate, endDate) => {
     try {
       const [cliniciansRes, caseAcceptanceRes, hygieneRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/dashboard/clinicians-league?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/case-acceptance?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/hygiene-utilization?period=all&start_date=${startDate}&end_date=${endDate}`)
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/clinicians-league?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/case-acceptance?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/hygiene-utilization?period=all&start_date=${startDate}&end_date=${endDate}`)
       ]);
       return {
         cliniciansData: await cliniciansRes.json(),
@@ -150,7 +150,7 @@ export default function Clinicians() {
 
   const refreshPageCache = async () => {
     try {
-      await fetch('http://localhost:8000/api/admin/cache/refresh-page?page=clinicians', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=clinicians', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing page cache:', error);
     }

@@ -352,11 +352,11 @@ export default function InvoicesDatedOn() {
   const fetchDataForPeriod = async (period) => {
     try {
       const [kpiRes, trendRes, treatmentRevRes, topPatientsRes, revBySiteRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/dashboard/invoices-kpis-datedon?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/invoices-trend-datedon?period=${period}`),
-        fetch(`http://localhost:8000/api/invoices/revenue-by-treatment?period=${period}`),
-        fetch(`http://localhost:8000/api/invoices/top-patients-by-revenue-datedon?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/revenue-by-site-datedon?period=${period}`)
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/invoices-kpis-datedon?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/invoices-trend-datedon?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/invoices/revenue-by-treatment?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/invoices/top-patients-by-revenue-datedon?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/revenue-by-site-datedon?period=${period}`)
       ]);
       return {
         invoiceData: await kpiRes.json(),
@@ -384,11 +384,11 @@ export default function InvoicesDatedOn() {
   const fetchCustomInvoiceDatedOnData = async (startDate, endDate) => {
     try {
       const [kpiRes, trendRes, treatmentRevRes, topPatientsRes, revBySiteRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/dashboard/invoices-kpis-datedon?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/invoices-trend-datedon?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/invoices/revenue-by-treatment?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/invoices/top-patients-by-revenue-datedon?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/revenue-by-site-datedon?period=all&start_date=${startDate}&end_date=${endDate}`)
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/invoices-kpis-datedon?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/invoices-trend-datedon?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/invoices/revenue-by-treatment?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/invoices/top-patients-by-revenue-datedon?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/revenue-by-site-datedon?period=all&start_date=${startDate}&end_date=${endDate}`)
       ]);
       return {
         invoiceData: await kpiRes.json(),
@@ -518,7 +518,7 @@ export default function InvoicesDatedOn() {
 
   const refreshPageCache = async () => {
     try {
-      await fetch('http://localhost:8000/api/admin/cache/refresh-page?page=invoices', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=invoices', { method: 'POST' });
     } catch (e) {
       console.error('Page cache refresh error:', e);
     }

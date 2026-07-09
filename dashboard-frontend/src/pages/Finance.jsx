@@ -61,9 +61,9 @@ export default function Finance() {
   const fetchDataForPeriod = async (period) => {
     try {
       const [metricsRes, revenueRes, profitRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/dashboard/finance-metrics?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/revenue-by-stream?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/profit-per-practice?period=${period}`)
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/finance-metrics?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/revenue-by-stream?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/profit-per-practice?period=${period}`)
       ]);
       return {
         financeData: await metricsRes.json(),
@@ -87,9 +87,9 @@ export default function Finance() {
   const fetchCustomFinanceData = async (startDate, endDate) => {
     try {
       const [metricsRes, revenueRes, profitRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/dashboard/finance-metrics?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/revenue-by-stream?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/profit-per-practice`)
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/finance-metrics?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/revenue-by-stream?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/profit-per-practice`)
       ]);
       return {
         financeData: await metricsRes.json(),
@@ -150,7 +150,7 @@ export default function Finance() {
 
   const refreshPageCache = async () => {
     try {
-      await fetch('http://localhost:8000/api/admin/cache/refresh-page?page=finance', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=finance', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing cache:', error);
     }

@@ -166,12 +166,12 @@ export default function Payments() {
   const fetchDataForPeriod = async (period) => {
     try {
       const [kpiRes, trendRes, methodRes, siteRes, practitionerRes, recentRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/dashboard/payments-kpis?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/payments-trend?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/payments-by-method?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/payments-by-site?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/payments-by-practitioner?period=${period}`),
-        fetch(`http://localhost:8000/api/dashboard/recent-payments?period=${period}`)
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/payments-kpis?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/payments-trend?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/payments-by-method?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/payments-by-site?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/payments-by-practitioner?period=${period}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/recent-payments?period=${period}`)
       ]);
       return {
         kpiData: await kpiRes.json(),
@@ -201,12 +201,12 @@ export default function Payments() {
   const fetchCustomData = async (startDate, endDate) => {
     try {
       const [kpiRes, trendRes, methodRes, siteRes, practitionerRes, recentRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/dashboard/payments-kpis?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/payments-trend?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/payments-by-method?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/payments-by-site?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/payments-by-practitioner?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/recent-payments?period=all&start_date=${startDate}&end_date=${endDate}`)
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/payments-kpis?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/payments-trend?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/payments-by-method?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/payments-by-site?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/payments-by-practitioner?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/recent-payments?period=all&start_date=${startDate}&end_date=${endDate}`)
       ]);
       return {
         kpiData: await kpiRes.json(),
@@ -288,7 +288,7 @@ export default function Payments() {
 
   const refreshPageCache = async () => {
     try {
-      await fetch('http://localhost:8000/api/admin/cache/refresh-page?page=payments', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=payments', { method: 'POST' });
     } catch (e) {
       console.error('Page cache refresh error:', e);
     }

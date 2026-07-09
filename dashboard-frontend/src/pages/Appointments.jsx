@@ -170,7 +170,7 @@ export default function Appointments() {
 
   const fetchDataForPeriod = async (period) => {
     try {
-      const baseUrl = 'http://localhost:8000/api/dashboard';
+      const baseUrl = 'https://demodashboard-production.up.railway.app/api/dashboard';
       const [kpiRes, trendRes, siteRes, pracRes, recentRes, reasonRes, hourRes, dayRes, ctRes, lcRes, durRes, hmRes] = await Promise.all([
         fetch(`${baseUrl}/appointments-kpis?period=${period}`),
         fetch(`${baseUrl}/appointments-trend?period=${period}`),
@@ -224,7 +224,7 @@ export default function Appointments() {
 
   const fetchCustomData = async (startDate, endDate) => {
     try {
-      const baseUrl = 'http://localhost:8000/api/dashboard';
+      const baseUrl = 'https://demodashboard-production.up.railway.app/api/dashboard';
       const [kpiRes, trendRes, siteRes, pracRes, recentRes, reasonRes, hourRes, dayRes, ctRes, lcRes, durRes, hmRes] = await Promise.all([
         fetch(`${baseUrl}/appointments-kpis?period=all&start_date=${startDate}&end_date=${endDate}`),
         fetch(`${baseUrl}/appointments-trend?period=all&start_date=${startDate}&end_date=${endDate}`),
@@ -296,7 +296,7 @@ export default function Appointments() {
 
   const refreshPageCache = async () => {
     try {
-      await fetch('http://localhost:8000/api/admin/cache/refresh-page?page=appointments', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=appointments', { method: 'POST' });
     } catch (e) {
       console.error('Page cache refresh error:', e);
     }

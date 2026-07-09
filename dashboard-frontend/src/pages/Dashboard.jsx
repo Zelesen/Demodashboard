@@ -158,14 +158,14 @@ export default function Dashboard() {
 
   const fetchDataForPeriod = async (period) => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
     try {
       const [metricsRes, insightsRes, healthRes, leagueRes, sitesRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/dashboard/metrics?period=${period}`, { signal: controller.signal }),
-        fetch(`http://localhost:8000/api/dashboard/ai-insights?period=${period}`, { signal: controller.signal }),
-        fetch(`http://localhost:8000/api/dashboard/health-score?period=${period}`, { signal: controller.signal }),
-        fetch(`http://localhost:8000/api/dashboard/league?period=${period}`, { signal: controller.signal }),
-        fetch('http://localhost:8000/api/dashboard/sites', { signal: controller.signal })
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/metrics?period=${period}`, { signal: controller.signal }),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/ai-insights?period=${period}`, { signal: controller.signal }),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/health-score?period=${period}`, { signal: controller.signal }),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/league?period=${period}`, { signal: controller.signal }),
+        fetch('https://demodashboard-production.up.railway.app/api/dashboard/sites', { signal: controller.signal })
       ]);
       clearTimeout(timeoutId);
 
@@ -195,11 +195,11 @@ export default function Dashboard() {
   const fetchCustomData = async (startDate, endDate) => {
     try {
       const [metricsRes, insightsRes, healthRes, leagueRes, sitesRes] = await Promise.all([
-        fetch(`http://localhost:8000/api/dashboard/metrics?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/ai-insights?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/health-score?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`http://localhost:8000/api/dashboard/league?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch('http://localhost:8000/api/dashboard/sites')
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/metrics?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/ai-insights?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/health-score?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/league?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch('https://demodashboard-production.up.railway.app/api/dashboard/sites')
       ]);
       return {
         metrics: await metricsRes.json(),
@@ -265,7 +265,7 @@ export default function Dashboard() {
 
   const refreshPageCache = async () => {
     try {
-      await fetch('http://localhost:8000/api/admin/cache/refresh-page?page=dashboard', { method: 'POST' });
+      await fetch('https://demodashboard-production.up.railway.app/api/admin/cache/refresh-page?page=dashboard', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing page cache:', error);
     }
