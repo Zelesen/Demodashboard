@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 import httpx
 import glob
+import uuid
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ security = HTTPBearer(auto_error=False)
 # CORS middleware for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "http://localhost:5173","https://demodashboard-git-main-amanmaurya917-gmailcoms-projects.vercel.app","https://demodashboard-5hl0vkken-amanmaurya917-gmailcoms-projects.vercel.app"],
+    allow_origins=["*", "http://localhost:5173","http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -239,6 +240,10 @@ def login(request: LoginRequest):
 def get_me(current_user: dict = Depends(get_current_user)):
     return {"user": current_user}
 
+@app.get("/api/auth/user")
+def get_user(current_user: dict = Depends(get_current_user)):
+    return {"user": current_user}
+
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "Dental Dashboard API"}
@@ -363,7 +368,7 @@ def get_ai_insights(period: str = "7d", start_date: str = None, end_date: str = 
                    COUNT(DISTINCT a.id) as total_appointments,
                    SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed_appointments
             FROM dentally_sites s
-            LEFT JOIN dentally_appointments a ON s.dentally_id = a.practitioner_id
+            LEFT JOIN dentally_appointments a ON s.id::text = a.site_id
             WHERE {w_ai}
             GROUP BY s.name
             ORDER BY completed_appointments ASC
@@ -373,7 +378,9 @@ def get_ai_insights(period: str = "7d", start_date: str = None, end_date: str = 
         
         insights = []
         for site in underperforming:
-            completion_rate = (site['completed_appointments'] / site['total_appointments'] * 100) if site['total_appointments'] > 0 else 0
+            total = site['total_appointments'] or 0
+            completed = site['completed_appointments'] or 0
+            completion_rate = (completed / total * 100) if total > 0 else 0
             insights.append([
                 "ACT",
                 f"£{1000 + completion_rate * 10:.1f}k at stake",
@@ -507,16 +514,17 @@ def get_league(period: str = "30d", start_date: str = None, end_date: str = None
                    SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed,
                    COALESCE(SUM(i.amount::numeric), 0) as revenue
             FROM dentally_sites s
-            LEFT JOIN dentally_appointments a ON s.id::text = a.site_id
+            LEFT JOIN dentally_appointments a ON s.id::text = a.site_id AND ({w_league})
             LEFT JOIN dentally_invoices i ON s.id::text = i.site_id
-            WHERE {w_league}
             GROUP BY s.name
             ORDER BY revenue DESC
         """, p_league)
         
         practices = []
         for row in cursor.fetchall():
-            completion_rate = (row['completed'] / row['total_appointments'] * 100) if row['total_appointments'] > 0 else 0
+            total_appts = row['total_appointments'] or 0
+            completed_appts = row['completed'] or 0
+            completion_rate = (completed_appts / total_appts * 100) if total_appts > 0 else 0
             score = min(100, int(completion_rate + float(row['revenue'] or 0) / 1000))
             
             practices.append({
@@ -546,11 +554,19 @@ def get_sites():
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         
-        cursor.execute("""
-            SELECT name, town, postcode, active
-            FROM dentally_sites
-            WHERE active = 1
-        """)
+        try:
+            cursor.execute("""
+                SELECT name, town, postcode, active
+                FROM dentally_sites
+                WHERE active = 1
+            """)
+        except Exception:
+            conn.rollback()
+            cursor.execute("""
+                SELECT name, town, postcode, active
+                FROM dentally_sites
+                WHERE active = true
+            """)
         
         sites = []
         for row in cursor.fetchall():
@@ -926,6 +942,481 @@ def get_profit_per_practice():
         
         conn.close()
         return {"practices": practices}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/dashboard/contracts/seed")
+def seed_contracts():
+    """Seed realistic contract data (replaces existing data)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cursor.execute("DELETE FROM dentally_contracts")
+        
+        cursor.execute("SELECT COUNT(*) as cnt FROM dentally_sites")
+        site_count = cursor.fetchone()["cnt"]
+        if site_count == 0:
+            default_sites = [
+                "Central London Dental", "Manchester City Dental", "Birmingham Dental Centre",
+                "Leeds Dental Practice", "Liverpool Dental Clinic", "Bristol Dental Surgery",
+                "Sheffield Dental Care", "Newcastle Dental"
+            ]
+            for sname in default_sites:
+                cursor.execute("""
+                    INSERT INTO dentally_sites (id, name, active, created_at, updated_at)
+                    VALUES (%s, %s, 1, NOW(), NOW())
+                """, (str(uuid.uuid4()), sname))
+        
+        sites = []
+        cursor.execute("SELECT id, name FROM dentally_sites ORDER BY name")
+        for row in cursor.fetchall():
+            sites.append(row)
+        
+        contracts_data = [
+            ("NHS London Contract A", "CON-001", "100000", "8.50", "6000", "15.00", True, False),
+            ("NHS Birmingham Contract B", "CON-002", "120000", "7.80", "7200", "14.50", True, False),
+            ("NHS Manchester Contract C", "CON-003", "95000", "9.20", "5500", "16.00", True, False),
+            ("NHS Leeds Contract D", "CON-004", "80000", "8.00", "4800", "13.50", True, False),
+            ("NHS Liverpool Contract E", "CON-005", "110000", "7.50", "6800", "14.00", True, False),
+            ("NHS Bristol Contract F", "CON-006", "75000", "9.00", "4200", "15.50", True, False),
+            ("NHS Sheffield Contract G", "CON-007", "105000", "8.20", "6200", "14.80", True, False),
+            ("NHS Newcastle Contract H", "CON-008", "90000", "7.90", "5100", "13.90", True, False),
+            ("NHS Nottingham Contract I", "CON-009", "85000", "8.60", "4900", "15.20", True, False),
+            ("NHS Cardiff Contract J", "CON-010", "98000", "8.30", "5800", "14.60", True, False),
+            ("NHS Edinburgh Contract K", "CON-011", "115000", "7.70", "7000", "13.80", True, False),
+            ("NHS Glasgow Contract L", "CON-012", "88000", "8.80", "5300", "15.30", True, False),
+            ("NHS Southampton Contract M", "CON-013", "70000", "9.10", "4000", "16.20", True, False),
+            ("NHS Oxford Contract N", "CON-014", "102000", "8.40", "5900", "14.90", True, False),
+            ("NHS Cambridge Contract O", "CON-015", "92000", "7.95", "5400", "14.20", True, False),
+            ("NHS PDS Plus Contract P", "CON-016", "130000", "8.75", "7800", "15.10", True, True),
+            ("NHS PDS Plus Contract Q", "CON-017", "125000", "8.10", "7500", "14.40", True, True),
+            ("NHS PDS Plus Contract R", "CON-018", "108000", "8.90", "6400", "15.80", True, True),
+        ]
+        
+        from datetime import datetime, timedelta
+        
+        now = datetime.now()
+        date_ranges = [
+            ("today", 0),
+            ("today", 0),
+            ("today", -1),
+            ("7d", -3),
+            ("7d", -5),
+            ("7d", -7),
+            ("30d", -10),
+            ("30d", -15),
+            ("30d", -20),
+            ("90d", -40),
+            ("90d", -60),
+            ("90d", -80),
+            ("1y", -120),
+            ("1y", -200),
+            ("1y", -300),
+            ("all", -400),
+            ("all", -500),
+            ("all", -600),
+        ]
+        for i, (name, cnum, target, uda_val, uoa_target, uoa_val, active, pds_plus) in enumerate(contracts_data):
+            site = sites[i % len(sites)] if sites else {"id": str(uuid.uuid4()), "name": "Default Site"}
+            days_ago = date_ranges[i][1]
+            start = (now + timedelta(days=days_ago)).replace(hour=0, minute=0, second=0, microsecond=0)
+            end = start + timedelta(days=365 * 3)
+            cursor.execute("""
+                INSERT INTO dentally_contracts (id, organization_id, dentally_id, name, contract_number,
+                    start_date, end_date, uda_value, uoa_value, target, uoa_target, site_id, active,
+                    nhs_location_id, nhs_site_id, notes, pds_plus, created_at, updated_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4()),
+                name, cnum, start.date(), end.date(),
+                float(uda_val), float(uoa_val), float(target), float(uoa_target),
+                str(site["id"]), active,
+                str(uuid.uuid4()), str(uuid.uuid4()),
+                f"Contract for {name} covering period {start.date()} to {end.date()}",
+                pds_plus, start, start
+            ))
+        
+        conn.commit()
+        conn.close()
+        return {"status": "success", "message": f"Seeded {len(contracts_data)} contracts"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/dashboard/payments/seed")
+def seed_payments():
+    """Add payments for the last 7 days to ensure filter shows data"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cursor.execute("SELECT COUNT(*) as cnt FROM dentally_payments WHERE dated_on >= CURRENT_DATE - INTERVAL '7 days'")
+        existing = cursor.fetchone()["cnt"]
+        if existing > 0:
+            conn.close()
+            return {"status": "success", "message": f"Payments already exist for last 7 days ({existing} records), skipping"}
+        
+        cursor.execute("""
+            UPDATE dentally_sites SET dentally_id = id::text WHERE dentally_id IS NULL
+        """)
+        
+        cursor.execute("""
+            SELECT id, dentally_id, name FROM dentally_sites 
+            WHERE dentally_id IS NOT NULL ORDER BY name
+        """)
+        sites = cursor.fetchall()
+        if not sites:
+            conn.close()
+            return {"status": "error", "message": "No sites with dentally_id found"}
+        
+        methods = ["debit card", "credit card", "stripe", "cash", "other", "finance"]
+        method_weights = [40, 25, 12, 10, 8, 5]
+        total_weight = sum(method_weights)
+        
+        from datetime import datetime, timedelta
+        import random
+        random.seed(42)
+        
+        now = datetime.now()
+        payments_inserted = 0
+        
+        for days_ago in range(7, -1, -1):
+            day = now - timedelta(days=days_ago)
+            day_date = day.date()
+            num_payments = random.randint(15, 35)
+            
+            for _ in range(num_payments):
+                site = random.choice(sites)
+                method = random.choices(methods, weights=method_weights, k=1)[0]
+                amount = round(random.uniform(20, 350), 2)
+                
+                cursor.execute("""
+                    INSERT INTO dentally_payments 
+                    (id, organization_id, dentally_id, amount, method, dated_on, 
+                     reference, transaction_number, site_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    str(uuid.uuid4()), str(uuid.uuid4()), str(uuid.uuid4()),
+                    amount, method, day_date,
+                    f"PAY-{day_date.strftime('%Y%m%d')}-{random.randint(1000, 9999)}",
+                    f"TXN-{random.randint(10000000, 99999999)}",
+                    site["dentally_id"]
+                ))
+                payments_inserted += 1
+        
+        conn.commit()
+        conn.close()
+        return {"status": "success", "message": f"Seeded {payments_inserted} payments for last 7 days"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dashboard/contracts")
+def get_contracts(period: str = "all", start_date: str = None, end_date: str = None):
+    """List all contracts with details"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_contracts_list", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, dt("start_date"))
+        cursor.execute(f"""
+            SELECT c.*, s.name as site_name
+            FROM dentally_contracts c
+            LEFT JOIN dentally_sites s ON c.site_id = s.id::text
+            WHERE {w}
+            ORDER BY c.start_date DESC
+        """, p)
+        contracts = []
+        for row in cursor.fetchall():
+            contracts.append({
+                "id": row["id"],
+                "name": row["name"],
+                "contract_number": row["contract_number"],
+                "start_date": str(row["start_date"]) if row["start_date"] else None,
+                "end_date": str(row["end_date"]) if row["end_date"] else None,
+                "uda_value": float(row["uda_value"] or 0),
+                "uoa_value": float(row["uoa_value"] or 0),
+                "target": float(row["target"] or 0),
+                "uoa_target": float(row["uoa_target"] or 0),
+                "site_id": row["site_id"],
+                "site_name": row["site_name"],
+                "active": row["active"],
+                "pds_plus": row["pds_plus"],
+                "notes": row["notes"],
+                "created_at": str(row["created_at"]) if row["created_at"] else None,
+                "updated_at": str(row["updated_at"]) if row["updated_at"] else None,
+            })
+        conn.close()
+        return {"contracts": contracts, "total": len(contracts)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dashboard/contracts/kpis")
+def get_contracts_kpis(period: str = "all", start_date: str = None, end_date: str = None):
+    """Get contract KPI metrics"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_contracts_kpis", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, dt("start_date"))
+        
+        cursor.execute(f"""
+            SELECT 
+                COUNT(*) as total_contracts,
+                SUM(CASE WHEN active = true THEN 1 ELSE 0 END) as active_contracts,
+                SUM(target) as total_target,
+                SUM(uoa_target) as total_uoa_target,
+                AVG(uda_value) as avg_uda_value,
+                AVG(uoa_value) as avg_uoa_value,
+                SUM(CASE WHEN pds_plus = true THEN 1 ELSE 0 END) as pds_plus_count
+            FROM dentally_contracts
+            WHERE {w}
+        """, p)
+        row = cursor.fetchone()
+        
+        conn.close()
+        return {
+            "total_contracts": row["total_contracts"] or 0,
+            "active_contracts": row["active_contracts"] or 0,
+            "total_target": float(row["total_target"] or 0),
+            "total_uoa_target": float(row["total_uoa_target"] or 0),
+            "avg_uda_value": round(float(row["avg_uda_value"] or 0), 2),
+            "avg_uoa_value": round(float(row["avg_uoa_value"] or 0), 2),
+            "pds_plus_count": row["pds_plus_count"] or 0,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dashboard/contracts/by-site")
+def get_contracts_by_site(period: str = "all", start_date: str = None, end_date: str = None):
+    """Get contracts grouped by site"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_contracts_by_site", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, dt("c.start_date"))
+        
+        cursor.execute(f"""
+            SELECT 
+                COALESCE(s.name, 'Unknown') as site_name,
+                COUNT(*) as contract_count,
+                SUM(CASE WHEN c.active = true THEN 1 ELSE 0 END) as active_count,
+                SUM(c.target) as total_target,
+                SUM(c.uoa_target) as total_uoa_target,
+                AVG(c.uda_value) as avg_uda_value,
+                SUM(CASE WHEN c.pds_plus = true THEN 1 ELSE 0 END) as pds_plus_count
+            FROM dentally_contracts c
+            LEFT JOIN dentally_sites s ON c.site_id = s.id::text
+            WHERE {w}
+            GROUP BY s.name
+            ORDER BY total_target DESC
+        """, p)
+        
+        sites = []
+        for row in cursor.fetchall():
+            sites.append({
+                "site_name": row["site_name"],
+                "contract_count": row["contract_count"],
+                "active_count": row["active_count"],
+                "total_target": float(row["total_target"] or 0),
+                "total_uoa_target": float(row["total_uoa_target"] or 0),
+                "avg_uda_value": round(float(row["avg_uda_value"] or 0), 2),
+                "pds_plus_count": row["pds_plus_count"] or 0,
+            })
+        
+        conn.close()
+        return {"sites": sites, "total": len(sites)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dashboard/contracts/timeline")
+def get_contracts_timeline(period: str = "all", start_date: str = None, end_date: str = None):
+    """Get contract timeline data for Gantt-like visualization"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_contracts_timeline", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, dt("c.start_date"))
+        
+        cursor.execute(f"""
+            SELECT c.id, c.name, c.contract_number, c.start_date, c.end_date, c.active, c.target,
+                   c.uda_value, c.uoa_value, c.uoa_target, c.pds_plus,
+                   s.name as site_name
+            FROM dentally_contracts c
+            LEFT JOIN dentally_sites s ON c.site_id = s.id::text
+            WHERE {w}
+            ORDER BY c.start_date
+        """, p)
+        
+        timeline = []
+        for row in cursor.fetchall():
+            duration_days = (row["end_date"] - row["start_date"]).days if row["start_date"] and row["end_date"] else 0
+            today = datetime.now().date()
+            progress = 0
+            if row["start_date"] and row["end_date"] and duration_days > 0:
+                if today < row["start_date"]:
+                    progress = 0
+                elif today > row["end_date"]:
+                    progress = 100
+                else:
+                    progress = round((today - row["start_date"]).days / duration_days * 100, 1)
+            
+            timeline.append({
+                "id": row["id"],
+                "name": row["name"],
+                "contract_number": row["contract_number"],
+                "start_date": str(row["start_date"]) if row["start_date"] else None,
+                "end_date": str(row["end_date"]) if row["end_date"] else None,
+                "duration_days": duration_days,
+                "progress": progress,
+                "active": row["active"],
+                "target": float(row["target"] or 0),
+                "uda_value": float(row["uda_value"] or 0),
+                "site_name": row["site_name"],
+                "pds_plus": row["pds_plus"],
+            })
+        
+        conn.close()
+        return {"timeline": timeline, "total": len(timeline)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dashboard/contracts/uda-delivery")
+def get_contracts_uda_delivery(period: str = "all", start_date: str = None, end_date: str = None):
+    """Get UDA delivery performance against targets"""
+    if not start_date and not end_date:
+        try:
+            cached = get_cache("dashboard_contracts_uda_delivery", period)
+            if cached:
+                return cached
+        except Exception:
+            pass
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, dt("c.start_date"))
+        
+        rows = []
+        try:
+            cursor.execute(f"""
+                SELECT c.name, c.contract_number, c.target, c.uda_value, c.uoa_target, c.uoa_value,
+                       c.start_date, c.end_date, c.active, c.pds_plus,
+                       COALESCE(s.name, c.site_id) as site_name,
+                       COALESCE(SUM(CASE WHEN nc.status = 'delivered' THEN 1 ELSE 0 END), 0) as uda_delivered,
+                       COALESCE(SUM(CASE WHEN nc.status = 'claimed' THEN 1 ELSE 0 END), 0) as uda_claimed
+                FROM dentally_contracts c
+                LEFT JOIN dentally_sites s ON c.site_id = s.id::text
+                LEFT JOIN dentally_nhs_claims nc ON nc.contract_id = c.id::text
+                WHERE {w}
+                GROUP BY c.id, c.name, c.contract_number, c.target, c.uda_value, c.uoa_target, c.uoa_value,
+                         c.start_date, c.end_date, c.active, c.pds_plus, s.name, s.id
+                ORDER BY c.name
+            """, p)
+            rows = cursor.fetchall()
+        except Exception as e1:
+            print(f"[contracts/uda-delivery] JOIN query failed: {e1}")
+            conn.rollback()
+            try:
+                cursor.execute(f"""
+                    SELECT c.name, c.contract_number, c.target, c.uda_value, c.uoa_target, c.uoa_value,
+                           c.start_date, c.end_date, c.active, c.pds_plus,
+                           COALESCE(s.name, c.site_id) as site_name
+                    FROM dentally_contracts c
+                    LEFT JOIN dentally_sites s ON c.site_id = s.id::text
+                    WHERE {w}
+                    ORDER BY c.name
+                """, p)
+                rows = cursor.fetchall()
+            except Exception as e2:
+                print(f"[contracts/uda-delivery] fallback query also failed: {e2}")
+                conn.close()
+                return {"contracts": [], "total_target": 0, "total_delivered": 0, "overall_delivery_rate": 0, "total": 0}
+        
+        delivery_data = []
+        total_target = 0
+        total_delivered = 0
+        for row in rows:
+            target = float(row["target"] or 0)
+            delivered = float(row.get("uda_delivered", 0) or 0)
+            claimed = float(row.get("uda_claimed", 0) or 0)
+            delivery_rate = round(delivered / target * 100, 1) if target > 0 else 0
+            total_target += target
+            total_delivered += delivered
+            delivery_data.append({
+                "name": row["name"],
+                "contract_number": row["contract_number"],
+                "site_name": row["site_name"],
+                "target": target,
+                "uda_value": float(row["uda_value"] or 0),
+                "uoa_target": float(row["uoa_target"] or 0),
+                "uoa_value": float(row["uoa_value"] or 0),
+                "uda_delivered": delivered,
+                "uda_claimed": claimed,
+                "delivery_rate": delivery_rate,
+                "remaining": max(0, target - delivered),
+                "active": row["active"],
+                "pds_plus": row["pds_plus"],
+            })
+        
+        overall_rate = round(total_delivered / total_target * 100, 1) if total_target > 0 else 0
+        
+        conn.close()
+        return {
+            "contracts": delivery_data,
+            "total_target": total_target,
+            "total_delivered": total_delivered,
+            "overall_delivery_rate": overall_rate,
+            "total": len(delivery_data)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dashboard/contracts/value-distribution")
+def get_contracts_value_distribution(period: str = "all", start_date: str = None, end_date: str = None):
+    """Get UDA value distribution data for charts"""
+    if not start_date and not end_date:
+        cached = get_cache("dashboard_contracts_value_distribution", period)
+        if cached:
+            return cached
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        w, p = build_date_clause(period, start_date, end_date, dt("start_date"))
+        
+        cursor.execute(f"""
+            SELECT 
+                c.uda_value,
+                COUNT(*) as contract_count,
+                SUM(c.target) as total_target,
+                SUM(c.uoa_target) as total_uoa_target
+            FROM dentally_contracts c
+            WHERE {w}
+            GROUP BY c.uda_value
+            ORDER BY c.uda_value
+        """, p)
+        
+        distribution = []
+        for row in cursor.fetchall():
+            distribution.append({
+                "uda_value": float(row["uda_value"] or 0),
+                "contract_count": row["contract_count"],
+                "total_target": float(row["total_target"] or 0),
+                "total_uoa_target": float(row["total_uoa_target"] or 0),
+            })
+        
+        conn.close()
+        return {"distribution": distribution}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -2604,7 +3095,11 @@ def get_appointments_by_site(period: str = "7d", start_date: str = None, end_dat
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("a.start_time"))
-        cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.dentally_id = a.site_id AND {w} WHERE s.active = 1 GROUP BY s.id, s.name ORDER BY total_appointments DESC", p)
+        try:
+            cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.id::text = a.site_id AND {w} WHERE s.active = 1 GROUP BY s.id, s.name ORDER BY total_appointments DESC", p)
+        except Exception:
+            conn.rollback()
+            cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.id::text = a.site_id AND {w} WHERE s.active = true GROUP BY s.id, s.name ORDER BY total_appointments DESC", p)
         sites = [{"name": r["site_name"], "appointments": r["total_appointments"] or 0, "completed": r["completed"] or 0} for r in cur.fetchall()]
         conn.close()
         result = {"sites": sites}
@@ -2916,11 +3411,14 @@ def refresh_page_cache(request: Request):
                                     "dashboard_treatment_plan_nhs_delivery_rate", "dashboard_treatment_plan_duration_distribution"],
                 "clinicians": ["dashboard_clinicians_league", "dashboard_practice_league"],
                 "appointments": ["dashboard_appointments_kpis", "dashboard_appointments_trend",
-                                "dashboard_appointments_by_site", "dashboard_appointments_by_practitioner",
-                                "dashboard_recent_appointments", "dashboard_appointments_by_reason",
-                                "dashboard_appointments_by_hour", "dashboard_appointments_by_day",
-                                "dashboard_appointments_cancellation_by_day", "dashboard_appointments_lifecycle",
-                                "dashboard_appointments_duration", "dashboard_appointments_heatmap"],
+                                 "dashboard_appointments_by_site", "dashboard_appointments_by_practitioner",
+                                 "dashboard_recent_appointments", "dashboard_appointments_by_reason",
+                                 "dashboard_appointments_by_hour", "dashboard_appointments_by_day",
+                                 "dashboard_appointments_cancellation_by_day", "dashboard_appointments_lifecycle",
+                                 "dashboard_appointments_duration", "dashboard_appointments_heatmap"],
+                "contracts": ["dashboard_contracts_list", "dashboard_contracts_kpis",
+                              "dashboard_contracts_by_site", "dashboard_contracts_timeline",
+                              "dashboard_contracts_uda_delivery", "dashboard_contracts_value_distribution"],
             }
             
             cache_keys = page_cache_map.get(page, [])

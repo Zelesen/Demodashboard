@@ -46,7 +46,7 @@ export default function Operations() {
 
   const fetchOperationsData = async (period = '7d', startDate = null, endDate = null) => {
     try {
-      const baseUrl = 'https://demodashboard-production.up.railway.app/api/dashboard';
+      const baseUrl = 'http://localhost:8000/api/dashboard';
       let periodQuery = `period=${period}`;
       if (startDate && endDate) {
         periodQuery += `&start_date=${startDate}&end_date=${endDate}`;
@@ -94,7 +94,7 @@ export default function Operations() {
 
   const syncPageCache = async () => {
     try {
-      await fetch('https://demodashboard-production.up.railway.app/api/sync/page?page=operations', { method: 'POST' });
+      await fetch('http://localhost:8000/api/sync/page?page=operations', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing page cache:', error);
     }

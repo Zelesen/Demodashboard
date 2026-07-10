@@ -9,6 +9,7 @@ import InvoicesDatedOn from "./pages/InvoicesDatedOn";
 import Clinicians from "./pages/Clinicians";
 import Finance from "./pages/Finance";
 import Sales from "./pages/Sales";
+import Contracts from "./pages/Contracts";
 import TreatmentPlans from "./pages/TreatmentPlans";
 import Payments from "./pages/Payments";
 import Login from "./pages/Login";
@@ -125,6 +126,7 @@ function App() {
               <Route path="/clinicians" element={<Clinicians />} />
               <Route path="/finance" element={<Finance />} />
               <Route path="/sales" element={<Sales />} />
+              <Route path="/contracts" element={<Contracts />} />
               <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
             </Routes>
           </main>

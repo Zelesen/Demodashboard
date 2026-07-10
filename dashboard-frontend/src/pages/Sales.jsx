@@ -42,12 +42,12 @@ export default function Sales() {
   const fetchStaticData = async () => {
     try {
       const [sourcesRes, funnelRes, cosmeticRes, planRes, recallRes, repRes] = await Promise.all([
-        fetch(`https://demodashboard-production.up.railway.app/api/sales/acquisition-sources`),
-        fetch(`https://demodashboard-production.up.railway.app/api/sales/funnel`),
-        fetch(`https://demodashboard-production.up.railway.app/api/sales/cosmetic-pipeline`),
-        fetch(`https://demodashboard-production.up.railway.app/api/sales/plan-growth`),
-        fetch(`https://demodashboard-production.up.railway.app/api/sales/recall-reactivation`),
-        fetch(`https://demodashboard-production.up.railway.app/api/sales/reputation`)
+        fetch(`http://localhost:8000/api/sales/acquisition-sources`),
+        fetch(`http://localhost:8000/api/sales/funnel`),
+        fetch(`http://localhost:8000/api/sales/cosmetic-pipeline`),
+        fetch(`http://localhost:8000/api/sales/plan-growth`),
+        fetch(`http://localhost:8000/api/sales/recall-reactivation`),
+        fetch(`http://localhost:8000/api/sales/reputation`)
       ]);
       const staticData = {
         sources: await sourcesRes.json(),
@@ -72,7 +72,7 @@ export default function Sales() {
 
   const fetchMetricsForPeriod = async (period) => {
     try {
-      const res = await fetch(`https://demodashboard-production.up.railway.app/api/sales/metrics?period=${period}`);
+      const res = await fetch(`http://localhost:8000/api/sales/metrics?period=${period}`);
       return await res.json();
     } catch (error) {
       console.error('Error fetching sales metrics:', error);
@@ -82,7 +82,7 @@ export default function Sales() {
 
   const fetchCustomSalesMetrics = async (startDate, endDate) => {
     try {
-      const res = await fetch(`https://demodashboard-production.up.railway.app/api/sales/metrics?period=all&start_date=${startDate}&end_date=${endDate}`);
+      const res = await fetch(`http://localhost:8000/api/sales/metrics?period=all&start_date=${startDate}&end_date=${endDate}`);
       return await res.json();
     } catch (error) {
       console.error('Error fetching custom sales metrics:', error);
@@ -156,7 +156,7 @@ export default function Sales() {
 
   const syncPageCache = async () => {
     try {
-      await fetch('https://demodashboard-production.up.railway.app/api/sync/page?page=sales', { method: 'POST' });
+      await fetch('http://localhost:8000/api/sync/page?page=sales', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing cache:', error);
     }

@@ -35,6 +35,7 @@ const menuItems = [
         { label: "Invoices", href: "/invoices" },
         { label: "Invoices (Dated On)", href: "/invoices-datedon" },
         { label: "Payments", href: "/payments" },
+        { label: "Contracts", href: "/contracts" },
         {/*{ label: "Clinicians", href: "/clinicians" },
         { label: "Finance", href: "/finance" },
         { label: "Sales & Marketing", href: "/sales" },*/}
@@ -222,7 +223,7 @@ function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch('https://demodashboard-production.up.railway.app/api/auth/user');
+        const res = await fetch('http://localhost:8000/api/auth/user');
         const data = await res.json();
         setUserData(data);
       } catch (err) {

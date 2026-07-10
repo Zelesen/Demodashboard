@@ -24,7 +24,7 @@ CACHE_DIR = os.path.join(os.path.dirname(__file__), "cache")
 PERIODS = ["today", "7d", "30d", "90d", "1y", "all"]
 
 DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
-DB_PORT = os.getenv("DB_PORT", "5432")
+DB_PORT = os.getenv("DB_PORT", "54322")
 DB_NAME = os.getenv("DB_NAME", "postgres")
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
@@ -129,14 +129,15 @@ def cache_ai_insights(period):
             SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments,
                    SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed_appointments
             FROM dentally_sites s
-            LEFT JOIN dentally_appointments a ON s.dentally_id = a.practitioner_id
-            WHERE {w_ai}
+            LEFT JOIN dentally_appointments a ON s.id::text = a.site_id AND ({w_ai})
             GROUP BY s.name ORDER BY completed_appointments ASC LIMIT 3
         """, p_ai)
         underperforming = cur.fetchall()
         insights = []
         for site in underperforming:
-            rate = (site["completed_appointments"] / site["total_appointments"] * 100) if site["total_appointments"] > 0 else 0
+            total = site["total_appointments"] or 0
+            completed = site["completed_appointments"] or 0
+            rate = (completed / total * 100) if total > 0 else 0
             insights.append(["ACT", f"\u00a3{1000 + rate * 10:.1f}k at stake", f"{site['site_name']} is {100 - rate:.1f}% behind target completion rate."])
         save_cache("dashboard_ai_insights", {"insights": insights[:3]}, period)
     finally:
@@ -637,7 +638,11 @@ def cache_appointments_by_site(period):
     conn, cur = get_db()
     try:
         w_as, p_as = build_date_clause(period, column_expr=ts("a.start_time"))
-        cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.dentally_id = a.site_id AND {w_as} WHERE s.active = 1 GROUP BY s.id, s.name ORDER BY total_appointments DESC", p_as)
+        try:
+            cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.id::text = a.site_id AND {w_as} WHERE s.active = 1 GROUP BY s.id, s.name ORDER BY total_appointments DESC", p_as)
+        except Exception:
+            conn.rollback()
+            cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.id::text = a.site_id AND {w_as} WHERE s.active = true GROUP BY s.id, s.name ORDER BY total_appointments DESC", p_as)
         sites = [{"name": r["site_name"], "appointments": r["total_appointments"] or 0, "completed": r["completed"] or 0} for r in cur.fetchall()]
         save_cache("dashboard_appointments_by_site", {"sites": sites}, period)
     finally:
@@ -1228,6 +1233,195 @@ def cache_recent_payments(period):
         conn.close()
 
 
+# ==================== CONTRACTS ====================
+
+def cache_contracts_list(period):
+    conn, cur = get_db()
+    try:
+        w, p = build_date_clause(period, dt("c.start_date"))
+        cur.execute(f"""
+            SELECT c.*, s.name as site_name
+            FROM dentally_contracts c
+            LEFT JOIN dentally_sites s ON c.site_id = s.id::text
+            WHERE {w}
+            ORDER BY c.start_date DESC
+        """, p)
+        contracts = [{
+            "id": r["id"], "name": r["name"], "contract_number": r["contract_number"],
+            "start_date": str(r["start_date"]) if r["start_date"] else None,
+            "end_date": str(r["end_date"]) if r["end_date"] else None,
+            "uda_value": float(r["uda_value"] or 0), "uoa_value": float(r["uoa_value"] or 0),
+            "target": float(r["target"] or 0), "uoa_target": float(r["uoa_target"] or 0),
+            "site_id": r["site_id"], "site_name": r["site_name"], "active": r["active"],
+            "pds_plus": r["pds_plus"], "notes": r["notes"],
+            "created_at": str(r["created_at"]) if r["created_at"] else None,
+        } for r in cur.fetchall()]
+        save_cache("dashboard_contracts_list", {"contracts": contracts, "total": len(contracts)}, period)
+    finally:
+        conn.close()
+
+def cache_contracts_kpis(period):
+    conn, cur = get_db()
+    try:
+        w, p = build_date_clause(period, dt("start_date"))
+        cur.execute(f"""
+            SELECT COUNT(*) as total_contracts,
+                   SUM(CASE WHEN active = true THEN 1 ELSE 0 END) as active_contracts,
+                   SUM(target) as total_target, SUM(uoa_target) as total_uoa_target,
+                   AVG(uda_value) as avg_uda_value, AVG(uoa_value) as avg_uoa_value,
+                   SUM(CASE WHEN pds_plus = true THEN 1 ELSE 0 END) as pds_plus_count
+            FROM dentally_contracts WHERE {w}
+        """, p)
+        row = cur.fetchone()
+        save_cache("dashboard_contracts_kpis", {
+            "total_contracts": row["total_contracts"] or 0,
+            "active_contracts": row["active_contracts"] or 0,
+            "total_target": float(row["total_target"] or 0),
+            "total_uoa_target": float(row["total_uoa_target"] or 0),
+            "avg_uda_value": round(float(row["avg_uda_value"] or 0), 2),
+            "avg_uoa_value": round(float(row["avg_uoa_value"] or 0), 2),
+            "pds_plus_count": row["pds_plus_count"] or 0,
+        }, period)
+    finally:
+        conn.close()
+
+def cache_contracts_by_site(period):
+    conn, cur = get_db()
+    try:
+        w, p = build_date_clause(period, dt("c.start_date"))
+        cur.execute(f"""
+            SELECT COALESCE(s.name, 'Unknown') as site_name, COUNT(*) as contract_count,
+                   SUM(CASE WHEN c.active = true THEN 1 ELSE 0 END) as active_count,
+                   SUM(c.target) as total_target, SUM(c.uoa_target) as total_uoa_target,
+                   AVG(c.uda_value) as avg_uda_value,
+                   SUM(CASE WHEN c.pds_plus = true THEN 1 ELSE 0 END) as pds_plus_count
+            FROM dentally_contracts c LEFT JOIN dentally_sites s ON c.site_id = s.id::text
+            WHERE {w} GROUP BY s.name ORDER BY total_target DESC
+        """, p)
+        sites = [{
+            "site_name": r["site_name"], "contract_count": r["contract_count"],
+            "active_count": r["active_count"], "total_target": float(r["total_target"] or 0),
+            "total_uoa_target": float(r["total_uoa_target"] or 0),
+            "avg_uda_value": round(float(r["avg_uda_value"] or 0), 2),
+            "pds_plus_count": r["pds_plus_count"] or 0,
+        } for r in cur.fetchall()]
+        save_cache("dashboard_contracts_by_site", {"sites": sites, "total": len(sites)}, period)
+    finally:
+        conn.close()
+
+def cache_contracts_timeline(period):
+    conn, cur = get_db()
+    try:
+        w, p = build_date_clause(period, dt("c.start_date"))
+        cur.execute(f"""
+            SELECT c.id, c.name, c.contract_number, c.start_date, c.end_date, c.active,
+                   c.target, c.uda_value, c.uoa_value, c.uoa_target, c.pds_plus, s.name as site_name
+            FROM dentally_contracts c LEFT JOIN dentally_sites s ON c.site_id = s.id::text
+            WHERE {w} ORDER BY c.start_date
+        """, p)
+        today = datetime.now().date()
+        timeline = []
+        for r in cur.fetchall():
+            dur = (r["end_date"] - r["start_date"]).days if r["start_date"] and r["end_date"] else 0
+            prog = 0
+            if r["start_date"] and r["end_date"] and dur > 0:
+                if today < r["start_date"]: prog = 0
+                elif today > r["end_date"]: prog = 100
+                else: prog = round((today - r["start_date"]).days / dur * 100, 1)
+            timeline.append({
+                "id": r["id"], "name": r["name"], "contract_number": r["contract_number"],
+                "start_date": str(r["start_date"]) if r["start_date"] else None,
+                "end_date": str(r["end_date"]) if r["end_date"] else None,
+                "duration_days": dur, "progress": prog, "active": r["active"],
+                "target": float(r["target"] or 0), "uda_value": float(r["uda_value"] or 0),
+                "site_name": r["site_name"], "pds_plus": r["pds_plus"],
+            })
+        save_cache("dashboard_contracts_timeline", {"timeline": timeline, "total": len(timeline)}, period)
+    finally:
+        conn.close()
+
+def cache_contracts_uda_delivery(period):
+    conn, cur = get_db()
+    try:
+        w, p = build_date_clause(period, dt("c.start_date"))
+        try:
+            cur.execute(f"""
+                SELECT c.name, c.contract_number, c.target, c.uda_value, c.uoa_target, c.uoa_value,
+                       c.start_date, c.end_date, c.active, c.pds_plus,
+                       COALESCE(s.name, c.site_id) as site_name,
+                       COALESCE(SUM(CASE WHEN nc.status = 'delivered' THEN 1 ELSE 0 END), 0) as uda_delivered,
+                       COALESCE(SUM(CASE WHEN nc.status = 'claimed' THEN 1 ELSE 0 END), 0) as uda_claimed
+                FROM dentally_contracts c
+                LEFT JOIN dentally_sites s ON c.site_id = s.id::text
+                LEFT JOIN dentally_nhs_claims nc ON nc.contract_id = c.id::text
+                WHERE {w} GROUP BY c.id, c.name, c.contract_number, c.target, c.uda_value, c.uoa_target,
+                                  c.uoa_value, c.start_date, c.end_date, c.active, c.pds_plus, s.name, s.id
+                ORDER BY c.name
+            """, p)
+        except Exception:
+            conn.rollback()
+            try:
+                cur.execute(f"""
+                    SELECT c.name, c.contract_number, c.target, c.uda_value, c.uoa_target, c.uoa_value,
+                           c.start_date, c.end_date, c.active, c.pds_plus,
+                           COALESCE(s.name, c.site_id) as site_name
+                    FROM dentally_contracts c
+                    LEFT JOIN dentally_sites s ON c.site_id = s.id::text
+                    WHERE {w} ORDER BY c.name
+                """, p)
+            except Exception:
+                save_cache("dashboard_contracts_uda_delivery", {
+                    "contracts": [], "total_target": 0, "total_delivered": 0,
+                    "overall_delivery_rate": 0, "total": 0
+                }, period)
+                return
+        total_target = 0
+        total_delivered = 0
+        delivery_data = []
+        for r in cur.fetchall():
+            tgt = float(r["target"] or 0)
+            delv = float(r.get("uda_delivered", 0) or 0)
+            total_target += tgt
+            total_delivered += delv
+            delivery_data.append({
+                "name": r["name"], "contract_number": r["contract_number"],
+                "site_name": r.get("site_name", r.get("site_id", "")), "target": tgt,
+                "uda_value": float(r["uda_value"] or 0),
+                "uoa_target": float(r["uoa_target"] or 0),
+                "uoa_value": float(r["uoa_value"] or 0),
+                "uda_delivered": delv, "uda_claimed": float(r.get("uda_claimed", 0) or 0),
+                "delivery_rate": round(delv / tgt * 100, 1) if tgt > 0 else 0,
+                "remaining": max(0, tgt - delv), "active": r["active"], "pds_plus": r["pds_plus"],
+            })
+        overall_rate = round(total_delivered / total_target * 100, 1) if total_target > 0 else 0
+        save_cache("dashboard_contracts_uda_delivery", {
+            "contracts": delivery_data, "total_target": total_target,
+            "total_delivered": total_delivered, "overall_delivery_rate": overall_rate,
+            "total": len(delivery_data)
+        }, period)
+    finally:
+        conn.close()
+
+def cache_contracts_value_distribution(period):
+    conn, cur = get_db()
+    try:
+        w, p = build_date_clause(period, dt("start_date"))
+        cur.execute(f"""
+            SELECT uda_value, COUNT(*) as contract_count, SUM(target) as total_target,
+                   SUM(uoa_target) as total_uoa_target
+            FROM dentally_contracts WHERE {w}
+            GROUP BY uda_value ORDER BY uda_value
+        """, p)
+        dist = [{
+            "uda_value": float(r["uda_value"] or 0), "contract_count": r["contract_count"],
+            "total_target": float(r["total_target"] or 0),
+            "total_uoa_target": float(r["total_uoa_target"] or 0),
+        } for r in cur.fetchall()]
+        save_cache("dashboard_contracts_value_distribution", {"distribution": dist}, period)
+    finally:
+        conn.close()
+
+
 # ==================== MAIN ====================
 
 PERIODIC_ENDPOINTS = [
@@ -1279,6 +1473,12 @@ PERIODIC_ENDPOINTS = [
     ("dashboard_appointments_lifecycle", cache_appointments_lifecycle),
     ("dashboard_appointments_duration", cache_appointments_duration),
     ("dashboard_appointments_heatmap", cache_appointments_heatmap),
+    ("dashboard_contracts_list", cache_contracts_list),
+    ("dashboard_contracts_kpis", cache_contracts_kpis),
+    ("dashboard_contracts_by_site", cache_contracts_by_site),
+    ("dashboard_contracts_timeline", cache_contracts_timeline),
+    ("dashboard_contracts_uda_delivery", cache_contracts_uda_delivery),
+    ("dashboard_contracts_value_distribution", cache_contracts_value_distribution),
 ]
 
 STATIC_ENDPOINTS = [
@@ -1299,6 +1499,7 @@ PAGE_ENDPOINTS = {
     "sales": ["dashboard_revenue_by_stream", "dashboard_case_acceptance", "dashboard_hygiene_utilization", "dashboard_operations_kpis"],
     "payments": ["dashboard_payments_kpis", "dashboard_payments_trend", "dashboard_payments_by_method", "dashboard_payments_by_site", "dashboard_payments_by_practitioner", "dashboard_recent_payments"],
     "operations": ["dashboard_operations_kpis", "dashboard_practice_league", "dashboard_capacity_data", "dashboard_recall_backlog"],
+    "contracts": ["dashboard_contracts_list", "dashboard_contracts_kpis", "dashboard_contracts_by_site", "dashboard_contracts_timeline", "dashboard_contracts_uda_delivery", "dashboard_contracts_value_distribution"],
 }
 
 

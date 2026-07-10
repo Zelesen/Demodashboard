@@ -161,11 +161,11 @@ export default function Dashboard() {
     const timeoutId = setTimeout(() => controller.abort(), 60000);
     try {
       const [metricsRes, insightsRes, healthRes, leagueRes, sitesRes] = await Promise.all([
-        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/metrics?period=${period}`, { signal: controller.signal }),
-        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/ai-insights?period=${period}`, { signal: controller.signal }),
-        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/health-score?period=${period}`, { signal: controller.signal }),
-        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/league?period=${period}`, { signal: controller.signal }),
-        fetch('https://demodashboard-production.up.railway.app/api/dashboard/sites', { signal: controller.signal })
+        fetch(`http://localhost:8000/api/dashboard/metrics?period=${period}`, { signal: controller.signal }),
+        fetch(`http://localhost:8000/api/dashboard/ai-insights?period=${period}`, { signal: controller.signal }),
+        fetch(`http://localhost:8000/api/dashboard/health-score?period=${period}`, { signal: controller.signal }),
+        fetch(`http://localhost:8000/api/dashboard/league?period=${period}`, { signal: controller.signal }),
+        fetch('http://localhost:8000/api/dashboard/sites', { signal: controller.signal })
       ]);
       clearTimeout(timeoutId);
 
@@ -201,11 +201,11 @@ export default function Dashboard() {
   const fetchCustomData = async (startDate, endDate) => {
     try {
       const [metricsRes, insightsRes, healthRes, leagueRes, sitesRes] = await Promise.all([
-        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/metrics?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/ai-insights?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/health-score?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch(`https://demodashboard-production.up.railway.app/api/dashboard/league?period=all&start_date=${startDate}&end_date=${endDate}`),
-        fetch('https://demodashboard-production.up.railway.app/api/dashboard/sites')
+        fetch(`http://localhost:8000/api/dashboard/metrics?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`http://localhost:8000/api/dashboard/ai-insights?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`http://localhost:8000/api/dashboard/health-score?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch(`http://localhost:8000/api/dashboard/league?period=all&start_date=${startDate}&end_date=${endDate}`),
+        fetch('http://localhost:8000/api/dashboard/sites')
       ]);
       return {
         metrics: await metricsRes.json(),
@@ -290,7 +290,7 @@ export default function Dashboard() {
 
   const syncPageCache = async () => {
     try {
-      await fetch('https://demodashboard-production.up.railway.app/api/sync/page?page=dashboard', { method: 'POST' });
+      await fetch('http://localhost:8000/api/sync/page?page=dashboard', { method: 'POST' });
     } catch (error) {
       console.error('Error refreshing page cache:', error);
     }
@@ -1125,7 +1125,7 @@ export default function Dashboard() {
 
         {/* ============ FLOATING IDA CO-PILOT WIDGET ============ */}
         <div className="relative">
-          <span className="absolute -top-1 -right-1 z-50 inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500 shadow-sm">10</span>
+          
           <FloatingIdaWidget aiInsights={currentData.aiInsights} />
         </div>
 
