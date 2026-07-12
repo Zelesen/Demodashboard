@@ -12,6 +12,11 @@ import Sales from "./pages/Sales";
 import Contracts from "./pages/Contracts";
 import TreatmentPlans from "./pages/TreatmentPlans";
 import Payments from "./pages/Payments";
+import NewDashboard from "./pages/NewDashboard";
+import DashboardsList from "./pages/DashboardsList";
+import StartDashboard from "./pages/StartDashboard";
+import ChatIDA from "./pages/ChatIDA";
+import DashboardResult from "./pages/DashboardResult";
 import Login from "./pages/Login";
 
 function App() {
@@ -127,6 +132,11 @@ function App() {
               <Route path="/finance" element={<Finance />} />
               <Route path="/sales" element={<Sales />} />
               <Route path="/contracts" element={<Contracts />} />
+              <Route path="/new-dashboard" element={<NewDashboard />} />
+              <Route path="/dashboards" element={<DashboardsList />} />
+              <Route path="/start-dashboard" element={<StartDashboard />} />
+              <Route path="/chat-IDA" element={<ChatIDA />} />
+              <Route path="/dashboard-result" element={<DashboardResult />} />
               <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
             </Routes>
           </main>

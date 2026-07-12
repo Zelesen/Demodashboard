@@ -14,7 +14,8 @@ import {
   Bell,
   ChevronLeft,
   Layers,
-  ArrowUpRight
+  ArrowUpRight,
+  Plus
 } from "lucide-react";
 
 const menuItems = [
@@ -26,11 +27,12 @@ const menuItems = [
     isAi: true,
     badge: "AI"
   },
-  {
-      icon: LayoutDashboard,
-      label: "Dashboards",
-      children: [
-        { label: "Appointments", href: "/appointments" },
+  { 
+    icon: LayoutDashboard, 
+    label: "Dashboards", 
+    children: [
+      { label: "New Dashboard", href: "/dashboards", icon: Plus, badge: "AI" },
+      { label: "Appointments", href: "/appointments" },
         { label: "Treatment Plans", href: "/treatment-plans" },
         { label: "Invoices", href: "/invoices" },
         { label: "Invoices (Dated On)", href: "/invoices-datedon" },
@@ -150,12 +152,13 @@ function NavItem({
           <div className="overflow-hidden ml-[21px] pl-3 border-l border-slate-200/80 space-y-0.5 py-0.5">
             {children.map((child) => {
               const isSubActive = location.pathname === child.href;
+              const ChildIcon = child.icon;
               return (
                 <button
                   key={child.label}
                   onClick={() => navigate(child.href)}
                   className={`
-                    w-full flex items-center px-3 py-1.5 rounded-lg 
+                    w-full flex items-center gap-2 px-3 py-1.5 rounded-lg 
                     text-[13px] font-medium transition-all duration-150 text-left relative
                     ${
                       isSubActive
@@ -164,7 +167,11 @@ function NavItem({
                     }
                   `}
                 >
-                  <span className="truncate">{child.label}</span>
+                  {ChildIcon && <ChildIcon size={13} className="shrink-0" />}
+                  <span className="truncate flex-1">{child.label}</span>
+                  {child.badge && (
+                    <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-indigo-100 text-indigo-700">{child.badge}</span>
+                  )}
                   {isSubActive && (
                     <span className="absolute -left-[14px] top-1/2 -translate-y-1/2 w-1 h-3 bg-blue-500 rounded-full" />
                   )}
@@ -184,12 +191,13 @@ function NavItem({
           <div className="space-y-0.5 px-2">
             {children.map((child) => {
               const isSubActive = location.pathname === child.href;
+              const ChildIcon = child.icon;
               return (
                 <button
                   key={child.label}
                   onClick={() => navigate(child.href)}
                   className={`
-                    w-full flex items-center px-2.5 py-1.5 rounded-xl 
+                    w-full flex items-center gap-2 px-2.5 py-1.5 rounded-xl 
                     text-[13px] font-medium transition-all text-left
                     ${
                       isSubActive
@@ -198,7 +206,11 @@ function NavItem({
                     }
                   `}
                 >
-                  {child.label}
+                  {ChildIcon && <ChildIcon size={13} className="shrink-0" />}
+                  <span className="truncate flex-1">{child.label}</span>
+                  {child.badge && (
+                    <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-indigo-100 text-indigo-700">{child.badge}</span>
+                  )}
                 </button>
               );
             })}

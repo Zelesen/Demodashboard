@@ -13,11 +13,13 @@
     "@supabase/supabase-js": "^2.110.1",
     "apexcharts": "^5.15.2",
     "axios": "^1.18.1",
+    "framer-motion": "^12.42.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.21.0",
     "react": "^19.2.6",
     "react-apexcharts": "^2.1.1",
     "react-dom": "^19.2.6",
+    "react-grid-layout": "^2.2.3",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.18.0",
     "recharts": "^3.8.1"
