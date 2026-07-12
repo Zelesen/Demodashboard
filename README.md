@@ -143,6 +143,8 @@ This starts PostgreSQL (port 54322), API (port 54321), and Studio (port 54323).
 
 The backend is configured for **Railway** via `railway.json` (Nixpacks builder, uvicorn start command). The frontend is configured for **Vercel** via `vercel.json` (SPA rewrites).
 
+
+but run in local host http://localhost:8000
 ## License
 
 This project is for demonstration purposes.
