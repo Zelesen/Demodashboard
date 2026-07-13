@@ -2,16 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 
 const STORAGE_KEY = "dashboard-editor-state";
 
-const defaultWidgets = [
-  { i: "widget-1", x: 0, y: 0, w: 3, h: 2, type: "metric", title: "Total Patients" },
-  { i: "widget-2", x: 3, y: 0, w: 3, h: 2, type: "metric", title: "Avg Revenue/Patient" },
-  { i: "widget-3", x: 6, y: 0, w: 3, h: 2, type: "metric", title: "Group Production" },
-  { i: "widget-4", x: 9, y: 0, w: 3, h: 2, type: "metric", title: "Conversion Rate" },
-  { i: "widget-5", x: 0, y: 2, w: 6, h: 3, type: "bar", title: "Revenue by Practice" },
-  { i: "widget-6", x: 6, y: 2, w: 6, h: 3, type: "line", title: "Monthly Trends" },
-];
-
-let widgetCounter = 6;
+let widgetCounter = 0;
 
 function loadFromStorage() {
   try {
@@ -23,22 +14,37 @@ function loadFromStorage() {
         widgetCounter = max;
         return parsed;
       }
+      localStorage.removeItem(STORAGE_KEY);
     }
   } catch {}
   return null;
 }
 
 export default function useDashboardState() {
-  const [widgets, setWidgets] = useState(() => {
-    const saved = loadFromStorage();
-    return saved || defaultWidgets;
-  });
+  const [widgets, setWidgets] = useState([]);
 
   useEffect(() => {
-    try {
+    const saved = loadFromStorage();
+    if (saved) setWidgets(saved);
+  }, []);
+
+  useEffect(() => {
+    if (widgets.length > 0) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(widgets));
-    } catch {}
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
   }, [widgets]);
+
+  function getMinH(item) {
+    if (item.chartType === "totalAppointments" || item.chartType === "completedAppointments" || item.chartType === "cancelledAppointments" || item.chartType === "dnaRate" || item.chartType === "avgDuration" || item.chartType === "dnaCount") return 1;
+    if (item.type === "metric") return 1;
+    return 2;
+  }
+
+  function getMinW(item) {
+    return 1;
+  }
 
   const addWidget = useCallback((item) => {
     const id = `widget-${++widgetCounter}`;
@@ -54,7 +60,10 @@ export default function useDashboardState() {
       y: row,
       w: item.defaultW,
       h: item.defaultH,
+      minH: getMinH(item),
+      minW: getMinW(item),
       type: item.type,
+      chartType: item.chartType,
       title: item.title,
     }]);
   }, [widgets]);
@@ -86,9 +95,20 @@ export default function useDashboardState() {
   }, []);
 
   const resetDashboard = useCallback(() => {
-    widgetCounter = 6;
-    setWidgets(defaultWidgets);
+    widgetCounter = 0;
+    setWidgets([]);
     localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
+  const replaceWidgets = useCallback((newWidgets) => {
+    const max = newWidgets.reduce((m, w) => Math.max(m, parseInt(w.i.replace("widget-", ""), 10) || 0), 0);
+    widgetCounter = max;
+    setWidgets(newWidgets);
+    if (newWidgets.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newWidgets));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
   }, []);
 
   return {
@@ -98,5 +118,6 @@ export default function useDashboardState() {
     duplicateWidget,
     updateLayout,
     resetDashboard,
+    replaceWidgets,
   };
 }

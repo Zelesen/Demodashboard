@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Loader2, CornerDownLeft } from "lucide-react";
 
 export default function ChatIDA() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ export default function ChatIDA() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Hello, Aman"
+      content: "Hello Aman! Describe what you're tracking or what goals you have in mind, and I will generate a tailored dashboard workspace for you."
     }
   ]);
   const textareaRef = useRef(null);
@@ -40,14 +40,14 @@ export default function ChatIDA() {
 
     setMessages(prev => [...prev, {
       role: "assistant",
-      content: "I'll create a dashboard based on your request. Let me generate the widgets and layout for you."
+      content: "Perfect. I'm structuralizing your layouts, optimizing specific widget types, and building your data visualization map now."
     }]);
     setIsLoading(false);
 
     // Navigate to dashboard results after a short delay
     setTimeout(() => {
       navigate("/dashboard-result");
-    }, 1000);
+    }, 1200);
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -56,60 +56,72 @@ export default function ChatIDA() {
   };
 
   return (
-    <div className="bg-[#f7f9fd] font-sans antialiased min-h-screen">
+    <div className="bg-[#f8fafc] font-sans antialiased min-h-screen relative selection:bg-indigo-100 selection:text-indigo-900">
       {/* Ambient Background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-to-br from-blue-50 via-indigo-50/50 to-transparent rounded-full blur-3xl opacity-60" />
-        <div className="absolute -bottom-60 -left-40 w-[500px] h-[500px] bg-gradient-to-tr from-emerald-50/60 via-blue-50/30 to-transparent rounded-full blur-3xl opacity-50" />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-to-br from-indigo-200/20 via-blue-100/10 to-transparent rounded-full blur-3xl" />
+        <div className="absolute -bottom-60 -left-40 w-[500px] h-[500px] bg-gradient-to-tr from-emerald-100/10 via-blue-50/10 to-transparent rounded-full blur-3xl" />
       </div>
 
-      <div className="max-w-4xl mx-auto p-6 sm:p-8 relative z-10">
+      <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12 relative z-10 flex flex-col min-h-screen">
         {/* Back Button */}
-        <button
-          onClick={() => navigate("/start-dashboard")}
-          className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          Back to dashboards
-        </button>
+        <div className="mb-6">
+          <button
+            onClick={() => navigate("/start-dashboard")}
+            className="group inline-flex items-center gap-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors duration-200"
+          >
+            <div className="p-1.5 rounded-xl bg-white border border-slate-200 shadow-sm group-hover:border-slate-300 group-hover:shadow transition-all duration-200 group-hover:-translate-x-0.5">
+              <ArrowLeft size={13} className="text-slate-600" />
+            </div>
+            Back to dashboard methods
+          </button>
+        </div>
 
-        {/* Chat Container */}
-        <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-8 sm:p-12">
-          {/* Messages */}
-          <div className="space-y-6 mb-8">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-              >
+        {/* Main Chat Interface Window */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col flex-1 min-h-[500px] overflow-hidden">
+          
+          {/* Chat Messages Stream */}
+          <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6">
+            {messages.map((message, index) => {
+              const isUser = message.role === "user";
+              return (
                 <div
-                  className={`max-w-[80%] rounded-xl p-4 ${
-                    message.role === "user"
-                      ? "bg-slate-900 text-white"
-                      : "bg-slate-50 text-slate-900"
-                  }`}
+                  key={index}
+                  className={`flex gap-3 w-full max-w-2xl ${isUser ? "ml-auto justify-end" : "justify-start"}`}
                 >
-                  {message.role === "assistant" && index === 0 && (
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                        <Sparkles size={12} className="text-white" />
-                      </div>
-                      <span className="text-xs font-bold text-slate-600">IDA</span>
+                  {/* AI Status Avatar */}
+                  {!isUser && (
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white shadow-sm shrink-0 self-start mt-0.5">
+                      <Sparkles size={14} className="fill-white/20" />
                     </div>
                   )}
-                  <p className="text-sm font-medium">{message.content}</p>
-                </div>
-              </div>
-            ))}
 
-            {/* Loading indicator */}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-slate-50 rounded-xl p-4">
-                  <div className="flex items-center gap-2">
-                    <Loader2 size={16} className="text-indigo-600 animate-spin" />
-                    <span className="text-sm text-slate-600">IDA is thinking...</span>
+                  <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
+                    {!isUser && index === 0 && (
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 ml-1">IDA AI Assistant</span>
+                    )}
+                    <div
+                      className={`rounded-2xl px-4 py-3 text-sm font-medium leading-relaxed shadow-sm ${
+                        isUser
+                          ? "bg-slate-900 text-white rounded-tr-none"
+                          : "bg-slate-50 text-slate-800 border border-slate-100 rounded-tl-none"
+                      }`}
+                    >
+                      <p>{message.content}</p>
+                    </div>
                   </div>
+                </div>
+              );
+            })}
+
+            {/* Thinking Loader */}
+            {isLoading && (
+              <div className="flex gap-3 items-center justify-start max-w-2xl">
+                <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                  <Loader2 size={14} className="animate-spin text-indigo-600" />
+                </div>
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm">
+                  <span className="text-sm text-slate-500 font-medium tracking-wide">Assembling dashboard modules...</span>
                 </div>
               </div>
             )}
@@ -117,55 +129,68 @@ export default function ChatIDA() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
+          {/* Core Dynamic Content / Suggestions Area */}
           {!isLoading && messages.length === 1 && (
-            <div className="space-y-4">
-              <div className="text-center mb-6">
-                <h2 className="text-xl font-bold text-slate-900 mb-2">What should this dashboard help with?</h2>
-              </div>
+            <div className="px-5 sm:px-8 pb-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <div className="border-t border-slate-100 my-4" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                Suggested Targets for Your Dashboard
+              </h2>
 
-              {/* Suggestions */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {suggestions.map((suggestion, index) => (
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="flex items-center gap-3 p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-left transition-all"
+                    className="group flex items-center gap-3 p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-left transition-all duration-200 hover:border-slate-300 hover:shadow-sm"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
-                      <Sparkles size={14} className="text-slate-400" />
+                    <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100/50 flex items-center justify-center shrink-0 group-hover:bg-indigo-100/70 transition-colors">
+                      <Sparkles size={12} className="text-indigo-500" />
                     </div>
-                    <span className="text-sm font-medium text-slate-700">{suggestion}</span>
+                    <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900 transition-colors">
+                      {suggestion}
+                    </span>
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Input Form */}
-          <form onSubmit={handleSubmit} className="relative">
-            <textarea
-              ref={textareaRef}
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Help me create a dashboard"
-              rows={3}
-              className="w-full resize-none text-sm p-4 pr-12 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 placeholder:text-slate-400"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmit(e);
-                }
-              }}
-            />
-            <button
-              type="submit"
-              disabled={!prompt.trim() || isLoading}
-              className="absolute right-3 bottom-3 w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white flex items-center justify-center transition-all active:scale-95 disabled:cursor-not-allowed"
-            >
-              <Send size={14} />
-            </button>
-          </form>
+          {/* Bottom Chat Input Form Container */}
+          <div className="p-4 sm:p-6 bg-slate-50 border-t border-slate-100">
+            <form onSubmit={handleSubmit} className="relative bg-white border border-slate-200 rounded-xl shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all overflow-hidden">
+              <textarea
+                ref={textareaRef}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe your analytics goal (e.g., 'Track active growth vs drop-off metrics this month')..."
+                rows={2}
+                className="w-full resize-none text-sm p-4 pb-12 bg-transparent text-slate-800 placeholder:text-slate-400 focus:outline-none font-medium leading-relaxed"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }
+                }}
+              />
+              
+              {/* Controls bar inside input block */}
+              <div className="absolute bottom-2 left-4 right-2 flex items-center justify-between pointer-events-none">
+                <span className="text-[10px] text-slate-400 font-medium hidden sm:inline-flex items-center gap-1">
+                  Press <kbd className="px-1 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-500 font-sans text-[9px] flex items-center gap-0.5">Enter <CornerDownLeft size={8} /></kbd> to send
+                </span>
+                
+                <button
+                  type="submit"
+                  disabled={!prompt.trim() || isLoading}
+                  className="pointer-events-auto ml-auto w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:bg-slate-100 text-white disabled:text-slate-400 flex items-center justify-center transition-all active:scale-95 disabled:cursor-not-allowed shadow-sm"
+                >
+                  <Send size={13} strokeWidth={2.5} />
+                </button>
+              </div>
+            </form>
+          </div>
+
         </div>
       </div>
     </div>

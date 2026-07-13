@@ -15,7 +15,8 @@ import {
   ChevronLeft,
   Layers,
   ArrowUpRight,
-  Plus
+  Plus,
+  Layout
 } from "lucide-react";
 
 const menuItems = [
@@ -69,7 +70,8 @@ function NavItem({
   const location = useLocation();
   const [isHovered, setIsHovered] = useState(false);
 
-  const hasChildren = children && children.length > 0;
+  const visibleChildren = children?.filter(c => !c.separator) || [];
+  const hasChildren = visibleChildren.length > 0;
   const isCurrentActive = location.pathname === href;
   const isChildActive = hasChildren && children.some(child => location.pathname === child.href);
   const active = isCurrentActive || isChildActive;
@@ -150,7 +152,10 @@ function NavItem({
           isExpanded ? "grid-rows-[1fr] opacity-100 mt-0.5" : "grid-rows-[0fr] opacity-0 overflow-hidden"
         }`}>
           <div className="overflow-hidden ml-[21px] pl-3 border-l border-slate-200/80 space-y-0.5 py-0.5">
-            {children.map((child) => {
+            {children.map((child, idx) => {
+              if (child.separator) {
+                return <div key={`sep-${idx}`} className="h-px bg-slate-200/80 my-1.5" />;
+              }
               const isSubActive = location.pathname === child.href;
               const ChildIcon = child.icon;
               return (
@@ -189,7 +194,10 @@ function NavItem({
             {label}
           </div>
           <div className="space-y-0.5 px-2">
-            {children.map((child) => {
+            {children.map((child, idx) => {
+              if (child.separator) {
+                return <div key={`sep-${idx}`} className="h-px bg-slate-200/80 my-1.5 mx-1" />;
+              }
               const isSubActive = location.pathname === child.href;
               const ChildIcon = child.icon;
               return (
@@ -229,21 +237,54 @@ function NavItem({
 }
 
 function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
+  const location = useLocation();
   const [expandedMenus, setExpandedMenus] = useState({});
   const [userData, setUserData] = useState(null);
+  const [userDashboards, setUserDashboards] = useState([]);
+
+  const currentUser = (() => {
+    try { return JSON.parse(sessionStorage.getItem("user") || "{}"); }
+    catch { return {}; }
+  })();
+  const userId = currentUser?.id || null;
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/auth/user');
-        const data = await res.json();
-        setUserData(data);
+        const [userRes, dashRes] = await Promise.all([
+          fetch('http://localhost:8000/api/auth/user'),
+          userId ? fetch(`http://localhost:8000/api/dashboards?user_id=${userId}`) : Promise.resolve(null),
+        ]);
+        const userData = await userRes.json();
+        setUserData(userData);
+        if (dashRes) {
+          const dashData = await dashRes.json();
+          setUserDashboards((dashData.dashboards || []).filter(d => d.user_id !== null));
+        }
       } catch (err) {
-        console.error('Error fetching user data:', err);
+        console.error('Error fetching data:', err);
       }
     };
-    fetchUser();
-  }, []);
+    fetchData();
+  }, [userId, location.pathname]);
+
+  const dynamicMenuItems = menuItems.map(item => {
+    if (item.label === "Dashboards" && userDashboards.length > 0) {
+      return {
+        ...item,
+        children: [
+          ...item.children,
+          { separator: true },
+          ...userDashboards.map(d => ({
+            label: d.name,
+            href: `/dashboard-view/${d.id}`,
+            icon: Layout,
+          })),
+        ],
+      };
+    }
+    return item;
+  });
 
   const toggleMenu = (label) => {
     setExpandedMenus(prev => ({
@@ -314,7 +355,7 @@ function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
 
         {/* Global Navigation Hub */}
         <nav className="mt-5 space-y-0.5 overflow-y-auto max-h-[calc(100vh-21rem)] scrollbar-none">
-          {menuItems.map((item) => (
+          {dynamicMenuItems.map((item) => (
             <NavItem
               key={item.label}
               {...item}

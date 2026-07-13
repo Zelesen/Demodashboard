@@ -1,8 +1,8 @@
-from fastapi import FastAPI, HTTPException, Depends, status, Request
+from fastapi import FastAPI, HTTPException, Depends, status, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta, timezone
@@ -14,6 +14,7 @@ from pydantic import BaseModel
 import httpx
 import glob
 import uuid
+import shutil
 
 load_dotenv()
 
@@ -3613,6 +3614,389 @@ def get_recent_payments(period: str = "7d", start_date: str = None, end_date: st
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ==================== DASHBOARD STORAGE (dentally_dashboards) ====================
+
+UPLOADS_DIR = os.path.join(os.path.dirname(__file__), "uploads")
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+
+CUSTOM_DASHBOARD_DIR = os.path.join(os.path.dirname(__file__), "custom_dashboard")
+os.makedirs(CUSTOM_DASHBOARD_DIR, exist_ok=True)
+
+# Mount uploads for serving images
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+# Mount custom_dashboard so JS modules are directly accessible
+app.mount("/custom_dashboard", StaticFiles(directory=CUSTOM_DASHBOARD_DIR), name="custom_dashboard")
+
+
+import re
+
+def sanitize_filename(name):
+    name = re.sub(r'[^\w\s-]', '', name)
+    name = re.sub(r'[-\s]+', '_', name)
+    return name.strip('_').lower() or 'dashboard'
+
+def write_dashboard_js(file_path, page_data, title="Untitled Dashboard", user_id=None, dashboard_id=None):
+    widgets_js = json.dumps(page_data.get("widgets", []), indent=2)
+    content = f"""export default {{
+  title: {json.dumps(title)},
+  userId: {json.dumps(user_id)},
+  dashboardId: {json.dumps(dashboard_id)},
+  createdAt: {json.dumps(datetime.now().isoformat())},
+  widgets: {widgets_js}
+}};
+"""
+    with open(file_path, "w") as f:
+        f.write(content)
+
+def read_dashboard_js(file_path):
+    with open(file_path, "r") as f:
+        text = f.read()
+    text = text.strip()
+    if text.startswith("export default"):
+        text = text[len("export default"):].strip().rstrip(";")
+    return json.loads(text)
+
+
+class DashboardCreate(BaseModel):
+    name: str
+    type: str = "Custom"
+    description: str = ""
+    status: str = "Draft"
+    managed_by: str = "you"
+    path: str = None
+    user_id: str = None
+    page_data: dict = {}
+
+class DashboardUpdate(BaseModel):
+    name: str = None
+    type: str = None
+    description: str = None
+    status: str = None
+    managed_by: str = None
+    path: str = None
+    page_data: dict = None
+    preview_image_url: str = None
+
+def ensure_dashboards_table():
+    """Create and migrate dentally_dashboards table."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS dentally_dashboards (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                type VARCHAR(50) DEFAULT 'Custom',
+                description TEXT DEFAULT '',
+                status VARCHAR(100) DEFAULT 'Draft',
+                managed_by VARCHAR(100) DEFAULT 'you',
+                path VARCHAR(255) DEFAULT NULL,
+                user_id VARCHAR(255) DEFAULT NULL,
+                preview_image_url TEXT DEFAULT '',
+                page_data JSONB DEFAULT '{}',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        # Add columns if missing (idempotent migration)
+        for col, typ in [("path", "VARCHAR(255) DEFAULT NULL"), ("user_id", "VARCHAR(255) DEFAULT NULL")]:
+            try:
+                cursor.execute(f"ALTER TABLE dentally_dashboards ADD COLUMN IF NOT EXISTS {col} {typ}")
+            except Exception:
+                pass
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Warning: Could not create/migrate dentally_dashboards table: {e}")
+
+# Run on startup
+ensure_dashboards_table()
+# Auto-seed built-in pages (idempotent — skips existing)
+try:
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    for d in PRESET_DASHBOARDS:
+        cursor.execute("SELECT id FROM dentally_dashboards WHERE path = %s AND user_id IS NULL", (d["path"],))
+        if not cursor.fetchone():
+            cursor.execute("""
+                INSERT INTO dentally_dashboards (name, type, description, status, managed_by, path, user_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (d["name"], d["type"], d["description"], d["status"], d["managed_by"], d["path"], d["user_id"]))
+    conn.commit()
+    conn.close()
+except Exception as e:
+    print(f"Warning: Could not seed preset dashboards: {e}")
+
+PRESET_DASHBOARDS = [
+    {"name": "Home", "type": "System", "description": "High-level clinic performance summary with KPIs, health score, and practice league.", "status": "Live", "managed_by": "Intellident", "path": "/", "user_id": None},
+    {"name": "Appointments", "type": "System", "description": "Daily appointments, no-shows, booking trends, and practitioner schedules.", "status": "Live", "managed_by": "Intellident", "path": "/appointments", "user_id": None},
+    {"name": "Invoices", "type": "System", "description": "Payment tracking, overdue invoices, and revenue breakdown by treatment.", "status": "Live", "managed_by": "Intellident", "path": "/invoices", "user_id": None},
+    {"name": "Invoices Dated On", "type": "System", "description": "Invoice KPIs and trends filtered by the date they were raised.", "status": "Live", "managed_by": "Intellident", "path": "/invoices-datedon", "user_id": None},
+    {"name": "Treatment Plans", "type": "System", "description": "Treatment plan KPIs, case acceptance, and completion heatmaps.", "status": "Live", "managed_by": "Intellident", "path": "/treatment-plans", "user_id": None},
+    {"name": "Payments", "type": "System", "description": "Payment KPIs, trends, breakdown by method, site, and practitioner.", "status": "Live", "managed_by": "Intellident", "path": "/payments", "user_id": None},
+    {"name": "Clinicians", "type": "System", "description": "Clinician performance league, UDA delivery, and production metrics.", "status": "Live", "managed_by": "Intellident", "path": "/clinicians", "user_id": None},
+    {"name": "Finance", "type": "System", "description": "Financial metrics including profit per practice, revenue by stream, and cash position.", "status": "Live", "managed_by": "Intellident", "path": "/finance", "user_id": None},
+    {"name": "Sales", "type": "System", "description": "Sales KPIs including treatment plan value, conversion rates, and pipeline.", "status": "Live", "managed_by": "Intellident", "path": "/sales", "user_id": None},
+    {"name": "Contracts", "type": "System", "description": "NHS contract management, UDA delivery tracking, and contract timelines.", "status": "Live", "managed_by": "Intellident", "path": "/contracts", "user_id": None},
+]
+
+@app.post("/api/dashboards/seed")
+def seed_preset_dashboards():
+    """Insert preset dashboards if they don't already exist."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        seeded = 0
+        for d in PRESET_DASHBOARDS:
+            cursor.execute("SELECT id FROM dentally_dashboards WHERE path = %s AND user_id IS NULL", (d["path"],))
+            if not cursor.fetchone():
+                cursor.execute("""
+                    INSERT INTO dentally_dashboards (name, type, description, status, managed_by, path, user_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """, (d["name"], d["type"], d["description"], d["status"], d["managed_by"], d["path"], d["user_id"]))
+                seeded += 1
+        conn.commit()
+        conn.close()
+        return {"status": "success", "seeded": seeded, "total": len(PRESET_DASHBOARDS)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dashboards")
+def list_dashboards(user_id: str = None):
+    """List all dashboards. Optionally filter by user_id.
+    System dashboards (user_id IS NULL) are always included.
+    """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        if user_id:
+            cursor.execute("""
+                SELECT * FROM dentally_dashboards
+                WHERE user_id IS NULL OR user_id = %s
+                ORDER BY user_id NULLS FIRST, created_at DESC
+            """, (user_id,))
+        else:
+            cursor.execute("SELECT * FROM dentally_dashboards ORDER BY user_id NULLS FIRST, created_at DESC")
+        rows = cursor.fetchall()
+        conn.close()
+        dashboards = []
+        for r in rows:
+            d = dict(r)
+            if isinstance(d.get("created_at"), datetime):
+                d["created_at"] = d["created_at"].isoformat()
+            if isinstance(d.get("updated_at"), datetime):
+                d["updated_at"] = d["updated_at"].isoformat()
+            if isinstance(d.get("page_data"), dict):
+                d["page_data"] = d["page_data"]
+            dashboards.append(d)
+        return {"dashboards": dashboards}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/dashboards/built-in")
+def list_built_in_dashboards():
+    """Return the preset dashboard definitions (for reference)."""
+    return {"dashboards": PRESET_DASHBOARDS}
+
+@app.get("/api/dashboards/{dashboard_id}")
+def get_dashboard(dashboard_id: int):
+    """Get a single dashboard by ID."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT * FROM dentally_dashboards WHERE id = %s", (dashboard_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if not row:
+            raise HTTPException(status_code=404, detail="Dashboard not found")
+        d = dict(row)
+
+        # For user dashboards with a file path, load page_data from the JS module
+        if d.get("user_id") and d.get("path") and d["path"].startswith("custom_dashboard/"):
+            file_path = os.path.join(os.path.dirname(__file__), d["path"])
+            if os.path.exists(file_path):
+                try:
+                    d["page_data"] = read_dashboard_js(file_path)
+                except Exception:
+                    pass
+
+        if isinstance(d.get("created_at"), datetime):
+            d["created_at"] = d["created_at"].isoformat()
+        if isinstance(d.get("updated_at"), datetime):
+            d["updated_at"] = d["updated_at"].isoformat()
+        return {"dashboard": d}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/dashboards", status_code=201)
+def create_dashboard(dashboard: DashboardCreate):
+    """Create a new dashboard entry for a specific user."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # For custom user dashboards, save page_data as a JS module
+        path_value = dashboard.path
+        if dashboard.user_id and dashboard.page_data:
+            safe_name = sanitize_filename(dashboard.name)
+            filename = f"{safe_name}_{dashboard.user_id}.js"
+            file_path = os.path.join(CUSTOM_DASHBOARD_DIR, filename)
+            write_dashboard_js(file_path, dashboard.page_data, dashboard.name, dashboard.user_id)
+            path_value = f"custom_dashboard/{filename}"
+
+        cursor.execute("""
+            INSERT INTO dentally_dashboards (name, type, description, status, managed_by, path, user_id, page_data)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING *
+        """, (
+            dashboard.name, dashboard.type, dashboard.description,
+            dashboard.status, dashboard.managed_by, path_value,
+            dashboard.user_id, json.dumps(dashboard.page_data)
+        ))
+        row = cursor.fetchone()
+        conn.commit()
+        conn.close()
+        d = dict(row)
+        if isinstance(d.get("created_at"), datetime):
+            d["created_at"] = d["created_at"].isoformat()
+        if isinstance(d.get("updated_at"), datetime):
+            d["updated_at"] = d["updated_at"].isoformat()
+        return {"dashboard": d}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/dashboards/{dashboard_id}")
+def update_dashboard(dashboard_id: int, update: DashboardUpdate):
+    """Update an existing dashboard."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Fetch existing to check user_id and old path for cleanup
+        cursor.execute("SELECT * FROM dentally_dashboards WHERE id = %s", (dashboard_id,))
+        existing = cursor.fetchone()
+        if not existing:
+            conn.close()
+            raise HTTPException(status_code=404, detail="Dashboard not found")
+
+        update_data = update.dict(exclude_none=True)
+
+        # If updating page_data for a user dashboard, save to JS module
+        if update.page_data and existing.get("user_id"):
+            safe_name = sanitize_filename(update.name or existing["name"])
+            filename = f"{safe_name}_{existing['user_id']}.js"
+            file_path = os.path.join(CUSTOM_DASHBOARD_DIR, filename)
+            write_dashboard_js(file_path, update.page_data, update.name or existing["name"], existing["user_id"], existing["id"])
+            update_data["path"] = f"custom_dashboard/{filename}"
+
+            # Clean up old file if name changed
+            if existing.get("path") and existing["path"].startswith("custom_dashboard/"):
+                old_path = os.path.join(os.path.dirname(__file__), existing["path"])
+                if old_path != file_path and os.path.exists(old_path):
+                    try:
+                        os.remove(old_path)
+                    except Exception:
+                        pass
+
+        fields = []
+        params = []
+        for key, val in update_data.items():
+            if key == "page_data":
+                fields.append(f"{key} = %s")
+                params.append(json.dumps(val))
+            else:
+                fields.append(f"{key} = %s")
+                params.append(val)
+
+        if not fields:
+            conn.close()
+            raise HTTPException(status_code=400, detail="No fields to update")
+
+        fields.append("updated_at = CURRENT_TIMESTAMP")
+        params.append(dashboard_id)
+
+        cursor.execute(f"UPDATE dentally_dashboards SET {', '.join(fields)} WHERE id = %s RETURNING *", params)
+        row = cursor.fetchone()
+        conn.commit()
+        conn.close()
+
+        d = dict(row)
+        if isinstance(d.get("created_at"), datetime):
+            d["created_at"] = d["created_at"].isoformat()
+        if isinstance(d.get("updated_at"), datetime):
+            d["updated_at"] = d["updated_at"].isoformat()
+        return {"dashboard": d}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/dashboards/{dashboard_id}")
+def delete_dashboard(dashboard_id: int):
+    """Delete a user dashboard. System dashboards cannot be deleted."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT user_id, path FROM dentally_dashboards WHERE id = %s", (dashboard_id,))
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            raise HTTPException(status_code=404, detail="Dashboard not found")
+        if row["user_id"] is None:
+            conn.close()
+            raise HTTPException(status_code=403, detail="System dashboards cannot be deleted")
+
+        # Delete the associated file if it exists
+        if row.get("path") and row["path"].startswith("custom_dashboard/"):
+            file_path = os.path.join(os.path.dirname(__file__), row["path"])
+            if os.path.exists(file_path):
+                try:
+                    os.remove(file_path)
+                except Exception:
+                    pass
+
+        cursor.execute("DELETE FROM dentally_dashboards WHERE id = %s", (dashboard_id,))
+        conn.commit()
+        conn.close()
+        return {"status": "deleted", "id": dashboard_id}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/dashboards/{dashboard_id}/upload-image")
+async def upload_dashboard_image(dashboard_id: int, file: UploadFile = File(...)):
+    """Upload a preview image for a dashboard."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT id FROM dentally_dashboards WHERE id = %s", (dashboard_id,))
+        if not cursor.fetchone():
+            conn.close()
+            raise HTTPException(status_code=404, detail="Dashboard not found")
+
+        ext = os.path.splitext(file.filename)[1] if file.filename else ".png"
+        filename = f"dashboard_{dashboard_id}_{uuid.uuid4().hex[:8]}{ext}"
+        filepath = os.path.join(UPLOADS_DIR, filename)
+
+        with open(filepath, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        image_url = f"/uploads/{filename}"
+
+        cursor.execute("UPDATE dentally_dashboards SET preview_image_url = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s", (image_url, dashboard_id))
+        conn.commit()
+        conn.close()
+
+        return {"preview_image_url": image_url}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ==================== SPA FALLBACK (for Railway deployment) ====================
 
 FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "..", "dashboard-frontend", "dist")
@@ -3625,7 +4009,7 @@ if os.path.isdir(FRONTEND_DIST):
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str):
         # Let FastAPI handle API and docs routes normally
-        if full_path.startswith("api/") or full_path.startswith("docs") or full_path.startswith("openapi"):
+        if full_path.startswith("api/") or full_path.startswith("docs") or full_path.startswith("openapi") or full_path.startswith("uploads/") or full_path.startswith("custom_dashboard/"):
             raise HTTPException(status_code=404)
         # Serve static files that exist in dist root (favicon, etc.)
         file_path = os.path.join(FRONTEND_DIST, full_path)

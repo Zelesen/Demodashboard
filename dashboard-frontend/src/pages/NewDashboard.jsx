@@ -40,31 +40,33 @@ export default function NewDashboard() {
 
   const addWidget = useCallback((widget) => {
     const id = `widget-${++widgetCounter}`;
-    const cols = 12;
-    const existingItems = layout.length;
-    const itemsPerRow = Math.floor(cols / (widget.defaultW || 2));
-    const row = Math.floor(existingItems / itemsPerRow);
-    const col = (existingItems % itemsPerRow) * (widget.defaultW || 2);
+    const w = widget.defaultW || 2;
+    const h = widget.defaultH || 2;
+    const minH = (widget.chartType && !widget.type) ? 2 : (widget.type === "metric" ? 1 : 2);
 
+    // x: 0, y: Infinity is the standard react-grid-layout pattern for "append to the end" —
+    // it places the item past the current bottom, then compactType="vertical" packs it into
+    // the first genuinely free slot without overlapping existing widgets, no matter their widths.
     const newLayoutItem = {
       i: id,
-      x: col,
-      y: row,
-      w: widget.defaultW || 2,
-      h: widget.defaultH || 2,
+      x: 0,
+      y: Infinity,
+      w,
+      h,
       minW: 1,
-      minH: 1,
+      minH,
     };
 
     const newWidget = {
       i: id,
       type: widget.type,
+      chartType: widget.chartType,
       title: widget.title || `${widget.type.charAt(0).toUpperCase() + widget.type.slice(1)} Chart`,
     };
 
     setLayout(prev => [...prev, newLayoutItem]);
     setWidgets(prev => [...prev, newWidget]);
-  }, [layout]);
+  }, []);
 
   const removeWidget = useCallback((id) => {
     setLayout(prev => prev.filter(l => l.i !== id));
@@ -201,7 +203,17 @@ export default function NewDashboard() {
           {/* Dashboard Canvas */}
           <div ref={containerRef} className={`transition-all duration-300 ${showLibrary ? "flex-1 min-w-0" : "w-full"}`}>
             {generated && widgets.length > 0 ? (
-              <div className="bg-white/50 rounded-2xl border border-slate-200/40 shadow-sm p-2 min-h-[400px]">
+              <div
+                onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
+                onDrop={e => {
+                  e.preventDefault();
+                  try {
+                    const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+                    addWidget(data);
+                  } catch {}
+                }}
+                className="bg-white/50 rounded-2xl border border-slate-200/40 shadow-sm p-2 min-h-[400px]"
+              >
                 <div className="text-[10px] font-medium text-slate-400 px-2 py-1 flex items-center gap-2">
                   <LayoutDashboard size={11} />
                   Dashboard Canvas — Drag to rearrange, resize from bottom-right corner
@@ -244,10 +256,10 @@ export default function NewDashboard() {
                   <p className="text-[11px] text-slate-400 max-w-xs mx-auto mb-4">
                     Drag widgets from the library panel on the right to start building your dashboard
                   </p>
-                  <button
+                    <button
                     onClick={() => {
-                      const types = ["bar", "line", "pie", "area", "metric", "table"];
-                      types.forEach(t => addWidget({ type: t, title: `${t.charAt(0).toUpperCase() + t.slice(1)} Chart`, defaultW: t === "metric" ? 1 : 2, defaultH: t === "metric" ? 1 : 2 }));
+                      const types = ["totalAppointments", "completedAppointments", "cancelledAppointments", "dnaRate", "avgDuration", "dnaCount"];
+                      types.forEach(t => addWidget({ chartType: t, title: t, type: "metric", defaultW: 1, defaultH: 1 }));
                     }}
                     className="inline-flex items-center gap-1.5 px-4 h-8 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-[11px] font-bold transition-colors"
                   >
