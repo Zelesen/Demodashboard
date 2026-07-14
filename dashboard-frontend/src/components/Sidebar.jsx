@@ -15,7 +15,6 @@ import {
   ChevronLeft,
   Layers,
   ArrowUpRight,
-  Plus,
   Layout
 } from "lucide-react";
 
@@ -31,8 +30,8 @@ const menuItems = [
   { 
     icon: LayoutDashboard, 
     label: "Dashboards", 
+    href: "/dashboards",
     children: [
-      { label: "Custom Dashboard", href: "/dashboards", icon: Plus, badge: "AI" },
       { label: "Appointments", href: "/appointments" },
         { label: "Treatment Plans", href: "/treatment-plans" },
         { label: "Invoices", href: "/invoices" },
@@ -85,10 +84,15 @@ function NavItem({
   }, [location.pathname]);
 
   const handleClick = () => {
-    if (hasChildren) {
-      if (!collapsed) onToggle();
-    } else if (href) {
+    if (href) {
       navigate(href);
+    }
+  };
+
+  const handleChevronClick = (e) => {
+    e.stopPropagation();
+    if (hasChildren) {
+      onToggle();
     }
   };
 
@@ -130,12 +134,17 @@ function NavItem({
         }`}>
           <span className="truncate tracking-tight">{label}</span>
           {hasChildren ? (
-            <ChevronRight
-              size={12}
-              className={`text-slate-400 transition-transform duration-200 raw-icon ${
-                isExpanded ? "rotate-90 text-slate-800" : ""
-              }`}
-            />
+            <span
+              onClick={handleChevronClick}
+              className="flex items-center justify-center w-5 h-5 rounded-md hover:bg-slate-200/60 transition-colors cursor-pointer"
+            >
+              <ChevronRight
+                size={12}
+                className={`text-slate-400 transition-transform duration-200 raw-icon ${
+                  isExpanded ? "rotate-90 text-slate-800" : ""
+                }`}
+              />
+            </span>
           ) : (
             badge && (
               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md tracking-wider uppercase ${
