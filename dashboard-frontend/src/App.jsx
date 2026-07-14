@@ -16,8 +16,9 @@ import NewDashboard from "./pages/NewDashboard";
 import DashboardsList from "./pages/DashboardsList";
 import StartDashboard from "./pages/StartDashboard";
 import ChatIDA from "./pages/ChatIDA";
-import DashboardResult from "./pages/DashboardResult";
 import DashboardViewer from "./pages/DashboardViewer";
+import DashboardCreator from "./pages/DashboardCreator";
+import WidgetsCatalog from "./pages/WidgetsCatalog";
 import Login from "./pages/Login";
 
 function App() {
@@ -137,10 +138,12 @@ function App() {
               <Route path="/dashboards" element={<DashboardsList />} />
               <Route path="/start-dashboard" element={<StartDashboard />} />
               <Route path="/chat-IDA" element={<ChatIDA />} />
-              <Route path="/dashboard-result" element={<DashboardResult />} />
+              <Route path="/dashboard-result" element={<NewDashboard />} />
               <Route path="/dashboard-view/:id" element={<DashboardViewer />} />
-              <Route path="/dashboard/:id" element={<DashboardResult />} />
-              <Route path="/dashboard/:id/edit" element={<DashboardResult />} />
+              <Route path="/dashboard/:id" element={<DashboardViewer />} />
+              <Route path="/dashboard/:id/edit" element={<NewDashboard />} />
+              <Route path="/dashboard-creator" element={<DashboardCreator />} />
+              <Route path="/widgets" element={<WidgetsCatalog />} />
               <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
             </Routes>
           </main>

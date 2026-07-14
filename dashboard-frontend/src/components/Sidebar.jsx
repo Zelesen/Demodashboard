@@ -32,7 +32,7 @@ const menuItems = [
     icon: LayoutDashboard, 
     label: "Dashboards", 
     children: [
-      { label: "New Dashboard", href: "/dashboards", icon: Plus, badge: "AI" },
+      { label: "Custom Dashboard", href: "/dashboards", icon: Plus, badge: "AI" },
       { label: "Appointments", href: "/appointments" },
         { label: "Treatment Plans", href: "/treatment-plans" },
         { label: "Invoices", href: "/invoices" },
@@ -49,6 +49,8 @@ const menuItems = [
     icon: Settings,
     label: "Settings",
     children: [
+      { label: "Dashboard Creator", href: "/dashboard-creator" },
+      { label: "Widgets Catalog", href: "/widgets" },
       { label: "Integrations", href: "/integrations" },
       { label: "App settings", href: "/app-settings" },
     ],

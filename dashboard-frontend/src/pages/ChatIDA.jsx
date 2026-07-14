@@ -46,7 +46,7 @@ export default function ChatIDA() {
 
     // Navigate to dashboard results after a short delay
     setTimeout(() => {
-      navigate("/dashboard-result");
+      navigate("/dashboard-result?source=ida");
     }, 1200);
   };
 

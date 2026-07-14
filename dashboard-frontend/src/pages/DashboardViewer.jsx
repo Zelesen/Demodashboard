@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, CalendarRange, RefreshCw, LayoutDashboard } from "lucide-react";
+import { ArrowLeft, CalendarRange, RefreshCw, LayoutDashboard, Edit3 } from "lucide-react";
 import GridLayout from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import DashboardWidget from "../components/DashboardWidget";
@@ -175,6 +175,13 @@ export default function DashboardViewer() {
 
           <div className="flex items-center gap-2">
             <button
+              onClick={() => navigate(`/dashboard/${id}/edit`)}
+              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-800 rounded-xl text-[10px] font-bold shadow-sm transition-all"
+            >
+              <Edit3 size={11} />
+              Edit Dashboard
+            </button>
+            <button
               onClick={handleRefresh}
               disabled={isRefreshing || cooldownSecs > 0}
               className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
@@ -277,8 +284,7 @@ export default function DashboardViewer() {
                         >
                           <DashboardWidget
                             widget={widget}
-                            onRemove={() => {}}
-                            showControls={false}
+                            showControls={true}
                           />
                         </WidgetFrame>
                       </div>

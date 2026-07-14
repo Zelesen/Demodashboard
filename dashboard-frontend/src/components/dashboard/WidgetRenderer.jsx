@@ -106,7 +106,7 @@ const sampleLifecycleData = {
     { hour: 13, min: 10, avg: 26, max: 52 },
     { hour: 14, min: 15, avg: 35, max: 65 },
     { hour: 15, min: 10, avg: 30, max: 55 },
-    { hour: 16, min: 8, avg: 24, max: 48 },
+    { hour: 16, min: 8, text: "Dr A", avg: 24, max: 48 },
     { hour: 17, min: 12, avg: 28, max: 50 },
   ]
 };
@@ -264,7 +264,8 @@ export function AppointmentMetricCard({ title, value, change, positive = true, f
   );
 }
 
-export function OutcomeBreakdownChart({ data = sampleStatusBreakdown, height = 260 }) {
+export function OutcomeBreakdownChart({ data = sampleStatusBreakdown, height, onChartReady }) {
+  const chartHeight = height || 260;
   const entries = Object.entries(data).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
   const total = entries.reduce((s, [, v]) => s + v, 0);
   const colorMap = {
@@ -324,10 +325,11 @@ export function OutcomeBreakdownChart({ data = sampleStatusBreakdown, height = 2
       }
     }]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
 }
 
-export function AppointmentsByPracticeChart({ data = sampleSiteData, height = 220 }) {
+export function AppointmentsByPracticeChart({ data = sampleSiteData, height, onChartReady }) {
+  const chartHeight = height || 220;
   const sites = data.sites?.slice(0, 8) || [];
   const categoryNames = sites.map(s => s.name?.split(" ").slice(-1)[0] || s.name);
   const option = {
@@ -358,10 +360,11 @@ export function AppointmentsByPracticeChart({ data = sampleSiteData, height = 22
       barWidth: "55%",
     }]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
 }
 
-export function PractitionerWorkloadChart({ data = samplePracData, height = 280 }) {
+export function PractitionerWorkloadChart({ data = samplePracData, height, onChartReady }) {
+  const chartHeight = height || 280;
   const pracs = data.practitioners?.slice(0, 10) || [];
   const names = pracs.map(p => p.name?.split(" ")[0] || p.name);
   const option = {
@@ -414,10 +417,11 @@ export function PractitionerWorkloadChart({ data = samplePracData, height = 280 
       }
     ]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
 }
 
-export function DailyAppointmentVolumeChart({ data = sampleTrendData, height = 200 }) {
+export function DailyAppointmentVolumeChart({ data = sampleTrendData, height, onChartReady }) {
+  const chartHeight = height || 200;
   const chartData = data.chart_data || [];
   const dates = chartData.map(d => {
     const p = d.date?.split("-");
@@ -494,10 +498,11 @@ export function DailyAppointmentVolumeChart({ data = sampleTrendData, height = 2
       }
     ]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
 }
 
-export function AppointmentsByReasonChart({ data = sampleReasonData, height = 260 }) {
+export function AppointmentsByReasonChart({ data = sampleReasonData, height, onChartReady }) {
+  const chartHeight = height || 260;
   const reasons = data.reasons?.slice(0, 8) || [];
   const total = reasons.reduce((s, r) => s + r.count, 0);
   const colors = ["#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6", "#ef4444", "#14b8a6", "#f97316"];
@@ -553,10 +558,11 @@ export function AppointmentsByReasonChart({ data = sampleReasonData, height = 26
       }
     }]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
 }
 
-export function AppointmentsByHourChart({ data = sampleHourData, height = 220 }) {
+export function AppointmentsByHourChart({ data = sampleHourData, height, onChartReady }) {
+  const chartHeight = height || 220;
   const hours = data.hours || [];
   const option = {
     tooltip: {
@@ -596,10 +602,11 @@ export function AppointmentsByHourChart({ data = sampleHourData, height = 220 })
       barWidth: "60%",
     }]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
 }
 
-export function AppointmentsByDayChart({ data = sampleDayData, height = 220 }) {
+export function AppointmentsByDayChart({ data = sampleDayData, height, onChartReady }) {
+  const chartHeight = height || 220;
   const days = data.days || [];
   const dayColors = ["#6366f1", "#818cf8", "#a5b4fc", "#2dd4bf", "#34d399", "#f59e0b", "#f97316"];
   const option = {
@@ -633,10 +640,11 @@ export function AppointmentsByDayChart({ data = sampleDayData, height = 220 }) {
       barWidth: "65%",
     }]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
 }
 
-export function PractitionerCompletionRateChart({ data = samplePracData, height = 260 }) {
+export function PractitionerCompletionRateChart({ data = samplePracData, height, onChartReady }) {
+  const chartHeight = height || 260;
   const pracs = data.practitioners?.slice(0, 10) || [];
   const names = pracs.map(p => p.name?.split(" ")[0] || p.name);
   const option = {
@@ -679,10 +687,11 @@ export function PractitionerCompletionRateChart({ data = samplePracData, height 
       barWidth: "55%",
     }]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
 }
 
-export function CancelledByDayChart({ data = sampleCancelData, height = 260 }) {
+export function CancelledByDayChart({ data = sampleCancelData, height }) {
+  const chartHeight = height || 260;
   const days = data.days || [];
   const option = {
     tooltip: {
@@ -724,10 +733,11 @@ export function CancelledByDayChart({ data = sampleCancelData, height = 260 }) {
       barWidth: "60%",
     }]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} />;
 }
 
-export function AppointmentLifecycleChart({ data = sampleLifecycleData, height = 260 }) {
+export function AppointmentLifecycleChart({ data = sampleLifecycleData, height }) {
+  const chartHeight = height || 260;
   const hours = data.hours || [];
   const option = {
     tooltip: {
@@ -786,10 +796,11 @@ export function AppointmentLifecycleChart({ data = sampleLifecycleData, height =
       }
     ]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} />;
 }
 
-export function AppointmentDurationChart({ data = sampleDurationData, height = 200 }) {
+export function AppointmentDurationChart({ data = sampleDurationData, height }) {
+  const chartHeight = height || 200;
   const buckets = data.buckets || [];
   const total = buckets.reduce((s, b) => s + b.count, 0);
   const option = {
@@ -822,10 +833,11 @@ export function AppointmentDurationChart({ data = sampleDurationData, height = 2
       barWidth: "55%",
     }]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} />;
 }
 
-export function WeeklyActivityHeatmapChart({ data = sampleHeatmapData, height = 280 }) {
+export function WeeklyActivityHeatmapChart({ data = sampleHeatmapData, height }) {
+  const chartHeight = height || 280;
   const heatmapData = data.heatmap || [];
   const hours = Array.from({ length: 10 }, (_, i) => `${i + 8}:00`);
   const days = heatmapData.map(d => d.day?.slice(0, 3));
@@ -880,133 +892,13 @@ export function WeeklyActivityHeatmapChart({ data = sampleHeatmapData, height = 
       }
     }]
   };
-  return <ReactECharts option={option} style={{ height }} />;
+  return <ReactECharts option={option} style={{ height: chartHeight }} />;
 }
 
-// ===================== MINI CHART PREVIEWS (for widget panel) =====================
-const donutPreviewOption = {
-  series: [{
-    type: "pie",
-    radius: ["45%", "68%"],
-    data: [
-      { value: 185, itemStyle: { color: donutGradient("#10b981") } },
-      { value: 58, itemStyle: { color: donutGradient("#f59e0b") } },
-      { value: 22, itemStyle: { color: donutGradient("#f97316") } },
-      { value: 15, itemStyle: { color: donutGradient("#94a3b8") } },
-    ],
-    itemStyle: { borderColor: "#fff", borderWidth: 2 },
-    label: { show: false }
-  }],
-};
-
-const barPreviewOption = {
-  grid: { left: 5, right: 5, top: 5, bottom: 20, containLabel: true },
-  xAxis: { type: "category", data: ["Site A", "Site B", "Site C", "Site D"], axisLabel: { fontSize: 8, color: "#94a3b8" }, axisLine: { show: false }, axisTick: { show: false } },
-  yAxis: { type: "value", show: false, splitLine: { show: false } },
-  series: [{ type: "bar", data: [120, 95, 78, 65], barWidth: "60%", itemStyle: { color: "#3b82f6", borderRadius: [3, 3, 0, 0] } }],
-};
-
-const hbarPreviewOption = {
-  grid: { left: 5, right: 5, top: 5, bottom: 5, containLabel: true },
-  xAxis: { type: "value", show: false },
-  yAxis: { type: "category", data: ["Dr A", "Dr B", "Dr C"], axisLabel: { fontSize: 8, color: "#94a3b8" }, axisLine: { show: false }, axisTick: { show: false } },
-  series: [
-    { type: "bar", data: [45, 52, 38], barWidth: "35%", barGap: "20%", itemStyle: { color: "#6366f1", borderRadius: [0, 2, 2, 0] } },
-    { type: "bar", data: [38, 42, 32], barWidth: "35%", itemStyle: { color: "#10b981", borderRadius: [0, 2, 2, 0] } },
-  ],
-};
-
-const areaPreviewOption = {
-  grid: { left: 5, right: 5, top: 5, bottom: 15, containLabel: true },
-  xAxis: { type: "category", data: ["M", "T", "W", "T", "F"], axisLabel: { fontSize: 8, color: "#94a3b8" }, axisLine: { show: false }, axisTick: { show: false } },
-  yAxis: { type: "value", show: false, splitLine: { show: false } },
-  series: [{
-    type: "line", smooth: true, data: [28, 35, 22, 40, 32],
-    lineStyle: { width: 1.5, color: "#3b82f6" },
-    areaStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "rgba(59,130,246,0.2)" }, { offset: 1, color: "rgba(59,130,246,0.02)" }] } },
-    symbol: "none"
-  }],
-};
-
-const heatmapPreviewOption = {
-  grid: { left: 5, right: 5, top: 5, bottom: 5, containLabel: true },
-  xAxis: { type: "category", data: ["8:00", "10:00", "12:00", "14:00", "16:00"], axisLabel: { fontSize: 7, color: "#94a3b8", rotate: 20 }, axisLine: { show: false }, splitArea: { show: true } },
-  yAxis: { type: "category", data: ["Mon", "Wed", "Fri"], axisLabel: { fontSize: 7, color: "#94a3b8" }, axisLine: { show: false }, splitArea: { show: true } },
-  visualMap: { show: false, min: 0, max: 15, inRange: { color: ["#f0f9ff", "#bae6fd", "#7dd3fc", "#38bdf8", "#0ea5e9"] } },
-  series: [{
-    type: "heatmap", data: [
-      [0, 0, 4], [0, 1, 12], [0, 2, 5], [0, 3, 9], [0, 4, 7],
-      [1, 0, 3], [1, 1, 13], [1, 2, 5], [1, 3, 10], [1, 4, 6],
-      [2, 0, 2], [2, 1, 9], [2, 2, 3], [2, 3, 7], [2, 4, 5],
-    ], label: { show: true, fontSize: 7, color: "#1e293b", formatter: ({ value: [, , count] }) => count || "" }
-  }],
-};
-
-const groupedBarPreviewOption = {
-  grid: { left: 5, right: 5, top: 5, bottom: 15, containLabel: true },
-  xAxis: { type: "category", data: ["8:00", "10:00", "12:00", "14:00"], axisLabel: { fontSize: 7, color: "#94a3b8" }, axisLine: { show: false }, axisTick: { show: false } },
-  yAxis: { type: "value", show: false, splitLine: { show: false } },
-  series: [
-    { type: "bar", data: [28, 30, 22, 35], barWidth: "25%", barGap: "10%", itemStyle: { color: "#8b5cf6", borderRadius: [2, 2, 0, 0] } },
-    { type: "bar", data: [15, 10, 5, 15], barWidth: "25%", itemStyle: { color: "#a78bfa", borderRadius: [2, 2, 0, 0] } },
-    { type: "bar", data: [55, 58, 45, 65], barWidth: "25%", itemStyle: { color: "#c4b5fd", borderRadius: [2, 2, 0, 0] } },
-  ],
-};
-
-const miniPreviews = {
-  outcomeBreakdown: donutPreviewOption,
-  appointmentsByPractice: barPreviewOption,
-  practitionerWorkload: hbarPreviewOption,
-  dailyAppointmentVolume: areaPreviewOption,
-  appointmentsByReason: donutPreviewOption,
-  appointmentsByHour: { ...barPreviewOption, series: [{ type: "bar", data: [12, 28, 35, 30, 18, 15, 32, 38], barWidth: "60%", itemStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "#a78bfa" }, { offset: 1, color: "#8b5cf6" }] }, borderRadius: [3, 3, 0, 0] } }], xAxis: { ...barPreviewOption.xAxis, data: ["8", "10", "12", "14", "16"] } },
-  appointmentsByDay: { ...barPreviewOption, series: [{ type: "bar", data: [95, 110, 105, 98, 85].map((v, i) => ({ value: v, itemStyle: { color: ["#6366f1", "#818cf8", "#a5b4fc", "#2dd4bf", "#34d399"][i], borderRadius: [3, 3, 0, 0] } })), barWidth: "65%" }], xAxis: { ...barPreviewOption.xAxis, data: ["Mon", "Tue", "Wed", "Thu", "Fri"] } },
-  practitionerCompletionRate: { ...hbarPreviewOption, xAxis: { type: "value", max: 100, show: false }, series: [{ type: "bar", data: [84, 81, 84], barWidth: "55%", itemStyle: { color: { type: "linear", x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: "#34d399" }, { offset: 1, color: "#10b981" }] }, borderRadius: [0, 2, 2, 0] } }] },
-  cancelledByDay: { ...barPreviewOption, series: [{ type: "bar", data: [8, 12, 6, 10, 15], barWidth: "60%", itemStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "#f43f5e" }, { offset: 1, color: "#fb7185" }] }, borderRadius: [3, 3, 0, 0] } }], xAxis: { ...barPreviewOption.xAxis, data: ["Mon", "Tue", "Wed", "Thu", "Fri"] } },
-  appointmentLifecycle: groupedBarPreviewOption,
-  appointmentDuration: { ...barPreviewOption, series: [{ type: "bar", data: [45, 120, 85, 55, 30], barWidth: "55%", itemStyle: { color: "#0ea5e9", borderRadius: [3, 3, 0, 0] } }], xAxis: { ...barPreviewOption.xAxis, data: ["0-15", "15-30", "30-45", "45-60", "60-90"] } },
-  weeklyActivityHeatmap: heatmapPreviewOption,
-};
-
-function MiniChartPreview({ chartType }) {
-  const option = miniPreviews[chartType];
-  if (!option) return null;
-  return (
-    <div className="h-12 w-full pointer-events-none opacity-60 group-hover:opacity-90 transition-opacity">
-      <ReactECharts option={option} style={{ height: 48 }} notMerge />
-    </div>
-  );
-}
-
-// ===================== WIDGET TYPE DEFINITIONS =====================
-const appointmentWidgets = [
-  { type: "metric", chartType: "totalAppointments", title: "Total Appointments", icon: Calendar, defaultW: 1, defaultH: 1, description: "Total appointment count" },
-  { type: "metric", chartType: "completedAppointments", title: "Completed", icon: CheckCircle2, defaultW: 1, defaultH: 1, description: "Completed appointments" },
-  { type: "metric", chartType: "cancelledAppointments", title: "Cancelled", icon: XCircle, defaultW: 1, defaultH: 1, description: "Cancelled appointments" },
-  { type: "metric", chartType: "dnaRate", title: "DNA Rate", icon: AlertTriangle, defaultW: 1, defaultH: 1, description: "Did not attend rate" },
-  { type: "metric", chartType: "avgDuration", title: "Avg Duration", icon: Clock, defaultW: 1, defaultH: 1, description: "Average appointment duration" },
-  { type: "metric", chartType: "dnaCount", title: "Did Not Attend", icon: AlertCircle, defaultW: 1, defaultH: 1, description: "Did not attend count" },
-  { type: "chart", chartType: "outcomeBreakdown", title: "Outcome Breakdown", icon: CheckCircle2, defaultW: 2, defaultH: 2, description: "Donut chart of appointment outcomes" },
-  { type: "chart", chartType: "appointmentsByPractice", title: "By Practice", icon: Building2, defaultW: 2, defaultH: 2, description: "Appointments per practice site" },
-  { type: "chart", chartType: "practitionerWorkload", title: "Practitioner Workload", icon: Users, defaultW: 2, defaultH: 2, description: "Workload per practitioner" },
-  { type: "chart", chartType: "dailyAppointmentVolume", title: "Daily Volume", icon: TrendingUp, defaultW: 2, defaultH: 2, description: "Daily appointment trend" },
-  { type: "chart", chartType: "appointmentsByReason", title: "By Reason", icon: List, defaultW: 2, defaultH: 2, description: "Appointments grouped by reason" },
-  { type: "chart", chartType: "appointmentsByHour", title: "By Hour", icon: Clock, defaultW: 2, defaultH: 2, description: "Appointments by hour of day" },
-  { type: "chart", chartType: "appointmentsByDay", title: "By Day", icon: CalendarRange, defaultW: 2, defaultH: 2, description: "Appointments by day of week" },
-  { type: "chart", chartType: "practitionerCompletionRate", title: "Completion Rate", icon: UserCheck, defaultW: 2, defaultH: 2, description: "Practitioner completion percentages" },
-  { type: "chart", chartType: "cancelledByDay", title: "Cancelled by Day", icon: XCircle, defaultW: 2, defaultH: 2, description: "Cancellations by day of week" },
-  { type: "chart", chartType: "appointmentLifecycle", title: "Lifecycle", icon: Activity, defaultW: 2, defaultH: 2, description: "Min/avg/max duration by hour" },
-  { type: "chart", chartType: "appointmentDuration", title: "Duration Dist.", icon: BarChart3, defaultW: 2, defaultH: 2, description: "Actual appointment duration distribution" },
-  { type: "chart", chartType: "weeklyActivityHeatmap", title: "Activity Heatmap", icon: Grid3x3, defaultW: 2, defaultH: 2, description: "Weekly day-hour heatmap" },
-];
-
-export function getAppointmentWidgetId(widget) {
-  const found = appointmentWidgets.find(w => w.chartType === widget.chartType);
-  return found?.chartType || widget.chartType;
-}
-
+// ===================== RENDER ROUTER =====================
 export function renderAppointmentWidget(widget) {
   const trendVals = widget.data?.chartData?.map(d => d.total) || null;
+  
   switch (widget.chartType) {
     case "totalAppointments":
       return <AppointmentMetricCard title="Total Appointments" value={(widget.data?.totalAppointments || 0).toLocaleString()} change="+8.2%" icon={Calendar} footer="this period" sparklineValues={trendVals} />;
@@ -1047,97 +939,4 @@ export function renderAppointmentWidget(widget) {
     default:
       return <div className="h-full flex items-center justify-center text-slate-400 text-xs">Unknown widget</div>;
   }
-}
-
-// ===================== WIDGET LIBRARY PANEL =====================
-export default function WidgetLibrary({ onAddWidget, generated, onClose }) {
-  const [search, setSearch] = useState("");
-  const [dragWidget, setDragWidget] = useState(null);
-
-  const widgets = appointmentWidgets;
-
-  const filtered = widgets.filter(w =>
-    w.title?.toLowerCase().includes(search.toLowerCase()) ||
-    w.type?.toLowerCase().includes(search.toLowerCase()) ||
-    w.description?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const handleDragStart = (e, w) => {
-    setDragWidget(w);
-    e.dataTransfer.setData("text/plain", JSON.stringify(w));
-    e.dataTransfer.effectAllowed = "copy";
-  };
-
-  const handleDragEnd = () => {
-    setDragWidget(null);
-  };
-
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm h-full flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-        <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center">
-            <BarChart3 size={12} className="text-indigo-600" />
-          </div>
-          Widget Library
-          <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md">{filtered.length}</span>
-        </h3>
-        <button onClick={onClose} className="w-6 h-6 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
-          <X size={14} />
-        </button>
-      </div>
-
-      <div className="px-3 py-2">
-        <div className="relative">
-          <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search widgets..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full h-8 pl-7 pr-2 text-[11px] bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 placeholder:text-slate-400"
-          />
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-1.5 scrollbar-none">
-        {filtered.map((w, i) => {
-          const Icon = w.icon || BarChart3;
-
-          return (
-            <div
-              key={`${w.chartType || w.type}-${i}`}
-              draggable
-              onDragStart={e => handleDragStart(e, w)}
-              onDragEnd={handleDragEnd}
-              onClick={() => onAddWidget(w)}
-              className={`group flex flex-col gap-1 p-2.5 rounded-xl border cursor-grab active:cursor-grabbing transition-all duration-150
-                ${dragWidget === w ? "opacity-50 scale-95 shadow-inner" : "hover:border-indigo-200 hover:bg-indigo-50/30 hover:shadow-sm"}
-                border-slate-200/60 bg-white`}
-            >
-              <div className="flex items-center gap-3 w-full">
-                <div className="w-8 h-8 min-w-[32px] rounded-lg bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100/60 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Icon size={14} className="text-indigo-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[12px] font-semibold text-slate-700 truncate">{w.title || w.label}</span>
-                    <span className="text-[8px] font-medium text-slate-400 bg-slate-100 px-1 rounded shrink-0">{w.type}</span>
-                  </div>
-                  <p className="text-[10px] text-slate-400 truncate leading-tight">{w.description}</p>
-                </div>
-                <div className="flex items-center gap-1 text-slate-300 shrink-0">
-                  <span className="text-[8px] font-mono">{w.defaultW}×{w.defaultH}</span>
-                  <GripVertical size={12} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
-                </div>
-              </div>
-              {w.chartType && miniPreviews[w.chartType] && (
-                <MiniChartPreview chartType={w.chartType} />
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
 }

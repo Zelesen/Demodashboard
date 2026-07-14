@@ -1,7 +1,6 @@
 import { useState } from "react";
-import ReactECharts from "echarts-for-react";
-import { BarChart3, Calendar, CheckCircle2, XCircle, AlertTriangle, AlertCircle, Clock, Users, Building2, TrendingUp, CalendarRange, List, UserCheck, Grid3x3, Activity, Trash2, GripHorizontal } from "lucide-react";
-import { renderAppointmentWidget } from "./WidgetLibrary";
+import { BarChart3, Calendar, CheckCircle2, XCircle, AlertTriangle, AlertCircle, Clock, Users, Building2, TrendingUp, CalendarRange, List, UserCheck, Grid3x3, Activity } from "lucide-react";
+import { renderAppointmentWidget } from "./dashboard/WidgetRenderer";
 
 const APPOINTMENT_CHART_TYPES = new Set([
   "totalAppointments", "completedAppointments", "cancelledAppointments",
@@ -12,11 +11,13 @@ const APPOINTMENT_CHART_TYPES = new Set([
   "appointmentDuration", "weeklyActivityHeatmap",
 ]);
 
-export default function DashboardWidget({ widget, onRemove, showControls = true }) {
+export default function DashboardWidget({ widget, showControls = true }) {
   const [isHovered, setIsHovered] = useState(false);
 
   const renderChart = () => {
-    if (APPOINTMENT_CHART_TYPES.has(widget.chartType)) return renderAppointmentWidget(widget);
+    if (APPOINTMENT_CHART_TYPES.has(widget.chartType)) {
+      return renderAppointmentWidget(widget);
+    }
     return null;
   };
 
@@ -45,16 +46,12 @@ export default function DashboardWidget({ widget, onRemove, showControls = true 
         </div>
         {showControls && (
           <div className={`flex items-center gap-1 transition-opacity duration-200 ${isHovered ? "opacity-100" : "opacity-0"}`}>
-            <div className="w-4 h-4 rounded hover:bg-slate-200 flex items-center justify-center cursor-grab text-slate-400 hover:text-slate-600 react-grid-drag-handle">
-              <GripHorizontal size={10} />
-            </div>
-            <button onClick={() => onRemove(widget.i)} className="w-4 h-4 rounded hover:bg-rose-100 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-colors">
-              <Trash2 size={10} />
-            </button>
           </div>
         )}
       </div>
-      <div className="h-[calc(100%-28px)]">{renderChart()}</div>
+      <div className="h-[calc(100%-28px)]">
+        {renderChart()}
+      </div>
     </div>
   );
 }

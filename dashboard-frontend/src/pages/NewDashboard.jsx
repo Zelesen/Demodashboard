@@ -1,24 +1,84 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Plus, Sparkles, Send, LayoutDashboard, PanelRightOpen, PanelRightClose, BarChart3 } from "lucide-react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  ArrowLeft, Save, Sparkles, Layers, RotateCcw, 
+  PanelRightOpen, PanelRightClose, LayoutDashboard, Edit3
+} from "lucide-react";
 import GridLayout from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
-import WidgetLibrary from "../components/WidgetLibrary";
 import DashboardWidget from "../components/DashboardWidget";
+import useDashboardState from "../components/dashboard/useDashboardState";
+import WidgetPanel from "../components/dashboard/WidgetPanel";
+import WidgetFrame from "../components/dashboard/WidgetFrame";
 
-const defaultPrompt = "I want a dashboard for my patients";
-
-let widgetCounter = 0;
+const API = "http://localhost:8000";
+const ROW_HEIGHT = 100;
+const COLS = 12;
 
 export default function NewDashboard() {
-  const [prompt, setPrompt] = useState(defaultPrompt);
-  const [generated, setGenerated] = useState(false);
-  const [layout, setLayout] = useState([]);
-  const [widgets, setWidgets] = useState([]);
-  const [showLibrary, setShowLibrary] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const location = useLocation();
+
+  // If there is an ID in the route, we are editing. Otherwise, we are creating a new one.
+  const isEditing = !!id;
+  
+  const [dashboardTitle, setDashboardTitle] = useState("Untitled Dashboard");
+  const [dashboardDescription, setDashboardDescription] = useState("");
+  const [showPanel, setShowPanel] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [loadingDashboard, setLoadingDashboard] = useState(isEditing);
   const [containerWidth, setContainerWidth] = useState(800);
+  const [canvasHeight, setCanvasHeight] = useState(600);
+  const [validationErrors, setValidationErrors] = useState({});
   const containerRef = useRef(null);
 
+  const {
+    widgets,
+    addWidget,
+    removeWidget,
+    duplicateWidget,
+    updateLayout,
+    resetDashboard,
+    replaceWidgets,
+  } = useDashboardState();
+
+  // Determine if it was initiated from AI Chat
+  const queryParams = new URLSearchParams(location.search);
+  const isFromAI = queryParams.get("source") === "ida";
+
+  // Load existing dashboard if editing
+  useEffect(() => {
+    if (!id) {
+      resetDashboard();
+      // If we came from AI IDA, check if there are pre-generated widgets in localstorage or use a default set
+      setLoadingDashboard(false);
+      return;
+    }
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch(`${API}/api/dashboards/${id}`);
+        const data = await res.json();
+        if (cancelled) return;
+        const dash = data.dashboard;
+        setDashboardTitle(dash.name || "Untitled Dashboard");
+        setDashboardDescription(dash.description || "");
+        if (dash.page_data?.widgets) {
+          replaceWidgets(dash.page_data.widgets);
+        }
+      } catch (err) {
+        console.error("Failed to load dashboard:", err);
+      } finally {
+        if (!cancelled) setLoadingDashboard(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [id, replaceWidgets, resetDashboard]);
+
+  // Resize observer for container width
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -29,180 +89,156 @@ export default function NewDashboard() {
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [loadingDashboard]);
 
-  const handleGenerate = useCallback(async () => {
-    setIsGenerating(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setGenerated(true);
-    setIsGenerating(false);
-  }, []);
-
-  const addWidget = useCallback((widget) => {
-    const id = `widget-${++widgetCounter}`;
-    const w = widget.defaultW || 2;
-    const h = widget.defaultH || 2;
-    const minH = (widget.chartType && !widget.type) ? 2 : (widget.type === "metric" ? 1 : 2);
-
-    // x: 0, y: Infinity is the standard react-grid-layout pattern for "append to the end" —
-    // it places the item past the current bottom, then compactType="vertical" packs it into
-    // the first genuinely free slot without overlapping existing widgets, no matter their widths.
-    const newLayoutItem = {
-      i: id,
-      x: 0,
-      y: Infinity,
-      w,
-      h,
-      minW: 1,
-      minH,
-    };
-
-    const newWidget = {
-      i: id,
-      type: widget.type,
-      chartType: widget.chartType,
-      title: widget.title || `${widget.type.charAt(0).toUpperCase() + widget.type.slice(1)} Chart`,
-    };
-
-    setLayout(prev => [...prev, newLayoutItem]);
-    setWidgets(prev => [...prev, newWidget]);
-  }, []);
-
-  const removeWidget = useCallback((id) => {
-    setLayout(prev => prev.filter(l => l.i !== id));
-    setWidgets(prev => prev.filter(w => w.i !== id));
-  }, []);
+  // Dynamic canvas height adjustments
+  useEffect(() => {
+    if (!widgets.length) {
+      setCanvasHeight(600);
+      return;
+    }
+    const maxY = widgets.reduce((max, w) => Math.max(max, w.y + w.h), 2);
+    setCanvasHeight(Math.max(600, maxY * ROW_HEIGHT + 48));
+  }, [widgets]);
 
   const handleLayoutChange = useCallback((newLayout) => {
-    setLayout(newLayout);
-  }, []);
+    updateLayout(newLayout);
+  }, [updateLayout]);
 
-  const resetDashboard = useCallback(() => {
-    setGenerated(false);
-    setLayout([]);
-    setWidgets([]);
-    widgetCounter = 0;
-  }, []);
+  const handleSave = async () => {
+    if (saving) return;
+    const errors = {};
+    if (!dashboardTitle.trim()) errors.title = "Title is required";
+    if (!dashboardDescription.trim()) errors.description = "Description is required";
+    setValidationErrors(errors);
+    if (Object.keys(errors).length > 0) return;
 
-  const getWidget = useCallback((id) => {
-    return widgets.find(w => w.i === id);
-  }, [widgets]);
+    setSaving(true);
+    try {
+      const currentUser = JSON.parse(sessionStorage.getItem("user") || "{}");
+      const userId = currentUser?.id || null;
+      const payload = {
+        name: dashboardTitle,
+        type: "Custom",
+        description: dashboardDescription,
+        status: "Published",
+        managed_by: "you",
+        user_id: userId,
+        page_data: { widgets },
+      };
+
+      const url = isEditing ? `${API}/api/dashboards/${id}` : `${API}/api/dashboards`;
+      const method = isEditing ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      
+      // Clean local storage state
+      resetDashboard();
+      
+      // Redirect to the dashboard view page
+      navigate(`/dashboard-view/${data.dashboard.id}`);
+    } catch (err) {
+      console.error("Failed to save dashboard:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="bg-[#f7f9fd] font-sans antialiased min-h-screen">
+      {/* Background Ambience */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-to-br from-blue-50 via-indigo-50/50 to-transparent rounded-full blur-3xl opacity-60" />
         <div className="absolute -bottom-60 -left-40 w-[500px] h-[500px] bg-gradient-to-tr from-emerald-50/60 via-blue-50/30 to-transparent rounded-full blur-3xl opacity-50" />
-        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'radial-gradient(circle, #3b82f6 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
       </div>
 
-      <div className="max-w-full mx-auto p-3 sm:p-4 lg:p-5 space-y-3 relative z-10">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative group/logo">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-2xl blur-md opacity-30 group-hover/logo:opacity-50 transition-opacity" />
-              <div className="relative w-10 h-10 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center shadow-sm">
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm">
-                  <LayoutDashboard size={14} className="text-white" />
-                </div>
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-[2px] border-white rounded-full shadow-sm" />
-            </div>
-            <div>
+      <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-5 space-y-4 relative z-10">
+        {/* Editor Actions Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-slate-200/60">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button
+              onClick={() => navigate(isEditing ? `/dashboard-view/${id}` : "/dashboards")}
+              className="p-2 text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl transition-all shadow-sm"
+              title="Cancel editing"
+            >
+              <ArrowLeft size={15} />
+            </button>
+            <div className="h-6 w-px bg-slate-200 hidden sm:block" />
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="text-[1.3rem] font-bold tracking-tight text-slate-900 leading-tight">Dashboards</h1>
-                {generated && (
-                  <span className="inline-flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-600 rounded-md border border-emerald-100/50">
-                    <Sparkles size={8} /> AI Generated
+                <input
+                  type="text"
+                  value={dashboardTitle}
+                  onChange={e => { setDashboardTitle(e.target.value); setValidationErrors(v => ({ ...v, title: null })); }}
+                  placeholder="Enter Dashboard Title..."
+                  className="text-lg font-bold text-slate-900 tracking-tight leading-none bg-transparent hover:bg-slate-100/50 focus:bg-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-2 py-1 outline-none w-full max-w-[320px] sm:max-w-[420px] transition-all"
+                />
+                {isFromAI && (
+                  <span className="inline-flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-600 rounded-md border border-emerald-100/50 shrink-0">
+                    <Sparkles size={8} /> AI Draft
                   </span>
                 )}
               </div>
-              <p className="text-[10px] font-medium text-slate-400">
-                {generated ? `${widgets.length} widgets placed` : "Create a new dashboard with AI"}
-              </p>
+              {validationErrors.title && (
+                <p className="text-[10px] font-semibold text-rose-500 mt-1 ml-2">{validationErrors.title}</p>
+              )}
+              <input
+                type="text"
+                value={dashboardDescription}
+                onChange={e => { setDashboardDescription(e.target.value); setValidationErrors(v => ({ ...v, description: null })); }}
+                placeholder="Add a description of this dashboard..."
+                className="text-xs text-slate-500 bg-transparent hover:bg-slate-100/50 focus:bg-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-2 py-0.5 outline-none w-full max-w-[320px] sm:max-w-[420px] mt-1 transition-all"
+              />
+              {validationErrors.description && (
+                <p className="text-[10px] font-semibold text-rose-500 mt-1 ml-2">{validationErrors.description}</p>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {generated && (
-              <button
-                onClick={() => setShowLibrary(!showLibrary)}
-                className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200"
-              >
-                {showLibrary ? <PanelRightClose size={12} /> : <PanelRightOpen size={12} />}
-                {showLibrary ? "Hide Library" : "Show Library"}
-              </button>
-            )}
+          <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+            <button
+              onClick={() => setShowPanel(!showPanel)}
+              className="inline-flex items-center gap-1.5 px-3 h-[34px] bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-[11px] font-bold text-slate-600 transition-all shadow-sm"
+            >
+              {showPanel ? <PanelRightClose size={13} /> : <PanelRightOpen size={13} />}
+              {showPanel ? "Hide Library" : "Show Library"}
+            </button>
             <button
               onClick={resetDashboard}
-              className="inline-flex items-center gap-1.5 px-4 h-[32px] bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-[10px] font-bold shadow-lg shadow-indigo-200 hover:shadow-indigo-300 active:scale-[0.97] transition-all duration-200"
+              className="inline-flex items-center gap-1.5 px-3 h-[34px] bg-white border border-slate-200 text-slate-400 hover:text-rose-600 rounded-xl text-[11px] font-bold transition-all shadow-sm"
+              title="Clear all widgets"
             >
-              <Plus size={12} />
-              New Dashboard
+              <RotateCcw size={12} />
+              Clear
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="inline-flex items-center gap-1.5 px-4 h-[34px] bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded-xl text-[11px] font-bold shadow-md transition-all active:scale-[0.98]"
+            >
+              <Save size={13} />
+              {saving ? "Saving..." : "Save Dashboard"}
             </button>
           </div>
         </div>
 
-        {/* Prompt Section */}
-        {!generated && (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="p-4 sm:p-6">
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-8 h-8 min-w-[32px] rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-                  <Sparkles size={15} className="text-white" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-800">Describe your dashboard</h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Tell us what you want to see, and we'll generate widgets automatically</p>
-                </div>
-              </div>
-
-              <div className="relative">
-                <textarea
-                  value={prompt}
-                  onChange={e => setPrompt(e.target.value)}
-                  rows={2}
-                  className="w-full resize-none text-[13px] p-3 pr-12 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300 placeholder:text-slate-400"
-                  placeholder="Describe the dashboard you want..."
-                />
-                <button
-                  onClick={handleGenerate}
-                  disabled={isGenerating || !prompt.trim()}
-                  className="absolute right-2 bottom-2 w-8 h-8 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-slate-300 disabled:to-slate-300 text-white flex items-center justify-center transition-all active:scale-95 disabled:cursor-not-allowed"
-                >
-                  {isGenerating ? (
-                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                  ) : (
-                    <Send size={13} />
-                  )}
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 mt-3">
-                <span className="text-[10px] font-medium text-slate-400">Try:</span>
-                {["Show revenue trends", "Patient overview dashboard", "Practice performance"].map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    onClick={() => setPrompt(suggestion)}
-                    className="px-2 py-1 text-[10px] font-medium text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
+        {/* Builder Area */}
+        {loadingDashboard ? (
+          <div className="flex items-center justify-center min-h-[500px]">
+            <div className="text-center">
+              <div className="w-8 h-8 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-sm text-slate-500 font-medium">Loading dashboard...</p>
             </div>
           </div>
-        )}
-
-        {/* Main Content Area: Canvas + Library */}
-        <div className="flex gap-3">
-          {/* Dashboard Canvas */}
-          <div ref={containerRef} className={`transition-all duration-300 ${showLibrary ? "flex-1 min-w-0" : "w-full"}`}>
-            {generated && widgets.length > 0 ? (
+        ) : (
+          <div className="flex gap-4 items-start">
+            {/* Canvas grid board */}
+            <div ref={containerRef} className="flex-1 min-w-0">
               <div
                 onDragOver={e => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
                 onDrop={e => {
@@ -212,76 +248,99 @@ export default function NewDashboard() {
                     addWidget(data);
                   } catch {}
                 }}
-                className="bg-white/50 rounded-2xl border border-slate-200/40 shadow-sm p-2 min-h-[400px]"
+                className="relative rounded-2xl border border-slate-200 bg-white shadow-inner overflow-hidden"
+                style={{ minHeight: `${canvasHeight}px` }}
               >
-                <div className="text-[10px] font-medium text-slate-400 px-2 py-1 flex items-center gap-2">
-                  <LayoutDashboard size={11} />
-                  Dashboard Canvas — Drag to rearrange, resize from bottom-right corner
-                </div>
-                <GridLayout
-                  className="layout"
-                  layout={layout}
-                  cols={12}
-                  rowHeight={120}
-                  width={containerWidth}
-                  onLayoutChange={handleLayoutChange}
-                  isDraggable={true}
-                  isResizable={true}
-                  compactType="vertical"
-                  margin={[8, 8]}
-                  containerPadding={[4, 4]}
-                  draggableHandle=".react-grid-drag-handle"
+                {/* Visual grid guide lines */}
+                <div 
+                  className="absolute inset-0 pointer-events-none z-0 grid"
+                  style={{
+                    gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`,
+                    gap: '16px',
+                    padding: '16px',
+                  }}
                 >
-                  {layout.map(item => {
-                    const widget = getWidget(item.i);
-                    if (!widget) return null;
-                    return (
-                      <div key={item.i} className="relative">
-                        <DashboardWidget
-                          widget={widget}
-                          onRemove={removeWidget}
-                        />
+                  {Array.from({ length: Math.ceil(canvasHeight / (ROW_HEIGHT + 16)) * COLS }).map((_, idx) => (
+                    <div 
+                      key={`bg-grid-cell-${idx}`} 
+                      style={{ height: `${ROW_HEIGHT}px` }}
+                      className="border border-slate-100/60 bg-slate-50/20 rounded-xl"
+                    />
+                  ))}
+                </div>
+
+                <div className="relative z-10 w-full h-full">
+                  {widgets.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center min-h-[500px]">
+                      <div className="text-center max-w-xs p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 shadow-md">
+                        <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-3 text-indigo-500">
+                          <LayoutDashboard size={16} />
+                        </div>
+                        <h3 className="text-xs font-bold text-slate-800 mb-1">Canvas is empty</h3>
+                        <p className="text-[10px] text-slate-500 leading-relaxed">
+                          Drag and drop widgets from the library on the right, or click them to append them to your dashboard canvas.
+                        </p>
                       </div>
-                    );
-                  })}
-                </GridLayout>
-              </div>
-            ) : generated && widgets.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-12 min-h-[400px] flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                    <BarChart3 size={24} className="text-slate-300" />
-                  </div>
-                  <h3 className="text-sm font-bold text-slate-700 mb-1">Your dashboard is empty</h3>
-                  <p className="text-[11px] text-slate-400 max-w-xs mx-auto mb-4">
-                    Drag widgets from the library panel on the right to start building your dashboard
-                  </p>
-                    <button
-                    onClick={() => {
-                      const types = ["totalAppointments", "completedAppointments", "cancelledAppointments", "dnaRate", "avgDuration", "dnaCount"];
-                      types.forEach(t => addWidget({ chartType: t, title: t, type: "metric", defaultW: 1, defaultH: 1 }));
-                    }}
-                    className="inline-flex items-center gap-1.5 px-4 h-8 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-[11px] font-bold transition-colors"
-                  >
-                    <Plus size={12} />
-                    Add sample widgets
-                  </button>
+                    </div>
+                  ) : (
+                    <GridLayout
+                      className="layout relative"
+                      layout={widgets.map(({ i, x, y, w, h, minH, minW }) => ({ i, x, y, w, h, minH: minH || 2, minW: minW || 1 }))}
+                      cols={COLS}
+                      rowHeight={ROW_HEIGHT}
+                      width={containerWidth}
+                      onLayoutChange={handleLayoutChange}
+                      isDraggable={true}
+                      isResizable={true}
+                      compactType="vertical"
+                      margin={[16, 16]}
+                      containerPadding={[12, 12]}
+                      draggableHandle=".react-grid-drag-handle"
+                      useCSSTransforms={true}
+                    >
+                      {widgets.map(widget => (
+                        <div 
+                          key={widget.i} 
+                          className="rounded-xl bg-white border border-slate-200 shadow-sm transition-all duration-200 overflow-hidden hover:border-indigo-400 hover:shadow-md hover:ring-4 hover:ring-indigo-500/5"
+                        >
+                          <WidgetFrame
+                            widget={widget}
+                            onRemove={removeWidget}
+                            onDuplicate={duplicateWidget}
+                            isEditMode={true}
+                          >
+                            <DashboardWidget
+                              widget={widget}
+                              onRemove={removeWidget}
+                              showControls={false}
+                            />
+                          </WidgetFrame>
+                        </div>
+                      ))}
+                    </GridLayout>
+                  )}
                 </div>
               </div>
-            ) : null}
-          </div>
-
-          {/* Widget Library Aside */}
-          {showLibrary && generated && (
-            <div className="w-[280px] shrink-0">
-              <WidgetLibrary
-                onAddWidget={addWidget}
-                generated={true}
-                onClose={() => setShowLibrary(false)}
-              />
             </div>
-          )}
-        </div>
+
+            {/* Collapsible Widget Library Side Panel */}
+            <AnimatePresence>
+              {showPanel && (
+                <motion.div
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 280, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="shrink-0 sticky top-4 h-[calc(100vh-10rem)] overflow-hidden"
+                >
+                  <div className="h-full bg-white border border-slate-200 rounded-2xl shadow-sm p-1">
+                    <WidgetPanel onAddWidget={addWidget} />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
     </div>
   );
