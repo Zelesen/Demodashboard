@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Plus, Eye, ArrowUpRight, Sparkles, Image, Trash2 } from "lucide-react";
+import { Plus, Eye, ArrowUpRight, Sparkles, Image } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const API = "http://localhost:8000";
@@ -57,12 +57,6 @@ export default function DashboardsList() {
 
   const systemDashboards = dashboards.filter(d => d.user_id === null);
   const userDashboards = dashboards.filter(d => d.user_id !== null && d.user_id === userId);
-
-  const handleDelete = async (id, e) => {
-    e.stopPropagation();
-    const res = await fetch(`${API}/api/dashboards/${id}`, { method: "DELETE" });
-    if (res.ok) setDashboards(prev => prev.filter(d => d.id !== id));
-  };
 
   const handleImageUpload = async (id, file) => {
     const form = new FormData();
@@ -261,12 +255,6 @@ export default function DashboardsList() {
                             className="p-1 hover:bg-slate-100 rounded-md transition-colors" title="View"
                           >
                             <Eye size={12} className="text-slate-400 hover:text-slate-700" />
-                          </button>
-                          <button
-                            onClick={(e) => handleDelete(d.id, e)}
-                            className="p-1 hover:bg-rose-50 rounded-md transition-colors" title="Delete"
-                          >
-                            <Trash2 size={12} className="text-slate-400 hover:text-rose-500" />
                           </button>
                         </div>
                       </div>

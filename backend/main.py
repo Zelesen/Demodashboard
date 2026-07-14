@@ -3677,6 +3677,32 @@ class DashboardUpdate(BaseModel):
     page_data: dict = None
     preview_image_url: str = None
 
+class WidgetCreate(BaseModel):
+    title: str
+    description: str = ""
+    api: str = None
+    calculations: str = None
+    chart_type: str
+    type: str = "chart"
+    icon: str = None
+    default_w: int = 5
+    default_h: int = 2
+    section: str = None
+    disabled: bool = False
+
+class WidgetUpdate(BaseModel):
+    title: str = None
+    description: str = None
+    api: str = None
+    calculations: str = None
+    chart_type: str = None
+    type: str = None
+    icon: str = None
+    default_w: int = None
+    default_h: int = None
+    section: str = None
+    disabled: bool = None
+
 def ensure_dashboards_table():
     """Create and migrate dentally_dashboards table."""
     try:
@@ -3709,8 +3735,84 @@ def ensure_dashboards_table():
     except Exception as e:
         print(f"Warning: Could not create/migrate dentally_dashboards table: {e}")
 
+def ensure_widgets_table():
+    """Create dentally_widgets table."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS dentally_widgets (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                description TEXT DEFAULT '',
+                api TEXT DEFAULT NULL,
+                calculations TEXT DEFAULT NULL,
+                database_tables TEXT DEFAULT NULL,
+                api_fields JSONB DEFAULT NULL,
+                chart_type VARCHAR(100) NOT NULL,
+                type VARCHAR(50) DEFAULT 'chart',
+                icon VARCHAR(100) DEFAULT NULL,
+                default_w INTEGER DEFAULT 5,
+                default_h INTEGER DEFAULT 2,
+                section VARCHAR(100) DEFAULT NULL,
+                disabled BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        for col, typ in [("database_tables", "TEXT DEFAULT NULL"), ("api_fields", "JSONB DEFAULT NULL")]:
+            try:
+                cursor.execute(f"ALTER TABLE dentally_widgets ADD COLUMN IF NOT EXISTS {col} {typ}")
+            except Exception:
+                pass
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Warning: Could not create/migrate dentally_widgets table: {e}")
+
+PRESET_WIDGETS = [
+    {"title": "Total Appointments", "chart_type": "totalAppointments", "type": "metric", "icon": "Calendar", "default_w": 2, "default_h": 1, "section": "Metric Cards", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "id", "role": "Each row counted = one appointment"}, {"field": "start_time", "role": "Scoped to the selected date period"}], "description": "Total number of appointments in the period", "calculations": "Counts all appointment records created in the selected period."},
+    {"title": "Completed", "chart_type": "completedAppointments", "type": "metric", "icon": "CheckCircle2", "default_w": 2, "default_h": 1, "section": "Metric Cards", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "state", "role": "Filtered where state = completed"}, {"field": "start_time", "role": "Scoped to the selected date period"}], "description": "Appointments where state = completed", "calculations": "Counts appointments where state = 'completed' in the selected period."},
+    {"title": "Cancelled", "chart_type": "cancelledAppointments", "type": "metric", "icon": "XCircle", "default_w": 2, "default_h": 1, "section": "Metric Cards", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "state", "role": "Filtered where state = cancelled"}, {"field": "start_time", "role": "Scoped to the selected date period"}], "description": "Appointments where state = cancelled", "calculations": "Counts appointments where state = 'cancelled' in the selected period."},
+    {"title": "DNA Rate", "chart_type": "dnaRate", "type": "metric", "icon": "AlertTriangle", "default_w": 2, "default_h": 1, "section": "Metric Cards", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": None, "description": "Did not attend rate", "calculations": "DNA Rate = (DNA count / total appointments) x 100. DNA = did_not_attend_at IS NOT NULL"},
+    {"title": "Avg Duration", "chart_type": "avgDuration", "type": "metric", "icon": "Clock", "default_w": 2, "default_h": 1, "section": "Metric Cards", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "duration", "role": "Duration of each appointment in minutes"}, {"field": "start_time", "role": "Scoped to the selected date period"}], "description": "Average appointment duration in minutes", "calculations": "Avg Duration = sum of duration / total appointments. Only non-cancelled appointments included."},
+    {"title": "Did Not Attend", "chart_type": "dnaCount", "type": "metric", "icon": "AlertCircle", "default_w": 2, "default_h": 1, "section": "Metric Cards", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "did_not_attend_at", "role": "Presence of this timestamp indicates DNA"}, {"field": "start_time", "role": "Scoped to the selected date period"}], "description": "Total number of did not attend appointments", "calculations": "Counts appointments where did_not_attend_at is not null in the selected period."},
+    {"title": "Outcome Breakdown", "chart_type": "outcomeBreakdown", "icon": "CheckCircle2", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "state", "role": "Appointment state field used to categorise"}, {"field": "did_not_attend_at", "role": "Presence of this timestamp indicates DNA"}], "description": "Distribution of appointments by final outcome state", "calculations": "Groups appointments by state (completed, cancelled) and flags DNA via did_not_attend_at. Shown as a donut chart with percentages."},
+    {"title": "Appointments by Practice", "chart_type": "appointmentsByPractice", "icon": "Building2", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments, https://api.dentally.co/v1/sites, https://api.dentally.co/v1/practitioners", "database_tables": "dentally_appointments, dentally_sites", "api_fields": [{"field": "practitioner_id", "role": "Links appointment to practitioner"}, {"field": "site_id", "role": "Links appointment to site location"}, {"field": "name", "role": "Site name from the sites API"}, {"field": "state", "role": "Used to count completed appointments per site"}], "description": "Appointment volume and completions broken down by practice location", "calculations": "Joins dentally_sites with dentally_appointments on site_id, counts total and completed appointments grouped by site name. Sorted by total volume descending."},
+    {"title": "Practitioner Workload", "chart_type": "practitionerWorkload", "icon": "Users", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments, https://api.dentally.co/v1/practitioners", "database_tables": "dentally_appointments, dentally_practitioners", "api_fields": [{"field": "practitioner_id", "role": "Links appointment to practitioner"}, {"field": "first_name", "role": "Practitioner first name (practitioners API)"}, {"field": "last_name", "role": "Practitioner last name (practitioners API)"}, {"field": "state", "role": "Used to count completed appointments per practitioner"}], "description": "Total appointments and completed counts per practitioner", "calculations": "Groups appointments by practitioner_id, joins with practitioners for names. Counts total appointments and completed per practitioner. Shown as horizontal grouped bar chart."},
+    {"title": "Recent Activity", "chart_type": "recentActivity", "icon": "ArrowRight", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments, https://api.dentally.co/v1/practitioners", "database_tables": "dentally_appointments, dentally_practitioners", "api_fields": [{"field": "patient_name", "role": "Patient name from appointment record"}, {"field": "practitioner_id", "role": "Practitioner assigned to the appointment"}, {"field": "first_name", "role": "Practitioner first name (practitioners API)"}, {"field": "last_name", "role": "Practitioner last name (practitioners API)"}, {"field": "reason", "role": "Reason for the appointment"}, {"field": "start_time", "role": "Appointment start date/time"}, {"field": "state", "role": "Current appointment state"}], "description": "Latest appointment activity across all sites, ordered by start time", "calculations": "Returns the most recent appointments ordered by start_time DESC, limited to the 10 latest records."},
+    {"title": "Daily Appointment Volume", "chart_type": "dailyAppointmentVolume", "icon": "TrendingUp", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "start_time", "role": "Grouped by date to calculate daily counts"}, {"field": "state", "role": "Filtered by completed state for completion trend"}], "description": "Track daily appointment volume and completion trends over time", "calculations": "Groups appointments by start_time date. Counts total and completed per day. Shown as an area chart comparing total volume vs completed volume."},
+    {"title": "Appointments by Reason", "chart_type": "appointmentsByReason", "icon": "List", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "reason", "role": "Reason for the appointment"}], "description": "Distribution of appointments grouped by reason/treatment type", "calculations": "Groups appointments by reason and counts them. Shown as a donut chart with the top 8 reasons."},
+    {"title": "Appointments by Hour", "chart_type": "appointmentsByHour", "icon": "Clock", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "start_time", "role": "Extracts hour to group appointments by time of day"}], "description": "Distribution of appointments across hours of the day", "calculations": "Groups appointments by the hour of their start_time. Shown as a bar chart to visualise peak booking times."},
+    {"title": "Appointments by Day", "chart_type": "appointmentsByDay", "icon": "CalendarRange", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "start_time", "role": "Extracts day of week to group appointments"}], "description": "Distribution of appointments across days of the week", "calculations": "Groups appointments by day of the week using their start_time. Shown as a bar chart to visualise busy days."},
+    {"title": "Practitioner Completion Rate", "chart_type": "practitionerCompletionRate", "icon": "UserCheck", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments, https://api.dentally.co/v1/practitioners", "database_tables": "dentally_appointments, dentally_practitioners", "api_fields": [{"field": "practitioner_id", "role": "Links appointment to practitioner"}, {"field": "state", "role": "Used to count completed appointments"}], "description": "Percentage of appointments completed per practitioner", "calculations": "For each practitioner: completed appointments / total appointments * 100. Only practitioners with active status are included."},
+    {"title": "Cancelled by Day", "chart_type": "cancelledByDay", "icon": "XCircle", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "state", "role": "Filtered where status = Cancelled"}, {"field": "start_time", "role": "Extracts day of week"}], "description": "Absolute number of cancellations per day of the week", "calculations": "Groups cancelled appointments by day of the week. Shows raw cancellation volume per day."},
+    {"title": "Appointment Lifecycle", "chart_type": "appointmentLifecycle", "icon": "Activity", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "completed_at", "role": "Completion timestamp"}, {"field": "start_time", "role": "Appointment start time"}], "description": "Average, minimum, and maximum appointment duration broken down by hour of day", "calculations": "For each hour of the day: calculates min, avg, and max of (completed_at - start_time) in minutes. Shows the lifecycle range of appointment durations."},
+    {"title": "Actual Duration", "chart_type": "appointmentDuration", "icon": "Clock", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "completed_at", "role": "Completion timestamp"}, {"field": "start_time", "role": "Start time"}], "description": "Distribution of actual appointment durations (completed_at - start_time)", "calculations": "Groups completed appointments by time difference between completed_at and start_time into 15-min buckets."},
+    {"title": "Activity Heatmap", "chart_type": "weeklyActivityHeatmap", "icon": "Grid3x3", "default_w": 5, "default_h": 2, "section": "Appointments", "api": "https://api.dentally.co/v1/appointments", "database_tables": "dentally_appointments", "api_fields": [{"field": "start_time", "role": "Extracts day of week and hour for grouping"}], "description": "Appointment volume by day of week and hour of day. Darker cells indicate peak times.", "calculations": "Groups appointments by day of week and hour of start_time. Displayed as a heatmap to visualise peak periods."},
+]
+
+def seed_widgets():
+    """Insert preset widgets if they don't already exist."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        for w in PRESET_WIDGETS:
+            cursor.execute("SELECT id FROM dentally_widgets WHERE chart_type = %s", (w["chart_type"],))
+            if not cursor.fetchone():
+                cursor.execute("""
+                    INSERT INTO dentally_widgets (title, chart_type, type, icon, default_w, default_h, section, api, database_tables, api_fields, description, calculations)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (w["title"], w["chart_type"], w.get("type", "chart"), w.get("icon"), w.get("default_w", 5), w.get("default_h", 2), w.get("section"), w.get("api"), w.get("database_tables"), json.dumps(w.get("api_fields")) if w.get("api_fields") else None, w.get("description"), w.get("calculations")))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Warning: Could not seed widgets: {e}")
+
 # Run on startup
 ensure_dashboards_table()
+ensure_widgets_table()
+seed_widgets()
 # Auto-seed built-in pages (idempotent — skips existing)
 try:
     conn = get_db_connection()
@@ -3991,6 +4093,141 @@ async def upload_dashboard_image(dashboard_id: int, file: UploadFile = File(...)
         conn.close()
 
         return {"preview_image_url": image_url}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== WIDGETS CRUD ====================
+
+@app.get("/api/widgets")
+def list_widgets(section: str = None):
+    """List all widgets. Optionally filter by section."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        if section:
+            cursor.execute("SELECT * FROM dentally_widgets WHERE section = %s ORDER BY id", (section,))
+        else:
+            cursor.execute("SELECT * FROM dentally_widgets ORDER BY id")
+        rows = cursor.fetchall()
+        conn.close()
+        widgets = []
+        for r in rows:
+            w = dict(r)
+            if isinstance(w.get("created_at"), datetime):
+                w["created_at"] = w["created_at"].isoformat()
+            if isinstance(w.get("updated_at"), datetime):
+                w["updated_at"] = w["updated_at"].isoformat()
+            widgets.append(w)
+        return {"widgets": widgets}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/widgets/{widget_id}")
+def get_widget(widget_id: int):
+    """Get a single widget by ID."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT * FROM dentally_widgets WHERE id = %s", (widget_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if not row:
+            raise HTTPException(status_code=404, detail="Widget not found")
+        w = dict(row)
+        if isinstance(w.get("created_at"), datetime):
+            w["created_at"] = w["created_at"].isoformat()
+        if isinstance(w.get("updated_at"), datetime):
+            w["updated_at"] = w["updated_at"].isoformat()
+        return {"widget": w}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/widgets", status_code=201)
+def create_widget(widget: WidgetCreate):
+    """Create a new widget."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("""
+            INSERT INTO dentally_widgets (title, description, api, calculations, chart_type, type, icon, default_w, default_h, section, disabled)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING *
+        """, (
+            widget.title, widget.description, widget.api, widget.calculations,
+            widget.chart_type, widget.type, widget.icon, widget.default_w,
+            widget.default_h, widget.section, widget.disabled
+        ))
+        row = cursor.fetchone()
+        conn.commit()
+        conn.close()
+        w = dict(row)
+        if isinstance(w.get("created_at"), datetime):
+            w["created_at"] = w["created_at"].isoformat()
+        if isinstance(w.get("updated_at"), datetime):
+            w["updated_at"] = w["updated_at"].isoformat()
+        return {"widget": w}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/widgets/{widget_id}")
+def update_widget(widget_id: int, update: WidgetUpdate):
+    """Update an existing widget."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("SELECT id FROM dentally_widgets WHERE id = %s", (widget_id,))
+        if not cursor.fetchone():
+            conn.close()
+            raise HTTPException(status_code=404, detail="Widget not found")
+
+        update_data = update.dict(exclude_none=True)
+        fields = []
+        params = []
+        for key, val in update_data.items():
+            fields.append(f"{key} = %s")
+            params.append(val)
+
+        if not fields:
+            conn.close()
+            raise HTTPException(status_code=400, detail="No fields to update")
+
+        fields.append("updated_at = CURRENT_TIMESTAMP")
+        params.append(widget_id)
+
+        cursor.execute(f"UPDATE dentally_widgets SET {', '.join(fields)} WHERE id = %s RETURNING *", params)
+        row = cursor.fetchone()
+        conn.commit()
+        conn.close()
+        w = dict(row)
+        if isinstance(w.get("created_at"), datetime):
+            w["created_at"] = w["created_at"].isoformat()
+        if isinstance(w.get("updated_at"), datetime):
+            w["updated_at"] = w["updated_at"].isoformat()
+        return {"widget": w}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/widgets/{widget_id}")
+def delete_widget(widget_id: int):
+    """Delete a widget."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT id FROM dentally_widgets WHERE id = %s", (widget_id,))
+        if not cursor.fetchone():
+            conn.close()
+            raise HTTPException(status_code=404, detail="Widget not found")
+        cursor.execute("DELETE FROM dentally_widgets WHERE id = %s", (widget_id,))
+        conn.commit()
+        conn.close()
+        return {"status": "deleted", "id": widget_id}
     except HTTPException:
         raise
     except Exception as e:
