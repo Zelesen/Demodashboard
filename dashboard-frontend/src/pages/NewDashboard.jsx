@@ -333,7 +333,7 @@ export default function NewDashboard() {
                   transition={{ duration: 0.25, ease: "easeOut" }}
                   className="shrink-0 sticky top-4 h-[calc(100vh-10rem)] overflow-hidden"
                 >
-                  <div className="h-full bg-white border border-slate-200 rounded-2xl shadow-sm p-1">
+                  <div className="h-full bg-transparent rounded-2xl shadow-sm p-1">
                     <WidgetPanel onAddWidget={addWidget} />
                   </div>
                 </motion.div>

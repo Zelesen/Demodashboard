@@ -17,8 +17,6 @@ const categories = [
   { id: "all", label: "All" },
   { id: "metrics", label: "Metric Cards" },
   { id: "charts", label: "Charts" },
-  { id: "filters", label: "Filters" },
-  { id: "text", label: "Text" },
 ];
 
 function buildFrontendWidgets() {
@@ -300,10 +298,15 @@ export default function WidgetsCatalog() {
   );
 
   const dropdownWidgets = useMemo(() => {
-    return allWidgets.filter((w) =>
-      w.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery, allWidgets]);
+    return allWidgets.filter((w) => {
+      const matchesSearch = w.title.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
+      if (activeCategory === "all") return true;
+      if (activeCategory === "metrics") return w._kind === "metric";
+      if (activeCategory === "charts") return w._kind === "chart" || (!w.type && w.chartType);
+      return true;
+    });
+  }, [searchQuery, allWidgets, activeCategory]);
 
   const toggleSection = (id) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -331,16 +334,12 @@ export default function WidgetsCatalog() {
 
   const showMetrics = activeCategory === "all" || activeCategory === "metrics";
   const showCharts = activeCategory === "all" || activeCategory === "charts";
-  const showFilters = activeCategory === "all" || activeCategory === "filters";
-  const showText = activeCategory === "all" || activeCategory === "text";
 
   const totalVisible =
     (showMetrics ? filteredMetrics.length : 0) +
     filteredSections
       .filter((s) => {
         if (s.id === "appointments") return showCharts;
-        if (s.id === "filters") return showFilters;
-        if (s.id === "text") return showText;
         return true;
       })
       .reduce((sum, s) => sum + s.items.length, 0);
@@ -407,13 +406,9 @@ export default function WidgetsCatalog() {
           </div>
         </div>
 
-        {/* Selected Widget Detail */}
-        {selectedWidget && (
-          <WidgetDetailCard widget={selectedWidget} />
-        )}
-
         {/* Category tabs */}
-        <div className="flex items-center gap-1.5 mb-8 overflow-x-auto pb-1 scrollbar-none">
+        <div className="sticky top-0 z-20 -mx-5 sm:-mx-8 px-5 sm:px-8 py-3 bg-[#f7f9fd]/90 backdrop-blur-md">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
             return (
@@ -430,7 +425,13 @@ export default function WidgetsCatalog() {
               </button>
             );
           })}
+          </div>
         </div>
+
+        {/* Selected Widget Detail */}
+        {selectedWidget && (
+          <WidgetDetailCard widget={selectedWidget} />
+        )}
 
         {/* No results */}
         {totalVisible === 0 && (
@@ -462,17 +463,16 @@ export default function WidgetsCatalog() {
                 <div key={m.id} style={{ height: 140 }}>
                   <MetricCardFull m={m} />
                 </div>
-              ))}
-            </div>
+          ))}
           </div>
+        </div>
+          
         )}
 
         {/* Chart Sections */}
         {filteredSections.map((section) => {
           const isCharts = section.id === "appointments";
-          const isFilters = section.id === "filters";
-          const isText = section.id === "text";
-          if ((isCharts && !showCharts) || (isFilters && !showFilters) || (isText && !showText)) return null;
+          if (isCharts && !showCharts) return null;
 
           return (
             <div key={section.id} className="mb-10">

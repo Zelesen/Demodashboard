@@ -1,6 +1,5 @@
 import {
   BarChart3, Activity,
-  Filter, Type,
   Calendar, Clock, Users, CheckCircle2, XCircle, AlertTriangle,
   AlertCircle, UserCheck, Building2, TrendingUp, CalendarRange,
   List, Grid3x3,
@@ -32,22 +31,6 @@ export const sections = [
       { id: "add-lifecycle", title: "Lifecycle", chartType: "appointmentLifecycle", icon: Activity, defaultW: 5, defaultH: 2 },
       { id: "add-duration", title: "Duration Dist.", chartType: "appointmentDuration", icon: BarChart3, defaultW: 5, defaultH: 2 },
       { id: "add-heatmap", title: "Activity Heatmap", chartType: "weeklyActivityHeatmap", icon: Grid3x3, defaultW: 5, defaultH: 2 },
-    ],
-  },
-  {
-    id: "filters",
-    label: "Filters",
-    items: [
-      { id: "add-date-filter", title: "Date Range Picker", type: "filter", icon: Filter, defaultW: 3, defaultH: 1, disabled: true },
-      { id: "add-dropdown-filter", title: "Dropdown Filter", type: "filter", icon: Filter, defaultW: 2, defaultH: 1, disabled: true },
-    ],
-  },
-  {
-    id: "text",
-    label: "Text",
-    items: [
-      { id: "add-heading", title: "Heading", type: "text", icon: Type, defaultW: 4, defaultH: 1, disabled: true },
-      { id: "add-paragraph", title: "Paragraph", type: "text", icon: Type, defaultW: 6, defaultH: 2, disabled: true },
     ],
   },
 ];
