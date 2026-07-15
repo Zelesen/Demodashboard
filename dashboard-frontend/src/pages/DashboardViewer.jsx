@@ -1,17 +1,25 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, CalendarRange, RefreshCw, LayoutDashboard, Edit3 } from "lucide-react";
+import {
+  ArrowLeft, CalendarRange, RefreshCw, LayoutDashboard, Edit3, X,
+  Database, Calculator, Tag, Info, Puzzle,
+  Calendar, CheckCircle2, XCircle, AlertTriangle, Clock, AlertCircle,
+  Building2, Users, TrendingUp, List, UserCheck, Activity, Grid3x3, BarChart3,
+} from "lucide-react";
 import GridLayout from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import DashboardWidget from "../components/DashboardWidget";
 import WidgetFrame from "../components/dashboard/WidgetFrame";
 import useDashboardData from "../hooks/useDashboardData";
+import { renderAppointmentWidget, AppointmentMetricCard } from "../components/dashboard/WidgetRenderer";
+import EnhancedWidgetChart from "../components/dashboard/EnhancedWidgetChart";
+import { metricCards, sections } from "../components/dashboard/widgetDefinitions";
 
 const API = "http://localhost:8000";
 const ROW_HEIGHT = 100;
 const COLS = 12;
 
-const FILTERS = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "All time", "Custom"];
+const FILTERS = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "Custom"];
 
 const PERIOD_MAP = {
   "Today": "today",
@@ -19,8 +27,13 @@ const PERIOD_MAP = {
   "Last 30 days": "30d",
   "Last 90 days": "90d",
   "Last year": "1y",
-  "All time": "all",
   "Custom": "all",
+};
+
+const ICON_MAP = {
+  Calendar, CheckCircle2, XCircle, AlertTriangle, Clock, AlertCircle,
+  Building2, Users, TrendingUp, List, CalendarRange, UserCheck,
+  Activity, Grid3x3, BarChart3, Puzzle,
 };
 
 export default function DashboardViewer() {
@@ -37,6 +50,10 @@ export default function DashboardViewer() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [cooldownSecs, setCooldownSecs] = useState(0);
   const containerRef = useRef(null);
+  const [fullscreenWidgetId, setFullscreenWidgetId] = useState(null);
+  const [modalFilter, setModalFilter] = useState("Last 7 days");
+  const [modalCustomStart, setModalCustomStart] = useState("");
+  const [modalCustomEnd, setModalCustomEnd] = useState("");
 
   const period = activeFilter === "Custom" ? "all" : PERIOD_MAP[activeFilter];
   const startDate = activeFilter === "Custom" ? customStartDate : null;
@@ -44,6 +61,58 @@ export default function DashboardViewer() {
 
   const { dataMap, loading: dataLoading } = useDashboardData(widgets, period, startDate, endDate);
   const widgetsWithData = widgets.map(w => ({ ...w, data: dataMap[w.i] || w.data }));
+
+  const modalPeriod = modalFilter === "Custom" ? "all" : PERIOD_MAP[modalFilter];
+  const modalStartDate = modalFilter === "Custom" ? modalCustomStart : null;
+  const modalEndDate = modalFilter === "Custom" ? modalCustomEnd : null;
+
+  const fullscreenWidget = fullscreenWidgetId ? widgetsWithData.find(w => w.i === fullscreenWidgetId) : null;
+
+  const modalWidgetArr = useMemo(() => {
+    if (!fullscreenWidget) return [];
+    return [{ i: "modal_main", chartType: fullscreenWidget.chartType }];
+  }, [fullscreenWidgetId, fullscreenWidget?.chartType]);
+
+  const { dataMap: modalDataMap, loading: modalDataLoading } = useDashboardData(modalWidgetArr, modalPeriod, modalStartDate, modalEndDate);
+
+  const [widgetMeta, setWidgetMeta] = useState([]);
+  useEffect(() => {
+    fetch(`${API}/api/widgets`)
+      .then(r => r.json())
+      .then(d => setWidgetMeta(d.widgets || []))
+      .catch(() => setWidgetMeta([]));
+  }, []);
+
+  const modalWidgetData = fullscreenWidget ? {
+    ...fullscreenWidget,
+    i: "modal_main",
+    data: modalDataMap["modal_main"] || fullscreenWidget.data,
+  } : null;
+
+  const modalMeta = useMemo(() => {
+    if (!modalWidgetData) return null;
+    const dbMatch = widgetMeta.find(m => m.chart_type === modalWidgetData.chartType);
+    const allDefs = [...metricCards.flatMap(m => [m]), ...sections.flatMap(s => s.items)];
+    const feMatch = allDefs.find(d => d.chartType === modalWidgetData.chartType);
+    if (!dbMatch && !feMatch) return null;
+    const source = dbMatch || {};
+    let parsedFields = source.api_fields;
+    if (typeof parsedFields === "string") { try { parsedFields = JSON.parse(parsedFields); } catch { parsedFields = null; } }
+    const iconName = source.icon;
+    const IconComp = iconName && ICON_MAP[iconName] ? ICON_MAP[iconName] : (feMatch?.icon || null);
+    return {
+      title: source.title || feMatch?.title || modalWidgetData.title,
+      icon: IconComp,
+      type: source.type || feMatch?.type || "chart",
+      section: source.section || "Appointments",
+      api: source.api || null,
+      description: source.description || null,
+      calculations: source.calculations || null,
+      database_tables: source.database_tables || null,
+      api_fields: parsedFields || null,
+      value: feMatch?.value, change: feMatch?.change, positive: feMatch?.positive, footer: feMatch?.footer,
+    };
+  }, [modalWidgetData, widgetMeta]);
 
   useEffect(() => {
     if (!id) return;
@@ -126,7 +195,6 @@ export default function DashboardViewer() {
       case "Last 30 days": { const s = new Date(end); s.setDate(s.getDate() - 29); return `${fmtDate(s)} – ${fmtDate(end)}`; }
       case "Last 90 days": { const s = new Date(end); s.setDate(s.getDate() - 89); return `${fmtDate(s)} – ${fmtDate(end)}`; }
       case "Last year": { const s = new Date(end); s.setFullYear(s.getFullYear() - 1); return `${fmtDate(s)} – ${fmtDate(end)}`; }
-      case "All time": { const s = new Date("2020-01-01"); return `${fmtDate(s)} – ${fmtDate(end)}`; }
       case "Custom": {
         if (customStartDate && customEndDate) {
           return `${fmtDate(new Date(customStartDate))} – ${fmtDate(new Date(customEndDate))}`;
@@ -285,6 +353,7 @@ export default function DashboardViewer() {
                           <DashboardWidget
                             widget={widget}
                             showControls={true}
+                            onFullscreen={() => { setFullscreenWidgetId(widget.i); setModalFilter("Last 7 days"); setModalCustomStart(""); setModalCustomEnd(""); }}
                           />
                         </WidgetFrame>
                       </div>
@@ -296,6 +365,170 @@ export default function DashboardViewer() {
           </div>
         )}
       </div>
+
+      {modalWidgetData && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setFullscreenWidgetId(null)}
+        >
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            style={{ width: "92vw", maxWidth: 1100, maxHeight: 800 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                {modalMeta?.icon && (
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-md shadow-indigo-200 shrink-0">
+                    <modalMeta.icon size={16} className="text-white" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <h2 className="text-sm font-bold text-slate-900 truncate">{modalMeta?.title || modalWidgetData.title}</h2>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{modalMeta?.section || "Appointments"}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-0.5 bg-white border border-slate-200/60 rounded-md p-0.5">
+                  {FILTERS.map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setModalFilter(f)}
+                      className={`px-2 h-6 text-[9px] font-semibold tracking-tight rounded transition-all duration-200 ${
+                        modalFilter === f
+                          ? "bg-slate-900 text-white shadow-sm"
+                          : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                      }`}
+                    >
+                      {f}
+                    </button>
+                  ))}
+                  {modalFilter === "Custom" && (
+                    <div className="flex items-center gap-1 px-1.5">
+                      <input type="date" value={modalCustomStart} onChange={e => setModalCustomStart(e.target.value)} className="px-1.5 py-0.5 text-[9px] border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300" />
+                      <span className="text-[9px] text-slate-400">–</span>
+                      <input type="date" value={modalCustomEnd} onChange={e => setModalCustomEnd(e.target.value)} className="px-1.5 py-0.5 text-[9px] border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300" />
+                    </div>
+                  )}
+                </div>
+                <button onClick={() => setFullscreenWidgetId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all">
+                  <X size={15} />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              {modalDataLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <div className="p-5">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <div className={`rounded-xl border border-slate-100 bg-slate-50/50 p-3 ${modalMeta?.type === "metric" ? "lg:col-span-1" : "lg:col-span-2"}`}>
+                      <div className={`w-full ${modalMeta?.type === "metric" ? "h-[160px]" : "h-[340px]"}`}>
+                        {modalMeta?.type === "metric" ? (
+                          <AppointmentMetricCard
+                            title={modalWidgetData.title}
+                            value={(() => {
+                              const d = modalWidgetData.data;
+                              if (!d) return modalMeta.value;
+                              switch (modalWidgetData.chartType) {
+                                case "totalAppointments": return String(d.totalAppointments ?? modalMeta.value);
+                                case "completedAppointments": return String(d.completedAppointments ?? modalMeta.value);
+                                case "cancelledAppointments": return String(d.cancelledAppointments ?? modalMeta.value);
+                                case "dnaRate": return `${d.dnaRate ?? modalMeta.value}%`;
+                                case "avgDuration": return `${d.avgDuration ?? modalMeta.value} min`;
+                                case "dnaCount": return String(d.dnaCount ?? modalMeta.value);
+                                default: return modalMeta.value;
+                              }
+                            })()}
+                            change={modalMeta.change}
+                            positive={modalMeta.positive}
+                            footer={modalMeta.footer}
+                            icon={modalMeta.icon}
+                          />
+                        ) : (
+                          <EnhancedWidgetChart
+                            chartType={modalWidgetData.chartType}
+                            data={modalWidgetData.data}
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={`space-y-4 ${modalMeta?.type === "metric" ? "lg:col-span-2" : "lg:col-span-1"}`}>
+                      {modalMeta?.api && (
+                        <div>
+                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <Database size={11} /> Dentally API Source
+                          </h4>
+                          <div className="space-y-1.5">
+                            {modalMeta.api.split(",").map((ep, i) => (
+                              <div key={i} className="flex items-center gap-2 bg-slate-800 rounded-lg px-3 py-2">
+                                <span className="text-[8px] font-bold px-1.5 py-0.5 bg-indigo-600/30 text-indigo-300 rounded uppercase tracking-wider">GET</span>
+                                <span className="text-indigo-200 text-[11px] font-mono">{ep.trim().replace("https://api.dentally.co", "")}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {modalMeta?.api_fields && modalMeta.api_fields.length > 0 && (
+                        <div>
+                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <Tag size={11} /> Response Fields Used
+                          </h4>
+                          <div className="rounded-lg overflow-hidden border border-slate-200">
+                            {modalMeta.api_fields.map((f, i) => (
+                              <div key={i} className={`flex items-start gap-2 px-3 py-2 ${i % 2 === 0 ? "bg-slate-50" : "bg-white"}`}>
+                                <span className="font-mono text-amber-600 text-[11px] whitespace-nowrap shrink-0 pt-px">{f.field}</span>
+                                <span className="text-slate-500 text-[10px] leading-relaxed">{f.role}</span>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="text-[9px] text-slate-400 mt-1 text-right">via developer.dentally.co</div>
+                        </div>
+                      )}
+
+                      {modalMeta?.database_tables && (
+                        <div>
+                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                            <Database size={11} /> Database Tables
+                          </h4>
+                          <div className="flex flex-wrap gap-1.5">
+                            {modalMeta.database_tables.split(",").map((t, i) => (
+                              <span key={i} className="text-[11px] font-mono bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md">{t.trim()}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {modalMeta?.calculations && (
+                        <div>
+                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                            <Calculator size={11} /> Calculations
+                          </h4>
+                          <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50 rounded-lg border border-slate-100 px-3 py-2">{modalMeta.calculations}</p>
+                        </div>
+                      )}
+
+                      {modalMeta?.description && (
+                        <div>
+                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                            <Info size={11} /> Additional Info
+                          </h4>
+                          <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50 rounded-lg border border-slate-100 px-3 py-2">{modalMeta.description}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

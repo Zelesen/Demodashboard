@@ -34,10 +34,18 @@ function buildQuery(period, startDate, endDate) {
   return params.toString();
 }
 
+function getWidgetKey(widgets) {
+  return widgets.map(w => `${w.i}:${w.chartType}`).join("|");
+}
+
 export default function useDashboardData(widgets, period = "7d", startDate = null, endDate = null) {
   const [dataMap, setDataMap] = useState({});
   const [loading, setLoading] = useState(false);
   const cache = useRef({});
+  const widgetKeyRef = useRef("");
+
+  const widgetKey = getWidgetKey(widgets);
+  const fetchKey = `${widgetKey}__${period}__${startDate || ""}__${endDate || ""}`;
 
   useEffect(() => {
     if (!widgets.length) {
@@ -45,6 +53,11 @@ export default function useDashboardData(widgets, period = "7d", startDate = nul
       setLoading(false);
       return;
     }
+
+    if (fetchKey === widgetKeyRef.current) {
+      return;
+    }
+    widgetKeyRef.current = fetchKey;
 
     const chartTypes = widgets.map(w => w.chartType).filter(Boolean);
     const uniqueEndpoints = [...new Set(chartTypes.map(ct => ENDPOINT_MAP[ct]).filter(Boolean))];
@@ -89,7 +102,7 @@ export default function useDashboardData(widgets, period = "7d", startDate = nul
     }).catch(() => {
       setLoading(false);
     });
-  }, [widgets, period, startDate, endDate]);
+  }, [widgetKey, period, startDate, endDate]);
 
   return { dataMap, loading };
 }
