@@ -461,7 +461,7 @@ export default function Dashboard() {
   // Start at the top (12 o'clock)
 
   return (
-    <div className="bg-[#f7f9fd] font-sans antialiased">
+    <div className="font-sans antialiased">
       
       {/* ============ AMBIENT BACKGROUND DECOR ============ */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
