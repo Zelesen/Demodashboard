@@ -225,7 +225,7 @@ export default function DashboardViewer() {
   })();
 
   return (
-    <div className="bg-[#f7f9fd] font-sans antialiased min-h-screen">
+    <div className="font-sans antialiased min-h-screen">
       <style>{`.viewer-grid .react-resizable-handle { display: none !important; } .viewer-grid .react-grid-item { cursor: default !important; user-select: none !important; -webkit-user-drag: none !important; } .viewer-grid .react-grid-item > * { user-select: none !important; -webkit-user-drag: none !important; }`}</style>
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-to-br from-indigo-200/20 via-blue-100/10 to-transparent rounded-full blur-3xl" />
