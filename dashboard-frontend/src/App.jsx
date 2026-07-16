@@ -50,6 +50,16 @@ function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("darkMode");
+    if (saved !== null) return JSON.parse(saved);
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", JSON.stringify(darkMode));
+    document.documentElement.classList.toggle("dark", darkMode);
+  }, [darkMode]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -121,7 +131,7 @@ function App() {
         <div className={`flex-1 transition-all duration-300 ease-out ${
           isMobile ? "ml-0" : (sidebarCollapsed ? "ml-20" : "ml-60")
         }`}>
-          <Navbar onMenuClick={() => setMobileMenuOpen(true)} isMobile={isMobile} user={user} onLogout={handleLogout} />
+          <Navbar onMenuClick={() => setMobileMenuOpen(true)} isMobile={isMobile} user={user} onLogout={handleLogout} darkMode={darkMode} onToggleDarkMode={() => setDarkMode(!darkMode)} />
           <main className="p-4 sm:p-6 xl:p-8">
             <Routes>
               <Route path="/" element={<Dashboard />} />

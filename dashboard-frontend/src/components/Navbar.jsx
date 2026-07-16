@@ -1,9 +1,9 @@
-import { Search, Bell, Building2, ChevronDown, Menu, LogOut, User as UserIcon } from "lucide-react";
+import { Search, Bell, Building2, ChevronDown, Menu, LogOut, User as UserIcon, Sun, Moon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 const locations = ["All Locations", "Bright Smiles Clinic", "DentalCare HQ", "SmileStudio"];
 
-function Navbar({ onMenuClick, isMobile, user, onLogout }) {
+function Navbar({ onMenuClick, isMobile, user, onLogout, darkMode, onToggleDarkMode }) {
   const [location, setLocation] = useState("All Locations");
   const [showLocations, setShowLocations] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -22,7 +22,11 @@ function Navbar({ onMenuClick, isMobile, user, onLogout }) {
 
   return (
     <header
-      className="h-16 flex items-center justify-between px-6 xl:px-8 sticky top-0 z-40 backdrop-blur-xl bg-white/80 border-b border-slate-200/80 shadow-sm"
+      className="h-16 flex items-center justify-between px-6 xl:px-8 sticky top-0 z-40 backdrop-blur-xl border-b shadow-sm"
+      style={{
+        backgroundColor: "color-mix(in srgb, var(--c-page) 80%, transparent)",
+        borderColor: "var(--c-card-border)",
+      }}
     >
       <div className="relative">
           <button
@@ -44,8 +48,8 @@ function Navbar({ onMenuClick, isMobile, user, onLogout }) {
                 className="absolute top-full left-0 mt-2 w-64 rounded-xl shadow-xl border z-20 py-2 animate-slideDown"
                 style={{ backgroundColor: "var(--c-card)", borderColor: "var(--c-card-border)" }}
               >
-                <div className="px-3 py-2 border-b border-slate-100">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Location</p>
+                <div className="px-3 py-2" style={{ borderBottom: "1px solid var(--c-card-border)" }}>
+                  <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--c-muted)" }}>Select Location</p>
                 </div>
                 {locations.map((loc) => (
                   <button
@@ -79,7 +83,8 @@ function Navbar({ onMenuClick, isMobile, user, onLogout }) {
         {isMobile && (
           <button
             onClick={onMenuClick}
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all cursor-pointer border border-slate-200/80 lg:hidden"
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border lg:hidden"
+            style={{ color: "var(--c-heading)", borderColor: "var(--c-card-border)" }}
           >
             <Menu size={18} />
           </button>
@@ -89,10 +94,11 @@ function Navbar({ onMenuClick, isMobile, user, onLogout }) {
           <input
             type="text"
             placeholder="Search..."
-            className="w-64 pl-10 pr-4 py-2 rounded-xl text-sm outline-none transition-all duration-200 border border-slate-200 focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+            className="w-64 pl-10 pr-4 py-2 rounded-xl text-sm outline-none transition-all duration-200 border focus:ring-2"
             style={{
               backgroundColor: "var(--c-inner)",
               color: "var(--c-heading)",
+              borderColor: "var(--c-card-border)",
             }}
           />
         </div>
@@ -109,6 +115,19 @@ function Navbar({ onMenuClick, isMobile, user, onLogout }) {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
             </span>
           </span>
+        </button>
+
+        <button
+          onClick={onToggleDarkMode}
+          className="group relative w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer border border-transparent"
+          style={{ color: "var(--c-muted)" }}
+          title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {darkMode ? (
+            <Sun className="w-5 h-5 transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110" style={{ color: "#fbbf24" }} />
+          ) : (
+            <Moon className="w-5 h-5 transition-transform duration-300 group-hover:-rotate-12 group-hover:scale-110" style={{ color: "#6366f1" }} />
+          )}
         </button>
 
         <div className="flex items-center gap-3 pl-3 border-l" style={{ borderColor: "var(--c-card-border)" }}>
@@ -130,16 +149,17 @@ function Navbar({ onMenuClick, isMobile, user, onLogout }) {
 
             {/* User dropdown menu */}
             {showUserMenu && (
-              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl shadow-xl border bg-white z-20 py-2 animate-slideDown">
-                <div className="px-4 py-3 border-b border-slate-100">
-                  <p className="text-sm font-bold text-slate-800">{user?.name || "Admin User"}</p>
-                  <p className="text-xs text-slate-500">{user?.email || "admin@demo.com"}</p>
+              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl shadow-xl border z-20 py-2 animate-slideDown" style={{ backgroundColor: "var(--c-card)", borderColor: "var(--c-card-border)" }}>
+                <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--c-card-border)" }}>
+                  <p className="text-sm font-bold" style={{ color: "var(--c-heading)" }}>{user?.name || "Admin User"}</p>
+                  <p className="text-xs" style={{ color: "var(--c-muted)" }}>{user?.email || "admin@demo.com"}</p>
                 </div>
                 <button
                   onClick={() => setShowUserMenu(false)}
-                  className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-3 cursor-pointer"
+                  className="w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-3 cursor-pointer"
+                  style={{ color: "var(--c-body)" }}
                 >
-                  <UserIcon className="w-4 h-4 text-slate-400" />
+                  <UserIcon className="w-4 h-4" style={{ color: "var(--c-muted)" }} />
                   Profile
                 </button>
                 <button
@@ -147,7 +167,8 @@ function Navbar({ onMenuClick, isMobile, user, onLogout }) {
                     setShowUserMenu(false);
                     if (onLogout) onLogout();
                   }}
-                  className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-3 cursor-pointer border-t border-slate-100"
+                  className="w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-3 cursor-pointer"
+                  style={{ color: "var(--c-down)", borderTop: "1px solid var(--c-card-border)" }}
                 >
                   <LogOut className="w-4 h-4" />
                   Sign Out

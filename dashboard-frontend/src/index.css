@@ -3,27 +3,29 @@
 
 @theme {
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --color-brand: #3b82f6;
-  --color-brand-dark: #2563eb;
-  --color-brand-deep: #1d4ed8;
-  --color-brand-tint: #eff6ff;
-  --color-page: #f8fafc;
-  --color-card: #ffffff;
-  --color-card-border: #e2e8f0;
-  --color-inner: #f1f5f9;
-  --color-drill: #f8fafc;
-  --color-heading: #0f172a;
-  --color-body: #475569;
-  --color-muted: #94a3b8;
-  --color-axis: #64748b;
-  --color-grid: #e2e8f0;
-  --color-up: #10b981;
-  --color-near: #f59e0b;
-  --color-down: #ef4444;
-  --color-flat: #94a3b8;
-  --color-gold: #f5c50a;
-  --color-gold-text: #8a6d00;
-  --color-gold-tint: #fdf6dd;
+  --color-brand: var(--c-brand);
+  --color-brand-dark: var(--c-brand-dark);
+  --color-brand-deep: var(--c-brand-deep);
+  --color-brand-tint: var(--c-brand-tint);
+  --color-page: var(--c-page);
+  --color-card: var(--c-card);
+  --color-card-border: var(--c-card-border);
+  --color-inner: var(--c-inner);
+  --color-drill: var(--c-drill);
+  --color-heading: var(--c-heading);
+  --color-body: var(--c-body);
+  --color-muted: var(--c-muted);
+  --color-axis: var(--c-axis);
+  --color-grid: var(--c-grid);
+  --color-up: var(--c-up);
+  --color-near: var(--c-near);
+  --color-down: var(--c-down);
+  --color-flat: var(--c-flat);
+  --color-gold: var(--c-gold);
+  --color-gold-text: var(--c-gold-text);
+  --color-gold-tint: var(--c-gold-tint);
+  --color-surface: var(--c-surface);
+  --color-surface-alt: var(--c-surface-alt);
 }
 
 :root {
@@ -31,6 +33,8 @@
   --c-card: #fff;
   --c-card-border: #e6eaf1;
   --c-inner: #f4f6fb;
+  --c-surface: #f8fafc;
+  --c-surface-alt: #f1f5f9;
   --c-drill: #eef2f8;
   --c-heading: #0e1a2b;
   --c-body: #51607a;
@@ -53,6 +57,48 @@
   --c-scrollbar-track: #eef2f8;
   --c-scrollbar-thumb: #cbd3e1;
   --c-scrollbar-thumb-hover: #aab6c9;
+}
+
+.dark {
+  --c-page: #0f1219;
+  --c-card: #1a1f2e;
+  --c-card-border: #262d3d;
+  --c-inner: #161b28;
+  --c-surface: #141924;
+  --c-surface-alt: #1e2436;
+  --c-drill: #1e2436;
+  --c-heading: #e8ecf4;
+  --c-body: #a0aec0;
+  --c-axis: #8896ab;
+  --c-muted: #5a6a82;
+  --c-grid: #222a3a;
+  --c-up: #34d399;
+  --c-near: #fbbf24;
+  --c-down: #f87171;
+  --c-flat: #64748b;
+  --c-brand: #3b9cf6;
+  --c-brand-dark: #5bb3f9;
+  --c-brand-deep: #2980d9;
+  --c-brand-tint: #1a2a3e;
+  --c-gold: #fbbf24;
+  --c-gold-strong: #d4a017;
+  --c-gold-text: #f5c50a;
+  --c-gold-tint: #2a2410;
+  --c-on-accent: #0f172a;
+  --c-scrollbar-track: #161b28;
+  --c-scrollbar-thumb: #2d3748;
+  --c-scrollbar-thumb-hover: #4a5568;
+
+  --color-blue-50: #172554;
+  --color-blue-100: #1e3a5f;
+  --color-indigo-50: #1e1b4b;
+  --color-indigo-100: #272069;
+  --color-rose-50: #3b1119;
+  --color-rose-100: #4c1520;
+  --color-emerald-50: #064e3b;
+  --color-emerald-100: #065f46;
+  --color-amber-50: #451a03;
+  --color-amber-100: #78350f;
 }
 
 body {
