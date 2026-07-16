@@ -1,4 +1,4 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+﻿import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -52,7 +52,7 @@ function createCustomIcon(status) {
 
 export default function PracticeMap() {
   return (
-    <div className="h-[100%] rounded-xl overflow-hidden border border-slate-200 shadow-sm relative">
+    <div className="h-[100%] rounded-xl overflow-hidden border border-card-border shadow-sm relative">
       {/* Map container with custom styling */}
       <MapContainer
         center={[52.6, -0.9]}
@@ -81,15 +81,15 @@ export default function PracticeMap() {
                     p.status === 'warn' ? 'bg-orange-400' : 
                     'bg-rose-500'
                   }`}></div>
-                  <p className="font-bold text-sm text-slate-800">{p.name}</p>
+                  <p className="font-bold text-sm text-heading">{p.name}</p>
                 </div>
-                <div className="text-xs text-slate-600 space-y-1.5 ml-4">
+                <div className="text-xs text-body space-y-1.5 ml-4">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Revenue:</span>
-                    <span className="font-bold text-slate-700">{p.revenue}</span>
+                    <span className="text-muted">Revenue:</span>
+                    <span className="font-bold text-body">{p.revenue}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">vs target:</span>
+                    <span className="text-muted">vs target:</span>
                     <span className={`font-bold ${
                       p.status === 'good' ? 'text-emerald-600' : 
                       p.status === 'warn' ? 'text-orange-600' : 
@@ -104,7 +104,7 @@ export default function PracticeMap() {
       </MapContainer>
 
       {/* Overlay gradient for better integration */}
-      <div className="absolute inset-0 pointer-events-none rounded-xl border border-slate-300/50 z-20"></div>
+      <div className="absolute inset-0 pointer-events-none rounded-xl border border-card-border/50 z-20"></div>
     </div>
   );
 }

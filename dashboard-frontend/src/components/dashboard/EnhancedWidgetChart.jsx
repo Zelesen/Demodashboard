@@ -1,4 +1,4 @@
-import ReactECharts from "echarts-for-react";
+﻿import ReactECharts from "echarts-for-react";
 
 const FONT = "Inter, system-ui, sans-serif";
 
@@ -30,7 +30,7 @@ function gridOvr(overrides = {}) {
 
 export default function EnhancedWidgetChart({ chartType, data, height = 340 }) {
   const opt = buildOption(chartType, data);
-  if (!opt) return <div className="h-full flex items-center justify-center text-slate-400 text-xs">No data available</div>;
+  if (!opt) return <div className="h-full flex items-center justify-center text-muted text-xs">No data available</div>;
   return <ReactECharts option={opt} style={{ height }} opts={{ renderer: "canvas" }} notMerge={true} />;
 }
 
@@ -208,7 +208,15 @@ function outcomeDonut(data) {
       orient: "vertical",
       right: 8,
       top: "middle",
-      textStyle: { fontSize: 10, color: "#475569", fontFamily: FONT },
+      textStyle: {
+        fontSize: 10,
+        color: "#475569",
+        fontFamily: FONT,
+        rich: {
+          name: { fontSize: 11, fontWeight: 600, color: "#334155", fontFamily: FONT, lineHeight: 16 },
+          pct: { fontSize: 9, color: "#94a3b8", fontFamily: FONT, lineHeight: 14 },
+        },
+      },
       itemWidth: 12,
       itemHeight: 12,
       itemGap: 10,
@@ -217,12 +225,6 @@ function outcomeDonut(data) {
         const entry = entries.find(([k]) => k === name);
         const pct = entry ? ((entry[1] / total) * 100).toFixed(1) : 0;
         return `{name|${name}}\n{pct|${pct}%}`;
-      },
-      textStyle: {
-        rich: {
-          name: { fontSize: 11, fontWeight: 600, color: "#334155", fontFamily: FONT, lineHeight: 16 },
-          pct: { fontSize: 9, color: "#94a3b8", fontFamily: FONT, lineHeight: 14 },
-        },
       },
     },
     series: [
@@ -246,18 +248,25 @@ function outcomeDonut(data) {
           itemStyle: { color: colorMap[name.toLowerCase()] || palette[i % palette.length] },
         })),
       },
-      {
-        type: "pie",
-        radius: [0, "44%"],
-        center: ["33%", "50%"],
-        silent: true,
-        label: { show: false },
-        data: [{ value: 1, itemStyle: { color: "#f8fafc" } }],
-      },
     ],
     graphic: [
-      { type: "text", left: "27%", top: "42%", style: { text: total.toLocaleString(), textAlign: "center", fill: "#0f172a", fontSize: 24, fontWeight: 800, fontFamily: FONT } },
-      { type: "text", left: "27%", top: "55%", style: { text: "Total", textAlign: "center", fill: "#94a3b8", fontSize: 10, fontWeight: 600, fontFamily: FONT } },
+      {
+        type: "group",
+        left: "29%",
+        top: "48%",
+        children: [
+          {
+            type: "text",
+            top: -12,
+            style: { text: total.toLocaleString(), textAlign: "center", fill: "#0f172a", fontSize: 24, fontWeight: 800, fontFamily: FONT }
+          },
+          {
+            type: "text",
+            top: 14,
+            style: { text: "Total", textAlign: "center", fill: "#94a3b8", fontSize: 10, fontWeight: 600, fontFamily: FONT }
+          },
+        ],
+      },
     ],
   };
 }
@@ -267,7 +276,6 @@ function byPractice(data) {
   const sites = data?.sites?.slice(0, 10) || [];
   const names = sites.map(s => s.name?.length > 16 ? s.name.slice(0, 14) + "..." : s.name);
   const hasCompleted = sites.some(s => s.completed != null);
-  const maxVal = Math.max(...sites.map(s => s.appointments || 0), 1);
 
   return {
     animation: true,
@@ -902,7 +910,6 @@ function lifecycleRange(data) {
 function durationHistogram(data) {
   const buckets = data?.buckets || [];
   const total = buckets.reduce((s, b) => s + b.count, 0);
-  const maxCount = Math.max(...buckets.map(b => b.count), 1);
 
   return {
     animation: true,

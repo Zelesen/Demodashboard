@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import ReactECharts from "echarts-for-react";
 import {
   BarChart3, Activity,
@@ -236,10 +236,10 @@ export function AppointmentMetricCard({ title, value, change, positive = true, f
         <div className={`w-6 h-6 rounded-md ${bgAccent} flex items-center justify-center shrink-0`}>
           <Icon size={11} className={textAccent} />
         </div>
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate">{title}</span>
+        <span className="text-[9px] font-bold text-muted uppercase tracking-wider truncate">{title}</span>
       </div>
       <div className="flex items-baseline gap-1.5">
-        <span className="text-[1.25rem] font-bold tracking-tight text-slate-900 leading-none">{value}</span>
+        <span className="text-[1.25rem] font-bold tracking-tight text-heading leading-none">{value}</span>
         {change && (
           <span className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-bold shrink-0 ${bgAccent} ${textAccent}`}>
             {change}
@@ -259,7 +259,7 @@ export function AppointmentMetricCard({ title, value, change, positive = true, f
           <path d={spFill} fill={`url(#metricGrad-${title?.replace(/\s/g, "")})`} />
         </svg>
       </div>
-      {footer && <p className="text-[9px] font-medium text-slate-400 mt-1 truncate">{footer}</p>}
+      {footer && <p className="text-[9px] font-medium text-muted mt-1 truncate">{footer}</p>}
     </div>
   );
 }
@@ -937,6 +937,6 @@ export function renderAppointmentWidget(widget) {
     case "weeklyActivityHeatmap":
       return <WeeklyActivityHeatmapChart data={widget.data || sampleHeatmapData} />;
     default:
-      return <div className="h-full flex items-center justify-center text-slate-400 text-xs">Unknown widget</div>;
+      return <div className="h-full flex items-center justify-center text-muted text-xs">Unknown widget</div>;
   }
 }

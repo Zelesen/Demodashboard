@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+﻿import { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactECharts from "echarts-for-react";
 import { Plus, ChevronDown, ChevronRight, List, X, Info, Database, Calculator, Tag } from "lucide-react";
@@ -32,7 +32,7 @@ function WidgetInfoCard({ widget }) {
     <div className="mt-2 space-y-2">
       {apiEndpoints.length > 0 && (
         <div>
-          <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+          <h4 className="text-[9px] font-bold text-muted uppercase tracking-wider mb-1 flex items-center gap-1">
             <Database size={10} /> API Source
           </h4>
           <div className="space-y-1">
@@ -50,14 +50,14 @@ function WidgetInfoCard({ widget }) {
       )}
       {apiFields.length > 0 && (
         <div>
-          <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+          <h4 className="text-[9px] font-bold text-muted uppercase tracking-wider mb-1 flex items-center gap-1">
             <Tag size={10} /> Response Fields
           </h4>
-          <div className="rounded-lg overflow-hidden border border-slate-200">
+          <div className="rounded-lg overflow-hidden border border-card-border">
             {apiFields.map((f, i) => (
-              <div key={i} className={`flex items-start gap-1.5 px-2 py-1 ${i % 2 === 0 ? "bg-slate-50" : "bg-white"}`}>
+              <div key={i} className={`flex items-start gap-1.5 px-2 py-1 ${i % 2 === 0 ? "bg-surface" : "bg-card"}`}>
                 <span className="font-mono text-amber-600 text-[9px] whitespace-nowrap shrink-0">{f.field}</span>
-                <span className="text-slate-500 text-[8px] leading-relaxed">{f.role}</span>
+                <span className="text-muted text-[8px] leading-relaxed">{f.role}</span>
               </div>
             ))}
           </div>
@@ -65,7 +65,7 @@ function WidgetInfoCard({ widget }) {
       )}
       {dbTables.length > 0 && (
         <div>
-          <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+          <h4 className="text-[9px] font-bold text-muted uppercase tracking-wider mb-1 flex items-center gap-1">
             <Database size={10} /> Database Tables
           </h4>
           <div className="flex flex-wrap gap-1">
@@ -77,18 +77,18 @@ function WidgetInfoCard({ widget }) {
       )}
       {widget.calculations && (
         <div>
-          <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+          <h4 className="text-[9px] font-bold text-muted uppercase tracking-wider mb-1 flex items-center gap-1">
             <Calculator size={10} /> Calculations
           </h4>
-          <p className="text-[9px] text-slate-600 leading-relaxed bg-slate-50 rounded-lg border border-slate-100 px-2.5 py-1.5">{widget.calculations}</p>
+          <p className="text-[9px] text-body leading-relaxed bg-surface rounded-lg border border-card-border px-2.5 py-1.5">{widget.calculations}</p>
         </div>
       )}
       {widget.description && (
         <div>
-          <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
+          <h4 className="text-[9px] font-bold text-muted uppercase tracking-wider mb-1 flex items-center gap-1">
             <Info size={10} /> Info
           </h4>
-          <p className="text-[9px] text-slate-600 leading-relaxed bg-slate-50 rounded-lg border border-slate-100 px-2.5 py-1.5">{widget.description}</p>
+          <p className="text-[9px] text-body leading-relaxed bg-surface rounded-lg border border-card-border px-2.5 py-1.5">{widget.description}</p>
         </div>
       )}
     </div>
@@ -110,8 +110,8 @@ function MiniChartPreview({ chartType }) {
   }, []);
   if (!option) return null;
   return (
-    <div ref={containerRef} className="h-24 w-full pointer-events-none bg-slate-50/50 rounded-lg p-1.5 border border-slate-100/50 mt-1 opacity-60 group-hover:opacity-100 transition-opacity">
-      {visible ? <SafeECharts option={option} style={{ height: 84 }} /> : <div className="w-full h-full animate-pulse bg-slate-100 rounded" />}
+    <div ref={containerRef} className="h-24 w-full pointer-events-none bg-surface/50 rounded-lg p-1.5 border border-card-border/50 mt-1 opacity-60 group-hover:opacity-100 transition-opacity">
+      {visible ? <SafeECharts option={option} style={{ height: 84 }} /> : <div className="w-full h-full animate-pulse bg-surface-alt rounded" />}
     </div>
   );
 }
@@ -173,18 +173,18 @@ export default function WidgetPanel({ onAddWidget }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm h-full flex flex-col overflow-hidden max-h-[calc(100vh-9rem)]">
+    <div className="bg-card rounded-2xl border border-card-border/80 shadow-sm h-full flex flex-col overflow-hidden max-h-[calc(100vh-9rem)]">
       {/* Header Container */}
-      <div className="px-4 py-3.5 border-b border-slate-100 bg-slate-50/40">
-        <h3 className="text-xs font-bold text-slate-900 tracking-tight flex items-center gap-1.5 mb-2.5">
+      <div className="px-4 py-3.5 border-b border-card-border bg-surface/40">
+        <h3 className="text-xs font-bold text-heading tracking-tight flex items-center gap-1.5 mb-2.5">
           Widgets Catalog
         </h3>
         <div className="relative">
-          <List size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <List size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
           <select
             onChange={handleSelectWidget}
             defaultValue=""
-            className="w-full h-8.5 pl-8.5 pr-8 text-[11px] font-medium bg-white border border-slate-200/90 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 text-slate-700 appearance-none shadow-sm transition-all cursor-pointer"
+            className="w-full h-8.5 pl-8.5 pr-8 text-[11px] font-medium bg-card border border-card-border/90 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 text-body appearance-none shadow-sm transition-all cursor-pointer"
           >
             <option value="" disabled>Select a widget...</option>
             {sections.map(section => (
@@ -202,7 +202,7 @@ export default function WidgetPanel({ onAddWidget }) {
               ))}
             </optgroup>
           </select>
-          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
         </div>
       </div>
 
@@ -221,12 +221,12 @@ export default function WidgetPanel({ onAddWidget }) {
                 <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Preview</span>
                 <button
                   onClick={() => setPreviewWidget(null)}
-                  className="w-5 h-5 rounded-md flex items-center justify-center hover:bg-slate-100 transition-colors"
+                  className="w-5 h-5 rounded-md flex items-center justify-center hover:bg-surface-alt transition-colors"
                 >
-                  <X size={12} className="text-slate-400" />
+                  <X size={12} className="text-muted" />
                 </button>
               </div>
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3 shadow-sm">
+              <div className="bg-card rounded-xl border border-card-border/80 p-3 shadow-sm">
                 <motion.div
                   draggable
                   onDragStart={e => handleDragStart(e, previewWidget)}
@@ -245,27 +245,27 @@ export default function WidgetPanel({ onAddWidget }) {
                       );
                     })()}
                     <div className="flex-1 min-w-0">
-                      <div className="text-[11px] font-bold text-slate-800 truncate">{previewWidget.title}</div>
-                      <div className="text-[9px] text-slate-400">{previewWidget.category}</div>
+                      <div className="text-[11px] font-bold text-heading truncate">{previewWidget.title}</div>
+                      <div className="text-[9px] text-muted">{previewWidget.category}</div>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] font-bold bg-slate-50 border border-slate-100 rounded px-1.5 py-0.5 text-slate-400">
+                      <span className="text-[9px] font-bold bg-surface border border-card-border rounded px-1.5 py-0.5 text-muted">
                         {previewWidget.defaultW}×{previewWidget.defaultH}
                       </span>
                     </div>
                   </div>
                   {previewWidget.chartType && miniPreviews[previewWidget.chartType] && (
-                    <div className="h-24 w-full pointer-events-none bg-slate-50/50 rounded-lg p-1.5 border border-slate-100/50">
+                    <div className="h-24 w-full pointer-events-none bg-surface/50 rounded-lg p-1.5 border border-card-border/50">
                       <SafeECharts option={miniPreviews[previewWidget.chartType]} style={{ height: 84 }} />
                     </div>
                   )}
                   {previewWidget.type === "metric" && (
-                    <div className="flex items-baseline gap-2 p-2 bg-slate-50/50 rounded-lg border border-slate-100/50">
-                      <span className="text-lg font-black tracking-tight text-slate-900">{previewWidget.value}</span>
+                    <div className="flex items-baseline gap-2 p-2 bg-surface/50 rounded-lg border border-card-border/50">
+                      <span className="text-lg font-black tracking-tight text-heading">{previewWidget.value}</span>
                       <span className={`text-[10px] font-bold ${previewWidget.positive ? "text-emerald-600" : "text-rose-500"}`}>
                         {previewWidget.change}
                       </span>
-                      <span className="text-[9px] text-slate-400 ml-auto">{previewWidget.footer}</span>
+                      <span className="text-[9px] text-muted ml-auto">{previewWidget.footer}</span>
                     </div>
                   )}
                   <div className="mt-2.5 h-8 rounded-lg border-2 border-dashed border-indigo-200 bg-indigo-50/30 flex items-center justify-center gap-1.5 text-indigo-500">
@@ -285,12 +285,12 @@ export default function WidgetPanel({ onAddWidget }) {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-4 scrollbar-thin scrollbar-thumb-card-border scrollbar-track-transparent">
         {/* Metrics Sub-grid */}
         <div>
           <div className="flex items-center gap-2 px-1 py-1 mb-1.5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Metrics</span>
-            <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full ml-auto">{metricCards.length}</span>
+            <span className="text-[10px] font-bold text-muted uppercase tracking-wider">Metrics</span>
+            <span className="text-[9px] font-bold bg-surface-alt text-muted px-1.5 py-0.5 rounded-full ml-auto">{metricCards.length}</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {metricCards.map(m => {
@@ -306,23 +306,23 @@ export default function WidgetPanel({ onAddWidget }) {
                     onClick={() => onAddWidget(m)}
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`flex flex-col gap-1 p-2.5 rounded-xl border cursor-grab active:cursor-grabbing transition-all duration-150 text-left group relative bg-white ${
+                    className={`flex flex-col gap-1 p-2.5 rounded-xl border cursor-grab active:cursor-grabbing transition-all duration-150 text-left group relative bg-card ${
                       dragWidget === m 
                         ? "opacity-40 border-indigo-200 shadow-inner" 
-                        : "border-slate-200/80 hover:border-indigo-200/80 hover:shadow-md hover:shadow-indigo-500/5"
+                        : "border-card-border/80 hover:border-indigo-200/80 hover:shadow-md hover:shadow-indigo-500/5"
                     }`}
                   >
                     <div className="flex items-center gap-1.5 w-full">
                       <div className={`w-5.5 h-5.5 rounded-lg ${bgAccent} flex items-center justify-center shrink-0`}>
                         <Icon size={10} className={textAccent} />
                       </div>
-                      <span className="text-[9px] font-bold text-slate-400 tracking-wide truncate uppercase leading-tight flex-1">{m.title}</span>
+                      <span className="text-[9px] font-bold text-muted tracking-wide truncate uppercase leading-tight flex-1">{m.title}</span>
                     </div>
                     <div className="flex items-baseline justify-between gap-1 mt-0.5 w-full">
-                      <span className="text-sm font-black tracking-tight text-slate-900 leading-none">{m.value}</span>
+                      <span className="text-sm font-black tracking-tight text-heading leading-none">{m.value}</span>
                       <span className={`inline-flex items-center px-1 py-0.5 rounded text-[8px] font-bold ${bgAccent} ${textAccent} scale-90 origin-right`}>{m.change}</span>
                     </div>
-                    <span className="text-[8px] font-medium text-slate-400/90 truncate mt-0.5">{m.footer}</span>
+                    <span className="text-[8px] font-medium text-muted/90 truncate mt-0.5">{m.footer}</span>
                   </motion.button>
                 );
               })}
@@ -331,14 +331,14 @@ export default function WidgetPanel({ onAddWidget }) {
 
         {/* Collapsible Sections (Charts, Tables, etc) */}
         {sections.map(section => (
-          <div key={section.id} className="border-b border-slate-100/60 last:border-0 pb-3 last:pb-0">
+          <div key={section.id} className="border-b border-card-border/60 last:border-0 pb-3 last:pb-0">
             <button
               onClick={() => toggleSection(section.id)}
-              className="w-full flex items-center gap-2 px-1 py-1.5 rounded-xl hover:bg-slate-50 transition-colors text-left font-bold text-slate-400 uppercase tracking-wider text-[10px]"
+              className="w-full flex items-center gap-2 px-1 py-1.5 rounded-xl hover:bg-surface transition-colors text-left font-bold text-muted uppercase tracking-wider text-[10px]"
             >
-              {expanded[section.id] ? <ChevronDown size={12} className="text-slate-400" /> : <ChevronRight size={12} className="text-slate-400" />}
-              <span className="text-slate-800">{section.label}</span>
-              <span className="text-[9px] font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full ml-auto">{section.items.length}</span>
+              {expanded[section.id] ? <ChevronDown size={12} className="text-muted" /> : <ChevronRight size={12} className="text-muted" />}
+              <span className="text-heading">{section.label}</span>
+              <span className="text-[9px] font-bold bg-surface-alt text-muted px-1.5 py-0.5 rounded-full ml-auto">{section.items.length}</span>
             </button>
 
             <AnimatePresence initial={false}>
@@ -364,14 +364,14 @@ export default function WidgetPanel({ onAddWidget }) {
                           whileTap={item.disabled ? {} : { scale: 0.99 }}
                           className={`w-full flex flex-col gap-1.5 p-2.5 rounded-xl border text-left group relative transition-all ${
                             item.disabled
-                              ? "border-slate-100 bg-slate-50/40 opacity-50 cursor-not-allowed"
-                              : "border-slate-200/80 bg-white hover:border-indigo-200/80 hover:shadow-md hover:shadow-indigo-500/5 cursor-pointer"
+                              ? "border-card-border bg-surface/40 opacity-50 cursor-not-allowed"
+                              : "border-card-border/80 bg-card hover:border-indigo-200/80 hover:shadow-md hover:shadow-indigo-500/5 cursor-pointer"
                           }`}
                         >
                           <div className="flex items-center gap-2.5 w-full">
                             <div className={`w-7.5 h-7.5 min-w-[30px] rounded-xl flex items-center justify-center ${
                               item.disabled
-                                ? "bg-slate-100 text-slate-400"
+                                ? "bg-surface-alt text-muted"
                                 : "bg-gradient-to-br from-indigo-50/80 to-blue-50/80 border border-indigo-100/60 text-indigo-600 group-hover:scale-105"
                             } transition-transform duration-150 shadow-sm`}
                             >
@@ -379,12 +379,12 @@ export default function WidgetPanel({ onAddWidget }) {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5">
-                                <span className={`text-[11px] font-bold truncate tracking-tight ${item.disabled ? "text-slate-400" : "text-slate-800"}`}>
+                                <span className={`text-[11px] font-bold truncate tracking-tight ${item.disabled ? "text-muted" : "text-heading"}`}>
                                   {item.title}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2 mt-0.5">
-                                <span className={`text-[9px] font-bold px-1.5 py-0.25 bg-slate-50 border border-slate-100 rounded text-slate-400`}>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.25 bg-surface border border-card-border rounded text-muted`}>
                                   Grid Map: {item.defaultW}×{item.defaultH}
                                 </span>
                                 {item.disabled && (
@@ -393,8 +393,8 @@ export default function WidgetPanel({ onAddWidget }) {
                               </div>
                             </div>
                             {!item.disabled && (
-                              <div className="w-5 h-5 rounded-lg border border-slate-100 flex items-center justify-center opacity-40 group-hover:opacity-100 group-hover:border-indigo-100 group-hover:bg-indigo-50/50 transition-all shrink-0">
-                                <Plus size={12} className="text-slate-400 group-hover:text-indigo-600 transition-colors" />
+                              <div className="w-5 h-5 rounded-lg border border-card-border flex items-center justify-center opacity-40 group-hover:opacity-100 group-hover:border-indigo-100 group-hover:bg-indigo-50/50 transition-all shrink-0">
+                                <Plus size={12} className="text-muted group-hover:text-indigo-600 transition-colors" />
                               </div>
                             )}
                           </div>

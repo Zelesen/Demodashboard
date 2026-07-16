@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { motion } from "framer-motion";
 import { GripHorizontal, Copy, Trash2, Settings } from "lucide-react";
 
@@ -26,9 +26,9 @@ export default function WidgetFrame({ widget, children, onRemove, onDuplicate, i
           />
 
           <div
-            className={`absolute top-1 left-1 z-20 w-6 h-6 rounded-md bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm
+            className={`absolute top-1 left-1 z-20 w-6 h-6 rounded-md bg-card/90 backdrop-blur-sm border border-card-border shadow-sm
               flex items-center justify-center cursor-grab active:cursor-grabbing
-              text-slate-400 hover:text-slate-600 hover:bg-white transition-all
+              text-muted hover:text-body hover:bg-card transition-all
               react-grid-drag-handle opacity-0 group-hover:opacity-100`}
             title="Drag to move"
           >
@@ -42,23 +42,23 @@ export default function WidgetFrame({ widget, children, onRemove, onDuplicate, i
           >
             <button
               onClick={() => onDuplicate(widget.i)}
-              className="w-6 h-6 rounded-md bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm
-                flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-white hover:border-indigo-200 transition-all"
+              className="w-6 h-6 rounded-md bg-card/90 backdrop-blur-sm border border-card-border shadow-sm
+                flex items-center justify-center text-muted hover:text-indigo-600 hover:bg-card hover:border-indigo-200 transition-all"
               title="Duplicate"
             >
               <Copy size={10} />
             </button>
             <button
-              className="w-6 h-6 rounded-md bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm
-                flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-white transition-all cursor-pointer"
+              className="w-6 h-6 rounded-md bg-card/90 backdrop-blur-sm border border-card-border shadow-sm
+                flex items-center justify-center text-muted hover:text-body hover:bg-card transition-all cursor-pointer"
               title="Settings"
             >
               <Settings size={10} />
             </button>
             <button
               onClick={() => onRemove(widget.i)}
-              className="w-6 h-6 rounded-md bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm
-                flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-white hover:border-rose-200 transition-all"
+              className="w-6 h-6 rounded-md bg-card/90 backdrop-blur-sm border border-card-border shadow-sm
+                flex items-center justify-center text-muted hover:text-rose-500 hover:bg-card hover:border-rose-200 transition-all"
               title="Delete"
             >
               <Trash2 size={10} />
@@ -66,7 +66,7 @@ export default function WidgetFrame({ widget, children, onRemove, onDuplicate, i
           </div>
 
           <div className="absolute bottom-1 right-1 z-20 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <span className="text-[8px] font-mono text-slate-400 bg-white/80 px-1 rounded border border-slate-200">
+            <span className="text-[8px] font-mono text-muted bg-card/80 px-1 rounded border border-card-border">
               {widget.w}×{widget.h}
             </span>
           </div>

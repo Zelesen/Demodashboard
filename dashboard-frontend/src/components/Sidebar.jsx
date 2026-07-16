@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -96,9 +96,9 @@ function NavItem({
     }
   };
 
-  let btnStyles = "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900";
+  let btnStyles = "text-body hover:bg-surface-alt/50 hover:text-heading";
   if (active) {
-    btnStyles = "bg-white text-blue-600 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_10px_20px_-5px_rgba(0,0,0,0.04)] border-slate-200/60 font-semibold";
+    btnStyles = "bg-card text-blue-600 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_10px_20px_-5px_rgba(0,0,0,0.04)] border-card-border/60 font-semibold";
   } else if (isAi) {
     btnStyles = "text-indigo-600 hover:bg-indigo-50/60 bg-gradient-to-r from-indigo-50/30 to-transparent";
   }
@@ -125,7 +125,7 @@ function NavItem({
               <span className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping" />
             </div>
           ) : (
-            <Icon size={16} className={`transition-colors duration-200 ${active ? "text-blue-600" : "text-slate-400 group-hover/btn:text-slate-700"}`} />
+            <Icon size={16} className={`transition-colors duration-200 ${active ? "text-blue-600" : "text-muted group-hover/btn:text-body"}`} />
           )}
         </div>
 
@@ -136,12 +136,12 @@ function NavItem({
           {hasChildren ? (
             <span
               onClick={handleChevronClick}
-              className="flex items-center justify-center w-5 h-5 rounded-md hover:bg-slate-200/60 transition-colors cursor-pointer"
+              className="flex items-center justify-center w-5 h-5 rounded-md hover:bg-surface-alt/60 transition-colors cursor-pointer"
             >
               <ChevronRight
                 size={12}
-                className={`text-slate-400 transition-transform duration-200 raw-icon ${
-                  isExpanded ? "rotate-90 text-slate-800" : ""
+                className={`text-muted transition-transform duration-200 raw-icon ${
+                  isExpanded ? "rotate-90 text-heading" : ""
                 }`}
               />
             </span>
@@ -162,10 +162,10 @@ function NavItem({
         <div className={`grid transition-all duration-300 ease-in-out ${
           isExpanded ? "grid-rows-[1fr] opacity-100 mt-0.5" : "grid-rows-[0fr] opacity-0 overflow-hidden"
         }`}>
-          <div className="overflow-hidden ml-[21px] pl-3 border-l border-slate-200/80 space-y-0.5 py-0.5">
+          <div className="overflow-hidden ml-[21px] pl-3 border-l border-card-border/80 space-y-0.5 py-0.5">
             {children.map((child, idx) => {
               if (child.separator) {
-                return <div key={`sep-${idx}`} className="h-px bg-slate-200/80 my-1.5" />;
+                return <div key={`sep-${idx}`} className="h-px bg-surface-alt/80 my-1.5" />;
               }
               const isSubActive = location.pathname === child.href;
               const ChildIcon = child.icon;
@@ -179,7 +179,7 @@ function NavItem({
                     ${
                       isSubActive
                         ? "text-blue-600 font-semibold"
-                        : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/40"
+                        : "text-muted hover:text-heading hover:bg-surface-alt/40"
                     }
                   `}
                 >
@@ -200,14 +200,14 @@ function NavItem({
 
       {/* Collapsed Hover Flyout */}
       {collapsed && hasChildren && isHovered && (
-        <div className="absolute left-[calc(100%-4px)] top-0 w-52 bg-white/95 border border-slate-200 shadow-[0_10px_30px_rgba(0,0,0,0.08)] rounded-2xl py-2 z-[60] animate-in fade-in slide-in-from-left-3 duration-200 backdrop-blur-md">
-          <div className="px-3.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+        <div className="absolute left-[calc(100%-4px)] top-0 w-52 bg-card/95 border border-card-border shadow-[0_10px_30px_rgba(0,0,0,0.08)] rounded-2xl py-2 z-[60] animate-in fade-in slide-in-from-left-3 duration-200 backdrop-blur-md">
+          <div className="px-3.5 py-1 text-[10px] font-bold text-muted uppercase tracking-widest mb-1.5">
             {label}
           </div>
           <div className="space-y-0.5 px-2">
             {children.map((child, idx) => {
               if (child.separator) {
-                return <div key={`sep-${idx}`} className="h-px bg-slate-200/80 my-1.5 mx-1" />;
+                return <div key={`sep-${idx}`} className="h-px bg-surface-alt/80 my-1.5 mx-1" />;
               }
               const isSubActive = location.pathname === child.href;
               const ChildIcon = child.icon;
@@ -221,7 +221,7 @@ function NavItem({
                     ${
                       isSubActive
                         ? "bg-blue-50 text-blue-600 font-semibold"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                        : "text-body hover:bg-surface hover:text-heading"
                     }
                   `}
                 >
@@ -308,7 +308,7 @@ function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
     <aside
       className={`
         ${isOffcanvas ? "" : "fixed"} top-0 left-0 h-screen
-        bg-slate-100/80 border-r border-slate-200/60
+        bg-surface-alt/80 border-r border-card-border/60
         flex flex-col justify-between select-none group/sidebar
         transition-all duration-300 ease-in-out z-50 backdrop-blur-xl
         ${collapsed ? "w-[76px]" : "w-[250px]"}
@@ -321,19 +321,19 @@ function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
           {isOffcanvas && (
             <button
               onClick={onClose}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 shadow-sm z-50 transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg bg-card border border-card-border flex items-center justify-center text-muted hover:text-heading hover:bg-surface shadow-sm z-50 transition-colors"
             >
               <ChevronRight size={14} />
             </button>
           )}
           <div className={`flex items-center gap-2.5 p-1 rounded-xl w-full ${isOffcanvas ? "pr-8" : ""}`}>
-            <div className="w-8 h-8 min-w-[32px] rounded-xl bg-slate-900 flex items-center justify-center text-white text-sm font-black shadow-lg shadow-slate-900/20 relative overflow-hidden group-hover/sidebar:bg-blue-600 transition-colors duration-300">
+            <div className="w-8 h-8 min-w-[32px] rounded-xl bg-slate-900 flex items-center justify-center text-white text-sm font-black shadow-lg shadow-heading/20 relative overflow-hidden group-hover/sidebar:bg-blue-600 transition-colors duration-300">
               <Layers size={15} className="text-white" />
               <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent" />
             </div>
             <div className={`flex flex-col min-w-0 transition-all duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100 w-auto"}`}>
-              <span className="text-[13px] font-bold text-slate-800 tracking-tight leading-none mb-0.5">IntelliDent</span>
-              <span className="text-[10px] text-slate-400 font-medium truncate">v2.4.1</span>
+              <span className="text-[13px] font-bold text-heading tracking-tight leading-none mb-0.5">IntelliDent</span>
+              <span className="text-[10px] text-muted font-medium truncate">v2.4.1</span>
             </div>
           </div>
 
@@ -341,7 +341,7 @@ function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
           {!isOffcanvas && (
             <button 
               onClick={onToggle}
-              className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 shadow-sm hover:scale-105 opacity-0 group-hover/sidebar:opacity-100 transition-all duration-200 z-50"
+              className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-card border border-card-border flex items-center justify-center text-muted hover:text-body shadow-sm hover:scale-105 opacity-0 group-hover/sidebar:opacity-100 transition-all duration-200 z-50"
             >
               <ChevronLeft size={12} className={`transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`} />
             </button>
@@ -350,16 +350,16 @@ function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
 
         {/* Dynamic Workspace Switcher Module */}
         <div className="px-2.5 mt-2">
-          <div className={`flex items-center gap-2.5 p-2 rounded-xl bg-white/60 border border-slate-200/40 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all ${collapsed ? "justify-center cursor-pointer hover:bg-white" : "hover:border-slate-200 cursor-pointer"}`}>
+          <div className={`flex items-center gap-2.5 p-2 rounded-xl bg-card/60 border border-card-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all ${collapsed ? "justify-center cursor-pointer hover:bg-card" : "hover:border-card-border cursor-pointer"}`}>
             <div className="w-6 h-6 min-w-[24px] rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold text-[11px]">
               <Building size={12} />
             </div>
             <div className={`flex items-center justify-between flex-1 min-w-0 transition-all duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden invisible" : "opacity-100 w-auto visible"}`}>
               <div className="flex flex-col min-w-0">
-                <span className="text-[12px] font-semibold text-slate-700 truncate leading-tight">Acme Dental Group</span>
-                <span className="text-[10px] text-slate-400 truncate font-medium">Enterprise Workspace</span>
+                <span className="text-[12px] font-semibold text-body truncate leading-tight">Acme Dental Group</span>
+                <span className="text-[10px] text-muted truncate font-medium">Enterprise Workspace</span>
               </div>
-              <ChevronsUpDown size={12} className="text-slate-400 shrink-0 ml-2" />
+              <ChevronsUpDown size={12} className="text-muted shrink-0 ml-2" />
             </div>
           </div>
         </div>
@@ -382,7 +382,7 @@ function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
       <div className="p-2.5 space-y-2">
         {/* Dynamic Inline Upsell Card Component */}
         {!collapsed && (
-          <div className="mx-0.5 p-3 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 text-white relative overflow-hidden shadow-xl border border-slate-800 animate-in fade-in zoom-in-95 duration-300 group/card">
+          <div className="mx-0.5 p-3 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 text-white relative overflow-hidden shadow-xl border border-heading animate-in fade-in zoom-in-95 duration-300 group/card">
             <div className="absolute -right-6 -top-6 w-20 h-20 bg-blue-500/20 rounded-full blur-xl group-hover/card:bg-blue-500/30 transition-all" />
             <div className="relative z-10">
               <div className="flex items-center gap-1.5 mb-1">
@@ -391,7 +391,7 @@ function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
                 </span>
               </div>
               <p className="text-[12px] font-semibold text-slate-100 mb-2 leading-snug">Automate with AI Claims</p>
-              <button className="w-full py-1.5 px-2.5 bg-white text-slate-900 hover:bg-slate-50 active:scale-[0.98] transition-all rounded-xl text-[11px] font-bold flex items-center justify-center gap-1">
+              <button className="w-full py-1.5 px-2.5 bg-card text-heading hover:bg-surface active:scale-[0.98] transition-all rounded-xl text-[11px] font-bold flex items-center justify-center gap-1">
                 Explore Analytics <ArrowUpRight size={12} />
               </button>
             </div>
@@ -400,34 +400,34 @@ function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
 
         {/* Minimal Search Trigger Bar */}
         {!collapsed && (
-          <div className="mx-0.5 px-3 h-8 rounded-xl bg-slate-200/40 border border-slate-200/20 flex items-center justify-between text-slate-400 hover:bg-slate-200/70 transition-all cursor-pointer">
-            <span className="text-[11px] font-medium flex items-center gap-1.5 text-slate-500">
+          <div className="mx-0.5 px-3 h-8 rounded-xl bg-surface-alt/40 border border-card-border/20 flex items-center justify-between text-muted hover:bg-surface-alt/70 transition-all cursor-pointer">
+            <span className="text-[11px] font-medium flex items-center gap-1.5 text-muted">
               <Command size={12} /> Search operations...
             </span>
-            <kbd className="text-[9px] font-mono bg-white border border-slate-200 text-slate-400 px-1.5 py-0.5 rounded-md shadow-sm">
+            <kbd className="text-[9px] font-mono bg-card border border-card-border text-muted px-1.5 py-0.5 rounded-md shadow-sm">
               ⌘K
             </kbd>
           </div>
         )}
 
         {/* Clean Line Break Divider */}
-        <div className="h-[1px] bg-slate-200/60 mx-1" />
+        <div className="h-[1px] bg-surface-alt/60 mx-1" />
 
         {/* Interactive User Info Cluster */}
-        <div className={`flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-200/50 transition-all cursor-pointer group/user ${collapsed ? "justify-center" : ""}`}>
+        <div className={`flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-surface-alt/50 transition-all cursor-pointer group/user ${collapsed ? "justify-center" : ""}`}>
           <div className="relative shrink-0">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold border border-slate-200">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold border border-card-border">
               {userData?.user?.initials || "AU"}
             </div>
-            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-slate-100 rounded-full" />
+            <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-card-border rounded-full" />
           </div>
           
           <div className={`flex items-center justify-between flex-1 min-w-0 transition-all duration-200 ${collapsed ? "opacity-0 w-0 overflow-hidden invisible" : "opacity-100 w-auto visible"}`}>
             <div className="flex flex-col min-w-0">
-              <span className="text-[12px] font-bold text-slate-800 truncate leading-none mb-0.5 group-hover/user:text-blue-600 transition-colors">{userData?.user?.name || "Admin User"}</span>
-              <span className="text-[10px] text-slate-400 truncate font-medium">{userData?.user?.email || "admin@demo.com"}</span>
+              <span className="text-[12px] font-bold text-heading truncate leading-none mb-0.5 group-hover/user:text-blue-600 transition-colors">{userData?.user?.name || "Admin User"}</span>
+              <span className="text-[10px] text-muted truncate font-medium">{userData?.user?.email || "admin@demo.com"}</span>
             </div>
-            <button className="p-1 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 text-slate-400 hover:text-slate-600 transition-all">
+            <button className="p-1 rounded-lg hover:bg-card border border-transparent hover:border-card-border text-muted hover:text-body transition-all">
               <Bell size={13} />
             </button>
           </div>
@@ -438,7 +438,7 @@ function Sidebar({ collapsed, onToggle, isOffcanvas, onClose, onLogout }) {
           onClick={onLogout}
           className={`
             w-full flex items-center gap-2.5 px-3 rounded-xl
-            text-[12px] font-medium text-slate-400 hover:bg-rose-50/80 hover:text-rose-600 
+            text-[12px] font-medium text-muted hover:bg-rose-50/80 hover:text-rose-600 
             transition-all duration-150 border border-transparent
             ${collapsed ? "justify-center h-10" : "h-9"}
           `}
