@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { RefreshCw, CalendarRange, Building2, Layers, ArrowUpRight, TrendingUp, Target, Shield, Zap, MapPin, Cpu, Brain } from "lucide-react"
 import PracticeMap from '../components/PracticeMap';
 import FloatingIdaWidget from '../components/FloatingIdaWidget';
@@ -483,7 +483,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <div className="relative group/logo">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl blur-md opacity-30 group-hover/logo:opacity-50 transition-opacity duration-500" />
-              <div className="relative w-10 h-10 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center shadow-sm">
+              <div className="relative w-10 h-10 rounded-2xl bg-card border border-card-border/80 flex items-center justify-center shadow-sm">
                 <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                   <Layers size={14} className="text-white" />
                 </div>
@@ -493,7 +493,7 @@ export default function Dashboard() {
 
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-[1.3rem] font-bold tracking-tight text-slate-900 leading-tight">
+                <h1 className="text-[1.3rem] font-bold tracking-tight text-heading leading-tight">
                   Demo DSO
                 </h1>
                 <span className="inline-flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-600 rounded-md border border-indigo-100/50">
@@ -504,7 +504,7 @@ export default function Dashboard() {
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100/60">
                   <Building2 size={10} /> {sites?.length || 10} Practices Active
                 </span>
-                <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                <span className="text-[10px] font-medium text-muted flex items-center gap-1">
                   <CalendarRange size={10} />
                   {dateLabel}
                 </span>
@@ -516,11 +516,11 @@ export default function Dashboard() {
             <button 
               onClick={handleRefresh}
               disabled={isRefreshing || cooldownSecs > 0}
-              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-card border border-card-border/80 hover:border-card-border rounded-xl text-[10px] font-semibold text-body hover:text-heading hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
             >
               <RefreshCw 
                 size={11} 
-                className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-blue-500" : "text-slate-400"}`} 
+                className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-blue-500" : "text-muted"}`} 
               />
               {isRefreshing ? "Syncing..." : cooldownSecs > 0 ? `${Math.floor(cooldownSecs / 60)}:${String(cooldownSecs % 60).padStart(2, '0')} left` : "Refresh"}
             </button>
@@ -528,7 +528,7 @@ export default function Dashboard() {
         </div>
 
         {/* ================= FILTER TABS ================= */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
+        <div className="flex items-center gap-1 bg-card border border-card-border/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
           {filters.map((filter) => {
             const isSelected = activeFilter === filter;
             return (
@@ -538,7 +538,7 @@ export default function Dashboard() {
                 className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all duration-200 ${
                   isSelected
                     ? "bg-slate-900 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                    : "text-muted hover:text-heading hover:bg-surface"
                 }`}
               >
                 {filter}
@@ -550,21 +550,21 @@ export default function Dashboard() {
         {activeFilter === "Custom" && (
           <div className="flex items-center gap-2 bg-transparent rounded-lg p-2 w-fit">
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">From:</label>
+              <label className="text-[10px] font-semibold text-body">From:</label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">To:</label>
+              <label className="text-[10px] font-semibold text-body">To:</label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -574,22 +574,22 @@ export default function Dashboard() {
        
 
          {/* ================= KPI METRICS STRIP ================= */}
-        <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="p-3.5 flex flex-col justify-between">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-slate-200 animate-pulse" />
-                    <div className="h-2.5 w-14 bg-slate-200 rounded animate-pulse" />
+                    <div className="w-6 h-6 rounded-lg bg-surface-alt animate-pulse" />
+                    <div className="h-2.5 w-14 bg-surface-alt rounded animate-pulse" />
                   </div>
-                  <div className="h-7 w-16 bg-slate-200 rounded animate-pulse mb-1.5" />
-                  <div className="h-2.5 w-12 bg-slate-200 rounded animate-pulse" />
+                  <div className="h-7 w-16 bg-surface-alt rounded animate-pulse mb-1.5" />
+                  <div className="h-2.5 w-12 bg-surface-alt rounded animate-pulse" />
                 </div>
               ))}
             </div>
           ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
                 {currentData.metrics.map((m, index) => {
                 const isPositive = m.positive;
                 const Icon = m.icon;
@@ -598,15 +598,15 @@ export default function Dashboard() {
                 const textAccent = isPositive ? "text-emerald-600" : "text-rose-500";
                 
                 return (
-                  <div key={index} className="group p-3.5 hover:bg-slate-50/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
+                  <div key={index} className="group p-3.5 hover:bg-surface/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
                     {/* Header: icon + title + info */}
                     <div className="flex items-center gap-1.5 mb-2">
                       <div className={`w-6 h-6 rounded-md ${bgAccent} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200`}>
                         <Icon size={11} className={textAccent} />
                       </div>
                       <div className="flex items-center gap-1 min-w-0">
-                        <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-slate-200 text-[7px] font-bold text-slate-500 mr-1 shrink-0 self-center">{index + 1}</span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none truncate">
+                        <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-surface-alt text-[7px] font-bold text-muted mr-1 shrink-0 self-center">{index + 1}</span>
+                        <span className="text-[9px] font-bold text-muted uppercase tracking-wider leading-none truncate">
                           {m.title}
                         </span>
                         <InfoIcon 
@@ -621,7 +621,7 @@ export default function Dashboard() {
 
                     {/* Value + badge */}
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-[1.25rem] font-bold tracking-tight text-slate-900 leading-none">
+                      <span className="text-[1.25rem] font-bold tracking-tight text-heading leading-none">
                         {m.value}
                       </span>
                       <span className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-bold shrink-0 ${
@@ -659,7 +659,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Footer */}
-                    <p className="text-[9px] font-medium text-slate-400 mt-1 truncate">
+                    <p className="text-[9px] font-medium text-muted mt-1 truncate">
                       {m.footer}
                     </p>
                   </div>
@@ -675,49 +675,49 @@ export default function Dashboard() {
           <div className="lg:col-span-4">
             {loading ? (
               /* Skeleton Loading State */
-              <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-4 overflow-hidden flex flex-col justify-between min-h-[280px]">
+              <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm p-4 overflow-hidden flex flex-col justify-between min-h-[280px]">
                 {/* Skeleton Header */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-slate-200 animate-pulse" />
+                    <div className="w-10 h-10 rounded-xl bg-surface-alt animate-pulse" />
                     <div>
-                      <div className="h-4 w-32 bg-slate-200 rounded animate-pulse mb-2" />
-                      <div className="h-3 w-40 bg-slate-200 rounded animate-pulse" />
+                      <div className="h-4 w-32 bg-surface-alt rounded animate-pulse mb-2" />
+                      <div className="h-3 w-40 bg-surface-alt rounded animate-pulse" />
                     </div>
                   </div>
-                  <div className="h-8 w-20 bg-slate-200 rounded-full animate-pulse" />
+                  <div className="h-8 w-20 bg-surface-alt rounded-full animate-pulse" />
                 </div>
 
                 {/* Skeleton Circle Chart */}
                 <div className="relative flex items-center justify-center my-8">
-                  <div className="w-56 h-56 rounded-full border-8 border-slate-200 animate-pulse" />
+                  <div className="w-56 h-56 rounded-full border-8 border-card-border animate-pulse" />
                   <div className="absolute flex flex-col items-center justify-center">
-                    <div className="h-16 w-20 bg-slate-200 rounded animate-pulse mb-2" />
-                    <div className="h-3 w-16 bg-slate-200 rounded animate-pulse" />
+                    <div className="h-16 w-20 bg-surface-alt rounded animate-pulse mb-2" />
+                    <div className="h-3 w-16 bg-surface-alt rounded animate-pulse" />
                   </div>
                 </div>
 
                 {/* Skeleton Legend */}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3 pt-4 border-t border-slate-100">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3 pt-4 border-t border-card-border">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <div key={i} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full bg-slate-200 animate-pulse" />
-                        <div className="h-3 w-16 bg-slate-200 rounded animate-pulse" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-surface-alt animate-pulse" />
+                        <div className="h-3 w-16 bg-surface-alt rounded animate-pulse" />
                       </div>
-                      <div className="h-3 w-8 bg-slate-200 rounded animate-pulse" />
+                      <div className="h-3 w-8 bg-surface-alt rounded animate-pulse" />
                     </div>
                   ))}
                 </div>
 
                 {/* Skeleton Footer */}
-                <div className="mt-4 pt-3 border-t border-slate-100">
+                <div className="mt-4 pt-3 border-t border-card-border">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-slate-200 animate-pulse" />
-                      <div className="h-3 w-40 bg-slate-200 rounded animate-pulse" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-surface-alt animate-pulse" />
+                      <div className="h-3 w-40 bg-surface-alt rounded animate-pulse" />
                     </div>
-                    <div className="h-3 w-12 bg-slate-200 rounded animate-pulse" />
+                    <div className="h-3 w-12 bg-surface-alt rounded animate-pulse" />
                   </div>
                 </div>
               </div>
@@ -726,7 +726,7 @@ export default function Dashboard() {
                 {/* Static Decorative Background */}
                 <div className={`absolute -inset-1 bg-gradient-to-r ${score >= 70 ? 'from-emerald-500/10 via-teal-500/10 to-emerald-500/10' : score >= 50 ? 'from-amber-500/10 via-orange-500/10 to-amber-500/10' : 'from-rose-500/10 via-red-500/10 to-rose-500/10'} rounded-3xl blur-xl`} />
                 
-                <div className="relative bg-gradient-to-br from-white via-slate-50/30 to-white rounded-2xl border border-slate-200/80 shadow-lg shadow-slate-200/50 p-4 overflow-hidden flex flex-col justify-between min-h-[280px]">
+                <div className="relative bg-gradient-to-br from-white via-surface/30 to-white rounded-2xl border border-card-border/80 shadow-lg shadow-card-border/50 p-4 overflow-hidden flex flex-col justify-between min-h-[280px]">
                   {/* Animated Background Pattern */}
                   <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
                     <div className="absolute inset-0" style={{
@@ -749,8 +749,8 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <div>
-                        <h3 className="font-bold text-sm text-slate-900 tracking-tight flex items-center gap-1.5">
-                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">7</span>
+                        <h3 className="font-bold text-sm text-heading tracking-tight flex items-center gap-1.5">
+                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">7</span>
                           Group Health
                           <InfoIcon 
                             title="Group Health Score"
@@ -760,7 +760,7 @@ export default function Dashboard() {
                             additionalInfo="Score ranges: 70-100 (Strong/Green), 50-69 (Average/Amber), 0-49 (Weak/Red)"
                           />
                         </h3>
-                        <p className="text-[9px] text-slate-500 font-semibold">Weighted across 5 target pillars</p>
+                        <p className="text-[9px] text-muted font-semibold">Weighted across 5 target pillars</p>
                       </div>
                     </div>
 
@@ -863,7 +863,7 @@ export default function Dashboard() {
                         <div className="text-[11px] font-bold text-white mb-0.5">
                           {pillars[hoveredPillar]?.name || ''}
                         </div>
-                        <div className="text-[10px] text-slate-300">
+                        <div className="text-[10px] text-muted">
                           {pillars[hoveredPillar]?.value || 0}% performance
                         </div>
                         <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45" />
@@ -877,20 +877,20 @@ export default function Dashboard() {
                         <div className={`absolute inset-0 blur-xl ${score >= 70 ? 'bg-emerald-500/20' : score >= 50 ? 'bg-amber-500/20' : 'bg-rose-500/20'} scale-150`} />
                         
                         <div className="relative">
-                          <span className="text-4xl font-black text-slate-900 tracking-tighter leading-none bg-gradient-to-br from-slate-900 to-slate-700 bg-clip-text">
+                          <span className="text-4xl font-black text-heading tracking-tighter leading-none bg-gradient-to-br from-slate-900 to-slate-700 bg-clip-text">
                             {score}
                           </span>
                           <div className={`mt-1 h-0.5 w-12 mx-auto rounded-full bg-gradient-to-r ${score >= 70 ? 'from-emerald-400 to-teal-500' : score >= 50 ? 'from-amber-400 to-orange-500' : 'from-rose-400 to-red-500'} shadow-sm`} />
                         </div>
                       </div>
-                      <span className="text-[10px] font-bold text-slate-500 mt-1 tracking-wide">/ 100 Score</span>
+                      <span className="text-[10px] font-bold text-muted mt-1 tracking-wide">/ 100 Score</span>
                     </div>
                   </div>
 
                   {/* Enhanced Grid Legend Footer */}
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 pt-2 border-t border-slate-200/60 relative z-10">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 pt-2 border-t border-card-border/60 relative z-10">
                     {pillars.map((pillar, i) => (
-                      <div key={i} className="group/pillar flex items-center justify-between text-[10px] hover:bg-slate-50/50 px-1.5 py-1 rounded-lg transition-colors cursor-default">
+                      <div key={i} className="group/pillar flex items-center justify-between text-[10px] hover:bg-surface/50 px-1.5 py-1 rounded-lg transition-colors cursor-default">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <div className="relative">
                             <span 
@@ -898,19 +898,19 @@ export default function Dashboard() {
                               style={{ backgroundColor: pillar.color, boxShadow: `0 0 8px ${pillar.color}40` }}
                             />
                           </div>
-                          <span className="font-semibold text-slate-700 truncate">{pillar.name}</span>
+                          <span className="font-semibold text-body truncate">{pillar.name}</span>
                         </div>
-                        <span className="font-bold text-slate-900 ml-1 tabular-nums">{pillar.value}%</span>
+                        <span className="font-bold text-heading ml-1 tabular-nums">{pillar.value}%</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Quick Insight Footer */}
-                  <div className="mt-2 pt-2 border-t border-slate-100 relative z-10">
+                  <div className="mt-2 pt-2 border-t border-card-border relative z-10">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <div className={`w-1 h-1 rounded-full ${score >= 70 ? 'bg-emerald-500' : score >= 50 ? 'bg-amber-500' : 'bg-rose-500'} animate-pulse`} />
-                        <span className="text-[9px] font-semibold text-slate-500">
+                        <span className="text-[9px] font-semibold text-muted">
                           {score >= 70 ? 'All systems operational' : score >= 50 ? 'Some areas need attention' : 'Immediate action required'}
                         </span>
                       </div>
@@ -929,29 +929,29 @@ export default function Dashboard() {
           <div className="lg:col-span-8 h-full">
             {loading ? (
               /* Loading Skeleton - Side by Side */
-              <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden h-full">
+              <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden h-full">
                 <div className="flex flex-col lg:flex-row">
                   {/* League Table Skeleton - ~50% */}
                   <div className="lg:w-[50%]">
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-card-border">
                       <div>
-                        <div className="h-3.5 w-28 bg-slate-200 rounded animate-pulse mb-1" />
-                        <div className="h-2 w-40 bg-slate-200 rounded animate-pulse" />
+                        <div className="h-3.5 w-28 bg-surface-alt rounded animate-pulse mb-1" />
+                        <div className="h-2 w-40 bg-surface-alt rounded animate-pulse" />
                       </div>
-                      <div className="h-7 w-20 bg-slate-200 rounded-lg animate-pulse" />
+                      <div className="h-7 w-20 bg-surface-alt rounded-lg animate-pulse" />
                     </div>
                     <div className="px-2 py-1.5 space-y-1">
                       {[1, 2, 3, 4, 5].map((i) => (
                         <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl">
                           <div className="flex items-center gap-3 flex-1">
-                            <div className="w-6 h-6 rounded-lg bg-slate-200 animate-pulse shrink-0" />
-                            <div className="w-7 h-7 rounded-full bg-slate-200 animate-pulse shrink-0" />
+                            <div className="w-6 h-6 rounded-lg bg-surface-alt animate-pulse shrink-0" />
+                            <div className="w-7 h-7 rounded-full bg-surface-alt animate-pulse shrink-0" />
                             <div className="flex-1">
-                              <div className="h-3 w-20 bg-slate-200 rounded animate-pulse mb-1" />
-                              <div className="h-2 w-40 bg-slate-200 rounded animate-pulse" />
+                              <div className="h-3 w-20 bg-surface-alt rounded animate-pulse mb-1" />
+                              <div className="h-2 w-40 bg-surface-alt rounded animate-pulse" />
                             </div>
                           </div>
-                          <div className="h-6 w-14 bg-slate-200 rounded-lg animate-pulse shrink-0" />
+                          <div className="h-6 w-14 bg-surface-alt rounded-lg animate-pulse shrink-0" />
                         </div>
                       ))}
                     </div>
@@ -959,36 +959,36 @@ export default function Dashboard() {
 
                   {/* Map Skeleton - ~50% */}
                   <div className="lg:w-[50%] flex flex-col">
-                    <div className="px-5 py-3 border-b border-slate-100">
-                      <div className="h-3.5 w-28 bg-slate-200 rounded animate-pulse mb-1" />
-                      <div className="h-2 w-40 bg-slate-200 rounded animate-pulse" />
+                    <div className="px-5 py-3 border-b border-card-border">
+                      <div className="h-3.5 w-28 bg-surface-alt rounded animate-pulse mb-1" />
+                      <div className="h-2 w-40 bg-surface-alt rounded animate-pulse" />
                     </div>
                     <div className="flex-1 px-2 pb-2">
-                      <div className="h-full rounded-xl bg-slate-100 animate-pulse min-h-[200px]" />
+                      <div className="h-full rounded-xl bg-surface-alt animate-pulse min-h-[200px]" />
                     </div>
-                    <div className="flex items-center gap-2 px-5 py-2 border-t border-slate-100 bg-slate-50/30">
-                      <div className="h-2 w-8 bg-slate-200 rounded animate-pulse" />
-                      <div className="h-2 w-14 bg-slate-200 rounded animate-pulse" />
-                      <div className="w-px h-2.5 bg-slate-200" />
-                      <div className="h-2 w-14 bg-slate-200 rounded animate-pulse" />
-                      <div className="w-px h-2.5 bg-slate-200" />
-                      <div className="h-2 w-10 bg-slate-200 rounded animate-pulse" />
+                    <div className="flex items-center gap-2 px-5 py-2 border-t border-card-border bg-surface/30">
+                      <div className="h-2 w-8 bg-surface-alt rounded animate-pulse" />
+                      <div className="h-2 w-14 bg-surface-alt rounded animate-pulse" />
+                      <div className="w-px h-2.5 bg-surface-alt" />
+                      <div className="h-2 w-14 bg-surface-alt rounded animate-pulse" />
+                      <div className="w-px h-2.5 bg-surface-alt" />
+                      <div className="h-2 w-10 bg-surface-alt rounded animate-pulse" />
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
               /* Actual Content - Premium Analytics Dashboard Unified Card */
-              <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden h-full">
+              <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden h-full">
                 <div className="flex flex-col lg:flex-row">
                   {/* League Table - ~50% width */}
                   <div className="lg:w-[50%] relative">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-card-border">
                       <div>
-                        <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">8</span>
-                          <MapPin size={12} className="text-slate-400" />
+                        <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">8</span>
+                          <MapPin size={12} className="text-muted" />
                           Practice League
                           <InfoIcon 
                             title="Practice League Table"
@@ -997,9 +997,9 @@ export default function Dashboard() {
                             calculations="Score = completion_rate + (revenue/1000), capped at 100. Status: good (≥80), warn (60-79), bad (<60). Revenue is sum of invoices in period."
                           />
                         </h3>
-                        <p className="text-[9px] text-slate-400 font-medium">Ranked by production performance vs target</p>
+                        <p className="text-[9px] text-muted font-medium">Ranked by production performance vs target</p>
                       </div>
-                      <div className="flex bg-slate-100 rounded-lg p-0.5">
+                      <div className="flex bg-surface-alt rounded-lg p-0.5">
                         {["Top 5", "Bottom 5"].map((tab) => {
                           const isActive = leagueTab === tab;
                           return (
@@ -1007,7 +1007,7 @@ export default function Dashboard() {
                               key={tab}
                               onClick={() => setLeagueTab(tab)}
                               className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all duration-200 ${
-                                isActive ? "bg-white text-slate-800 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                                isActive ? "bg-card text-heading shadow-sm" : "text-muted hover:text-body"
                               }`}
                             >
                               {tab}
@@ -1030,7 +1030,7 @@ export default function Dashboard() {
                         return (
                           <div
                             key={item.name}
-                            className="group flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-slate-200/70 hover:bg-white hover:shadow-sm hover:shadow-slate-200/40 active:scale-[0.99] transition-all duration-200 cursor-default"
+                            className="group flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-card-border/70 hover:bg-card hover:shadow-sm hover:shadow-card-border/40 active:scale-[0.99] transition-all duration-200 cursor-default"
                           >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
                               <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold border shrink-0 transition-all duration-200 group-hover:scale-105 ${rankBg}`}>
@@ -1038,15 +1038,15 @@ export default function Dashboard() {
                               </span>
                               <div className="relative">
                                 <span className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border-[1.5px] border-white shrink-0 ${statusDot}`} />
-                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-700 bg-slate-100 border border-slate-200/60`}>
+                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-body bg-surface-alt border border-card-border/60`}>
                                   {item.name.charAt(0)}
                                 </div>
                               </div>
                               <div className="min-w-0">
-                                <p className="text-[12px] font-semibold text-slate-800 truncate group-hover:text-slate-900 transition-colors">
+                                <p className="text-[12px] font-semibold text-heading truncate group-hover:text-heading transition-colors">
                                   {item.name}
                                 </p>
-                                <p className="text-[10px] text-slate-400 font-medium truncate">
+                                <p className="text-[10px] text-muted font-medium truncate">
                                   {item.revenue} · {item.nhs} · {item.plan} · ★{item.rating}
                                 </p>
                               </div>
@@ -1060,15 +1060,15 @@ export default function Dashboard() {
                     </div>
 
                     {/* Subtle Vertical Divider */}
-                    <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
+                    <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-card-border to-transparent" />
                   </div>
 
                   {/* Practice Locations Map - ~50% width */}
                   <div className="lg:w-[50%] flex flex-col">
                     {/* Header */}
-                    <div className="px-5 py-3 border-b border-slate-100">
-                      <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">9</span>
+                    <div className="px-5 py-3 border-b border-card-border">
+                      <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">9</span>
                         Practice Locations
                         <InfoIcon 
                           title="Practice Locations Map"
@@ -1078,12 +1078,12 @@ export default function Dashboard() {
                           additionalInfo="Map shows practice locations across the UK with color-coded status indicators"
                         />
                       </h3>
-                      <p className="text-[9px] text-slate-400 font-medium">Geographic telemetry overview</p>
+                      <p className="text-[9px] text-muted font-medium">Geographic telemetry overview</p>
                     </div>
 
                     {/* Map Container */}
                     <div className="flex-1 px-2 pb-2">
-                      <div className="h-full rounded-xl bg-gradient-to-b from-slate-50 to-slate-100/50 border border-slate-200/50 overflow-hidden flex flex-col min-h-[200px]">
+                      <div className="h-full rounded-xl bg-gradient-to-b from-surface to-surface-alt/50 border border-card-border/50 overflow-hidden flex flex-col min-h-[200px]">
                         <div className="flex-1">
                           <PracticeMap sites={sites} />
                         </div>
@@ -1091,17 +1091,17 @@ export default function Dashboard() {
                     </div>
 
                     {/* Legend */}
-                    <div className="flex items-center gap-2 px-5 py-2 border-t border-slate-100 bg-slate-50/30">
-                      <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">Status</span>
-                      <span className="flex items-center gap-1 text-[9px] font-semibold text-slate-500">
+                    <div className="flex items-center gap-2 px-5 py-2 border-t border-card-border bg-surface/30">
+                      <span className="text-[8px] font-bold text-muted uppercase tracking-wider mr-0.5">Status</span>
+                      <span className="flex items-center gap-1 text-[9px] font-semibold text-muted">
                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500/30" /> On Target
                       </span>
-                      <span className="w-px h-2.5 bg-slate-200" />
-                      <span className="flex items-center gap-1 text-[9px] font-semibold text-slate-500">
+                      <span className="w-px h-2.5 bg-surface-alt" />
+                      <span className="flex items-center gap-1 text-[9px] font-semibold text-muted">
                         <span className="w-1.5 h-1.5 bg-amber-400 rounded-full shadow-sm shadow-amber-400/30" /> Near Baseline
                       </span>
-                      <span className="w-px h-2.5 bg-slate-200" />
-                      <span className="flex items-center gap-1 text-[9px] font-semibold text-slate-500">
+                      <span className="w-px h-2.5 bg-surface-alt" />
+                      <span className="flex items-center gap-1 text-[9px] font-semibold text-muted">
                         <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shadow-sm shadow-rose-500/30" /> Behind
                       </span>
                     </div>
@@ -1116,10 +1116,10 @@ export default function Dashboard() {
 
         {/* ============ IDA WATERMARK ============ */}
         <div className="text-center pb-2">
-          <p className="text-[8px] font-semibold text-slate-300 tracking-widest uppercase flex items-center justify-center gap-1.5">
-            <span className="w-6 h-px bg-slate-200" />
+          <p className="text-[8px] font-semibold text-muted tracking-widest uppercase flex items-center justify-center gap-1.5">
+            <span className="w-6 h-px bg-surface-alt" />
             Powered by Ida Intelligence
-            <span className="w-6 h-px bg-slate-200" />
+            <span className="w-6 h-px bg-surface-alt" />
           </p>
         </div>
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
@@ -22,12 +22,12 @@ const API = "http://localhost:8000";
 const statusColors = {
   Draft: "bg-amber-50 text-amber-700 border-amber-200",
   Live: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Archived: "bg-slate-100 text-slate-500 border-slate-200",
+  Archived: "bg-surface-alt text-muted border-card-border",
 };
 
 const typeColors = {
   Custom: "bg-indigo-50 text-indigo-600 border-indigo-200",
-  System: "bg-slate-100 text-slate-600 border-slate-200",
+  System: "bg-surface-alt text-body border-card-border",
   AI: "bg-violet-50 text-violet-600 border-violet-200",
 };
 
@@ -170,15 +170,15 @@ export default function DashboardCreator() {
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-200">
                 <LayoutDashboard size={17} className="text-white" />
               </div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">Dashboard Creator</h1>
+              <h1 className="text-xl font-bold text-heading tracking-tight">Dashboard Creator</h1>
             </div>
-            <p className="text-[13px] text-slate-500 ml-[46px]">
+            <p className="text-[13px] text-muted ml-[46px]">
               {loading ? "Loading..." : `${userDashboards.length} dashboard${userDashboards.length !== 1 ? "s" : ""} you've created`}
             </p>
           </div>
           <button
             onClick={openCreateModal}
-            className="inline-flex items-center gap-2 px-5 h-9 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all active:scale-[0.97] shadow-md shadow-slate-900/10 hover:shadow-lg hover:shadow-slate-900/20"
+            className="inline-flex items-center gap-2 px-5 h-9 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all active:scale-[0.97] shadow-md shadow-heading/10 hover:shadow-lg hover:shadow-heading/20"
           >
             <Plus size={14} />
             New Dashboard
@@ -189,18 +189,18 @@ export default function DashboardCreator() {
         {!loading && userDashboards.length > 0 && (
           <div className="mb-6">
             <div className="relative max-w-md">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               <input
                 type="text"
                 placeholder="Search dashboards..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-9 pl-9 pr-3 rounded-xl bg-white border border-slate-200/60 text-[13px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
+                className="w-full h-9 pl-9 pr-3 rounded-xl bg-card border border-card-border/60 text-[13px] text-body placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-body"
                 >
                   <X size={12} />
                 </button>
@@ -213,18 +213,18 @@ export default function DashboardCreator() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden animate-pulse">
-                <div className="h-3 bg-slate-200" />
+              <div key={i} className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden animate-pulse">
+                <div className="h-3 bg-surface-alt" />
                 <div className="p-4 space-y-3">
                   <div className="flex items-center gap-2">
-                    <div className="h-5 w-32 bg-slate-200 rounded" />
-                    <div className="h-4 w-14 bg-slate-200 rounded-full" />
+                    <div className="h-5 w-32 bg-surface-alt rounded" />
+                    <div className="h-4 w-14 bg-surface-alt rounded-full" />
                   </div>
-                  <div className="h-3 w-full bg-slate-200 rounded" />
-                  <div className="h-3 w-2/3 bg-slate-200 rounded" />
+                  <div className="h-3 w-full bg-surface-alt rounded" />
+                  <div className="h-3 w-2/3 bg-surface-alt rounded" />
                   <div className="flex justify-between pt-1">
-                    <div className="h-3 w-20 bg-slate-200 rounded" />
-                    <div className="h-3 w-16 bg-slate-200 rounded" />
+                    <div className="h-3 w-20 bg-surface-alt rounded" />
+                    <div className="h-3 w-16 bg-surface-alt rounded" />
                   </div>
                 </div>
               </div>
@@ -236,8 +236,8 @@ export default function DashboardCreator() {
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-100 to-purple-50 flex items-center justify-center mb-4 shadow-inner">
               <LayoutDashboard size={28} className="text-violet-400" />
             </div>
-            <h3 className="text-base font-bold text-slate-700 mb-1">No dashboards yet</h3>
-            <p className="text-[13px] text-slate-400 mb-5 text-center max-w-xs">
+            <h3 className="text-base font-bold text-body mb-1">No dashboards yet</h3>
+            <p className="text-[13px] text-muted mb-5 text-center max-w-xs">
               Create your first custom dashboard to start tracking what matters most to your practice.
             </p>
             <button
@@ -251,8 +251,8 @@ export default function DashboardCreator() {
         ) : filteredDashboards.length === 0 ? (
           /* No search results */
           <div className="flex flex-col items-center justify-center py-16">
-            <Search size={24} className="text-slate-300 mb-3" />
-            <p className="text-sm font-medium text-slate-500">No dashboards match "{searchQuery}"</p>
+            <Search size={24} className="text-muted mb-3" />
+            <p className="text-sm font-medium text-muted">No dashboards match "{searchQuery}"</p>
             <button
               onClick={() => setSearchQuery("")}
               className="mt-2 text-xs text-violet-600 hover:text-violet-700 font-medium"
@@ -266,7 +266,7 @@ export default function DashboardCreator() {
             {filteredDashboards.map((d) => (
               <div
                 key={d.id}
-                className="group relative bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                className="group relative bg-card rounded-2xl border border-card-border/60 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
                 onClick={() => navigate(`/dashboard-view/${d.id}`)}
               >
                 {/* Status bar */}
@@ -274,14 +274,14 @@ export default function DashboardCreator() {
                   d.status === "Live"
                     ? "bg-gradient-to-r from-emerald-400 to-emerald-500"
                     : d.status === "Archived"
-                    ? "bg-gradient-to-r from-slate-300 to-slate-400"
+                    ? "bg-gradient-to-r from-muted to-muted"
                     : "bg-gradient-to-r from-amber-400 to-amber-500"
                 }`} />
 
                 <div className="p-4">
                   {/* Top row: name + status */}
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-[13px] font-bold text-slate-900 group-hover:text-violet-600 transition-colors line-clamp-1">
+                    <h3 className="text-[13px] font-bold text-heading group-hover:text-violet-600 transition-colors line-clamp-1">
                       {d.name}
                     </h3>
                     <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ml-2 ${statusColors[d.status] || statusColors.Draft}`}>
@@ -290,7 +290,7 @@ export default function DashboardCreator() {
                   </div>
 
                   {/* Description */}
-                  <p className="text-[11px] text-slate-500 leading-relaxed mb-3 line-clamp-2 min-h-[28px]">
+                  <p className="text-[11px] text-muted leading-relaxed mb-3 line-clamp-2 min-h-[28px]">
                     {d.description || "No description"}
                   </p>
 
@@ -299,38 +299,38 @@ export default function DashboardCreator() {
                     <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-md border ${typeColors[d.type] || typeColors.Custom}`}>
                       {d.type || "Custom"}
                     </span>
-                    <div className="flex items-center gap-1 text-slate-400">
+                    <div className="flex items-center gap-1 text-muted">
                       <Calendar size={10} />
                       <span className="text-[9px] font-medium">{formatDate(d.created_at)}</span>
                     </div>
                   </div>
 
                   {/* Action buttons */}
-                  <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100">
+                  <div className="flex items-center gap-1.5 pt-2 border-t border-card-border">
                     <button
                       onClick={(e) => { e.stopPropagation(); navigate(`/dashboard-view/${d.id}`); }}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 bg-slate-50 hover:bg-violet-50 border border-slate-200/60 hover:border-violet-200 rounded-lg text-[10px] font-semibold text-slate-500 hover:text-violet-600 transition-all"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 bg-surface hover:bg-violet-50 border border-card-border/60 hover:border-violet-200 rounded-lg text-[10px] font-semibold text-muted hover:text-violet-600 transition-all"
                     >
                       <Eye size={10} />
                       View
                     </button>
                     <button
                       onClick={(e) => openEditModal(d, e)}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 bg-slate-50 hover:bg-blue-50 border border-slate-200/60 hover:border-blue-200 rounded-lg text-[10px] font-semibold text-slate-500 hover:text-blue-600 transition-all"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 bg-surface hover:bg-blue-50 border border-card-border/60 hover:border-blue-200 rounded-lg text-[10px] font-semibold text-muted hover:text-blue-600 transition-all"
                     >
                       <Pencil size={10} />
                       Edit
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/${d.id}/edit`); }}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 bg-slate-50 hover:bg-amber-50 border border-slate-200/60 hover:border-amber-200 rounded-lg text-[10px] font-semibold text-slate-500 hover:text-amber-600 transition-all"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 bg-surface hover:bg-amber-50 border border-card-border/60 hover:border-amber-200 rounded-lg text-[10px] font-semibold text-muted hover:text-amber-600 transition-all"
                     >
                       <FileText size={10} />
                       Builder
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); setDeleteConfirm(d.id); }}
-                      className="px-2 py-1.5 bg-slate-50 hover:bg-rose-50 border border-slate-200/60 hover:border-rose-200 rounded-lg text-slate-400 hover:text-rose-500 transition-all"
+                      className="px-2 py-1.5 bg-surface hover:bg-rose-50 border border-card-border/60 hover:border-rose-200 rounded-lg text-muted hover:text-rose-500 transition-all"
                     >
                       <Trash2 size={10} />
                     </button>
@@ -346,20 +346,20 @@ export default function DashboardCreator() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-200/60 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-card rounded-2xl shadow-2xl border border-card-border/60 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-card-border">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                   {editingDashboard ? <Pencil size={14} className="text-white" /> : <Plus size={14} className="text-white" />}
                 </div>
-                <h2 className="text-sm font-bold text-slate-900">
+                <h2 className="text-sm font-bold text-heading">
                   {editingDashboard ? "Edit Dashboard" : "Create Dashboard"}
                 </h2>
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="w-7 h-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors"
+                className="w-7 h-7 rounded-lg hover:bg-surface-alt flex items-center justify-center text-muted hover:text-body transition-colors"
               >
                 <X size={14} />
               </button>
@@ -368,7 +368,7 @@ export default function DashboardCreator() {
             {/* Modal body */}
             <div className="px-5 py-4 space-y-4">
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1.5">
                   Name <span className="text-rose-400">*</span>
                 </label>
                 <input
@@ -376,29 +376,29 @@ export default function DashboardCreator() {
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   placeholder="e.g. Monthly Revenue Overview"
-                  className="w-full h-9 px-3 rounded-xl bg-slate-50 border border-slate-200 text-[13px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
+                  className="w-full h-9 px-3 rounded-xl bg-surface border border-card-border text-[13px] text-body placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
                   autoFocus
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Type</label>
+                  <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1.5">Type</label>
                   <select
                     value={form.type}
                     onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
-                    className="w-full h-9 px-3 rounded-xl bg-slate-50 border border-slate-200 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all appearance-none"
+                    className="w-full h-9 px-3 rounded-xl bg-surface border border-card-border text-[13px] text-body focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all appearance-none"
                   >
                     <option value="Custom">Custom</option>
                     <option value="AI">AI Generated</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Status</label>
+                  <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1.5">Status</label>
                   <select
                     value={form.status}
                     onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-                    className="w-full h-9 px-3 rounded-xl bg-slate-50 border border-slate-200 text-[13px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all appearance-none"
+                    className="w-full h-9 px-3 rounded-xl bg-surface border border-card-border text-[13px] text-body focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all appearance-none"
                   >
                     <option value="Draft">Draft</option>
                     <option value="Live">Live</option>
@@ -408,22 +408,22 @@ export default function DashboardCreator() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Description</label>
+                <label className="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1.5">Description</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   placeholder="What is this dashboard for?"
                   rows={3}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-[13px] text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all resize-none"
+                  className="w-full px-3 py-2 rounded-xl bg-surface border border-card-border text-[13px] text-body placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all resize-none"
                 />
               </div>
             </div>
 
             {/* Modal footer */}
-            <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-slate-100 bg-slate-50/50">
+            <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-card-border bg-surface/50">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 h-8 rounded-xl text-[12px] font-semibold text-slate-500 hover:bg-slate-100 transition-all"
+                className="px-4 h-8 rounded-xl text-[12px] font-semibold text-muted hover:bg-surface-alt transition-all"
               >
                 Cancel
               </button>
@@ -444,20 +444,20 @@ export default function DashboardCreator() {
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setDeleteConfirm(null)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-200/60 w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-card rounded-2xl shadow-2xl border border-card-border/60 w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="p-5 text-center">
               <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-3">
                 <AlertCircle size={22} className="text-rose-500" />
               </div>
-              <h3 className="text-sm font-bold text-slate-900 mb-1">Delete Dashboard?</h3>
-              <p className="text-[12px] text-slate-500">
+              <h3 className="text-sm font-bold text-heading mb-1">Delete Dashboard?</h3>
+              <p className="text-[12px] text-muted">
                 This action cannot be undone. The dashboard and all its configuration will be permanently removed.
               </p>
             </div>
-            <div className="flex items-center gap-2 px-5 py-3 border-t border-slate-100 bg-slate-50/50">
+            <div className="flex items-center gap-2 px-5 py-3 border-t border-card-border bg-surface/50">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 h-8 rounded-xl text-[12px] font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-all"
+                className="flex-1 h-8 rounded-xl text-[12px] font-semibold text-body bg-card border border-card-border hover:bg-surface transition-all"
               >
                 Cancel
               </button>

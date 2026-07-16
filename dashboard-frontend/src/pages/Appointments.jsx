@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { RefreshCw, Calendar, Clock, Users, CheckCircle2, XCircle, AlertTriangle, AlertCircle, UserCheck, Building2, TrendingUp, ArrowRight, CalendarRange, Activity, PieChart, List, BarChart3, Grid3x3 } from 'lucide-react';
 import InfoIcon from '../components/InfoIcon';
@@ -9,19 +9,19 @@ function stateDot({ state }) {
     Completed: "bg-emerald-500",
     Cancelled: "bg-red-400",
     DNA: "bg-orange-400",
-    Pending: "bg-slate-300",
+    Pending: "bg-muted",
     Confirmed: "bg-blue-400",
     "In Surgery": "bg-purple-400",
     Arrived: "bg-teal-400",
   };
-  const dotClass = dotMap[state] || "bg-slate-300";
+  const dotClass = dotMap[state] || "bg-muted";
   return <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />;
 }
 
 // ==================== TIME TAG ====================
 function TimeTag({ dateStr }) {
-  if (!dateStr) return <span className="text-slate-300 text-[10px]">—</span>;
-  return <span className="text-[10px] font-medium text-slate-400">{dateStr}</span>;
+  if (!dateStr) return <span className="text-muted text-[10px]">—</span>;
+  return <span className="text-[10px] font-medium text-muted">{dateStr}</span>;
 }
 
 // ==================== ACTIVITY FEED ====================
@@ -31,10 +31,10 @@ function ActivityFeed({ appointments }) {
       <div className="space-y-2">
         {[1, 2, 3, 4].map(i => (
           <div key={i} className="flex items-start gap-3 p-3">
-            <div className="w-2 h-2 mt-1.5 rounded-full bg-slate-200 animate-pulse" />
+            <div className="w-2 h-2 mt-1.5 rounded-full bg-surface-alt animate-pulse" />
             <div className="flex-1 space-y-1.5">
-              <div className="h-3 w-24 bg-slate-200 rounded animate-pulse" />
-              <div className="h-2.5 w-36 bg-slate-200 rounded animate-pulse" />
+              <div className="h-3 w-24 bg-surface-alt rounded animate-pulse" />
+              <div className="h-2.5 w-36 bg-surface-alt rounded animate-pulse" />
             </div>
           </div>
         ))}
@@ -47,7 +47,7 @@ function ActivityFeed({ appointments }) {
       case "Completed": return "border-emerald-400 bg-emerald-50";
       case "Cancelled": return "border-red-300 bg-red-50";
       case "DNA": return "border-orange-300 bg-orange-50";
-      default: return "border-slate-300 bg-slate-50";
+      default: return "border-card-border bg-surface";
     }
   };
 
@@ -56,7 +56,7 @@ function ActivityFeed({ appointments }) {
       case "Completed": return "bg-emerald-500";
       case "Cancelled": return "bg-red-400";
       case "DNA": return "bg-orange-400";
-      default: return "bg-slate-300";
+      default: return "bg-muted";
     }
   };
 
@@ -65,32 +65,32 @@ function ActivityFeed({ appointments }) {
       {appointments.appointments.slice(0, 8).map((item, index) => {
         const firstCol = index === 0;
         return (
-          <div key={item.id} className="flex items-start gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors rounded-lg group">
+          <div key={item.id} className="flex items-start gap-3 px-4 py-2.5 hover:bg-surface transition-colors rounded-lg group">
             {/* Timeline line + dot */}
             <div className="flex flex-col items-center">
               <div className={`w-2.5 h-2.5 rounded-full border-2 ${getDotColor(item.state)} ${firstCol ? 'ring-2 ring-offset-1 ring-emerald-200' : ''}`} />
               {index < Math.min(appointments.appointments.length, 8) - 1 && (
-                <div className="w-0.5 h-full bg-slate-100 group-hover:bg-slate-200 transition-colors mt-0.5" style={{ minHeight: '16px' }} />
+                <div className="w-0.5 h-full bg-surface-alt group-hover:bg-surface-alt transition-colors mt-0.5" style={{ minHeight: '16px' }} />
               )}
             </div>
             {/* Content */}
             <div className="flex-1 min-w-0 pb-2.5">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[12px] font-semibold text-slate-800 truncate">{item.patientName}</p>
+                <p className="text-[12px] font-semibold text-heading truncate">{item.patientName}</p>
                 <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md shrink-0 ${
                   item.state === 'Completed' ? 'bg-emerald-50 text-emerald-700' :
                   item.state === 'Cancelled' ? 'bg-red-50 text-red-600' :
                   item.state === 'DNA' ? 'bg-orange-50 text-orange-700' :
-                  'bg-slate-100 text-slate-500'
+                  'bg-surface-alt text-muted'
                 }`}>{item.state}</span>
               </div>
-              <div className="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
+              <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted">
                 <span>{item.practitionerName}</span>
-                <span className="w-px h-2.5 bg-slate-200" />
+                <span className="w-px h-2.5 bg-surface-alt" />
                 <span>{item.reason}</span>
                 {item.duration && (
                   <>
-                    <span className="w-px h-2.5 bg-slate-200" />
+                    <span className="w-px h-2.5 bg-surface-alt" />
                     <span>{item.duration} min</span>
                   </>
                 )}
@@ -723,12 +723,12 @@ export default function Appointments() {
               <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-tight">Appointments</h1>
+              <h1 className="text-xl font-bold text-heading leading-tight">Appointments</h1>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-violet-50 text-violet-700 border border-violet-100/60">
                   <Calendar size={10} /> Schedule
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                <span className="text-[10px] text-muted font-medium flex items-center gap-1">
                   <CalendarRange size={10} />
                   {dateLabel}
                 </span>
@@ -737,53 +737,53 @@ export default function Appointments() {
           </div>
 
           <button onClick={handleRefresh} disabled={isRefreshing || cooldownSecs > 0}
-            className="inline-flex items-center gap-1.5 px-3 h-8 bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50">
-            <RefreshCw size={11} className={`transition-transform duration-700 ${isRefreshing ? "rotate-180 text-indigo-500" : "text-slate-400"}`} />
+            className="inline-flex items-center gap-1.5 px-3 h-8 bg-card border border-card-border/80 hover:border-card-border rounded-xl text-[10px] font-semibold text-body hover:text-heading hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50">
+            <RefreshCw size={11} className={`transition-transform duration-700 ${isRefreshing ? "rotate-180 text-indigo-500" : "text-muted"}`} />
             {isRefreshing ? "Refreshing..." : cooldownSecs > 0 ? `${Math.floor(cooldownSecs / 60)}:${String(cooldownSecs % 60).padStart(2, '0')} left` : "Refresh"}
           </button>
         </div>
 
         {/* ======= FILTERS ======= */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
+        <div className="flex items-center gap-1 bg-card border border-card-border/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
           {filters.map((f) => {
             const sel = activeFilter === f;
             return (
               <button key={f} onClick={() => setActiveFilter(f)}
                 className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all ${
-                  sel ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                  sel ? "bg-slate-900 text-white shadow-sm" : "text-muted hover:text-heading hover:bg-surface"
                 }`}>{f}</button>
             );
           })}
           {activeFilter === "Custom" && (
             <div className="flex items-center gap-2 px-2">
               <input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300" />
-              <span className="text-[10px] text-slate-400">–</span>
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <span className="text-[10px] text-muted">–</span>
               <input type="date" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300" />
             </div>
           )}
         </div>
 
         {/* ======= KPI STRIP ======= */}
         {loading ? (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="p-3.5 flex flex-col justify-between">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-slate-200 animate-pulse" />
-                    <div className="h-2.5 w-14 bg-slate-200 rounded animate-pulse" />
+                    <div className="w-6 h-6 rounded-lg bg-surface-alt animate-pulse" />
+                    <div className="h-2.5 w-14 bg-surface-alt rounded animate-pulse" />
                   </div>
-                  <div className="h-7 w-16 bg-slate-200 rounded animate-pulse mb-1.5" />
-                  <div className="h-2.5 w-12 bg-slate-200 rounded animate-pulse" />
+                  <div className="h-7 w-16 bg-surface-alt rounded animate-pulse mb-1.5" />
+                  <div className="h-2.5 w-12 bg-surface-alt rounded animate-pulse" />
                 </div>
               ))}
             </div>
           </div>
         ) : kpiData && (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[
                 {
                   title: "Total Appointments",
@@ -861,14 +861,14 @@ export default function Appointments() {
                 const textAccent = m.positive ? "text-emerald-600" : "text-rose-500";
 
                 return (
-                  <div key={index} className="group p-3.5 hover:bg-slate-50/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
+                  <div key={index} className="group p-3.5 hover:bg-surface/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
                     <div className="flex items-center gap-1.5 mb-2">
                       <div className={`w-6 h-6 rounded-md ${bgAccent} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200`}>
                         <Icon size={11} className={textAccent} />
                       </div>
                       <div className="flex items-center gap-1 min-w-0">
-                        <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-slate-200 text-[7px] font-bold text-slate-500 mr-1 shrink-0 self-center">{index + 33}</span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none truncate">
+                        <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-surface-alt text-[7px] font-bold text-muted mr-1 shrink-0 self-center">{index + 33}</span>
+                        <span className="text-[9px] font-bold text-muted uppercase tracking-wider leading-none truncate">
                           {m.title}
                         </span>
                         <InfoIcon
@@ -883,7 +883,7 @@ export default function Appointments() {
                     </div>
 
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-[1.25rem] font-bold tracking-tight text-slate-900 leading-none">
+                      <span className="text-[1.25rem] font-bold tracking-tight text-heading leading-none">
                         {m.value}
                       </span>
                       <span className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-bold shrink-0 ${
@@ -916,7 +916,7 @@ export default function Appointments() {
                       })()}
                     </div>
 
-                    <p className="text-[9px] font-medium text-slate-400 mt-1 truncate">
+                    <p className="text-[9px] font-medium text-muted mt-1 truncate">
                       {m.footer}
                     </p>
                   </div>
@@ -929,21 +929,21 @@ export default function Appointments() {
         {/* ======= state DONUT + SITE BARS ======= */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 p-5">
-              <div className="w-full h-[260px] bg-slate-100 rounded-lg animate-pulse" />
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 p-5">
+              <div className="w-full h-[260px] bg-surface-alt rounded-lg animate-pulse" />
             </div>
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 p-5">
-              <div className="w-full h-[220px] bg-slate-100 rounded-lg animate-pulse" />
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 p-5">
+              <div className="w-full h-[220px] bg-surface-alt rounded-lg animate-pulse" />
             </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* state donut */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">39</span>
-                  <CheckCircle2 size={12} className="text-slate-400" />
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">39</span>
+                  <CheckCircle2 size={12} className="text-muted" />
                   Outcome Breakdown
                   <InfoIcon
                     title="Outcome Breakdown"
@@ -972,11 +972,11 @@ export default function Appointments() {
             </div>
 
             {/* Site bars */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">40</span>
-                    <Building2 size={12} className="text-slate-400" />
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">40</span>
+                    <Building2 size={12} className="text-muted" />
                     Appointments by Practice
                   <InfoIcon
                     title="Appointments by Practice"
@@ -1003,21 +1003,21 @@ export default function Appointments() {
         {/* ======= PRACTITIONER WORKLOAD + ACTIVITY FEED ======= */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 p-5">
-              <div className="w-full h-[280px] bg-slate-100 rounded-lg animate-pulse" />
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 p-5">
+              <div className="w-full h-[280px] bg-surface-alt rounded-lg animate-pulse" />
             </div>
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 p-5">
-              <div className="space-y-3">{[1, 2, 3, 4].map(i => <div key={i} className="h-10 bg-slate-100 rounded-lg animate-pulse" />)}</div>
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 p-5">
+              <div className="space-y-3">{[1, 2, 3, 4].map(i => <div key={i} className="h-10 bg-surface-alt rounded-lg animate-pulse" />)}</div>
             </div>
           </div>
         ) : practitionerData && recentAppointments && (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* Practitioner bars */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">41</span>
-                    <Users size={12} className="text-slate-400" />
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">41</span>
+                    <Users size={12} className="text-muted" />
                     Practitioner Workload
                   <InfoIcon
                     title="Practitioner Workload"
@@ -1040,12 +1040,12 @@ export default function Appointments() {
             </div>
 
             {/* Activity feed */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">42</span>
-                    <ArrowRight size={12} className="text-slate-400" />
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">42</span>
+                    <ArrowRight size={12} className="text-muted" />
                     Recent Activity
                     <InfoIcon
                       title="Recent Activity"
@@ -1064,12 +1064,12 @@ export default function Appointments() {
                       calculations="Returns the most recent appointments ordered by start_time DESC, limited to the 10 latest records."
                     />
                   </h3>
-                  <span className="text-[9px] font-medium text-slate-400">
+                  <span className="text-[9px] font-medium text-muted">
                     {recentAppointments.appointments?.length || 0} entries
                   </span>
                 </div>
               </div>
-              <div className="divide-y divide-slate-50 max-h-[320px] overflow-y-auto">
+              <div className="divide-y divide-surface max-h-[320px] overflow-y-auto">
                 <ActivityFeed appointments={recentAppointments} />
               </div>
             </div>
@@ -1078,17 +1078,17 @@ export default function Appointments() {
 
         {/* ======= TREND CHART ======= */}
         {loading ? (
-          <div className="bg-white rounded-xl border border-slate-200/50 p-5">
-            <div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" />
+          <div className="bg-card rounded-xl border border-card-border/50 p-5">
+            <div className="w-full h-[200px] bg-surface-alt rounded-lg animate-pulse" />
           </div>
         ) : trendData && (
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100">
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border">
               <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">43</span>
-                      <TrendingUp size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">43</span>
+                      <TrendingUp size={12} className="text-muted" />
                       Daily Appointment Volume
                     <InfoIcon
                       title="Appointment Trend"
@@ -1102,7 +1102,7 @@ export default function Appointments() {
                       calculations="Groups appointments by start_time date. Counts total and completed per day. Shown as an area chart comparing total volume vs completed volume."
                     />
                   </h3>
-                  <p className="text-[9px] text-slate-400 font-medium">Total vs completed per day</p>
+                  <p className="text-[9px] text-muted font-medium">Total vs completed per day</p>
                 </div>
               </div>
             </div>
@@ -1115,17 +1115,17 @@ export default function Appointments() {
         {/* ======= NEW CHARTS ROW: REASON + HOUR ======= */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[260px] bg-slate-100 rounded-lg animate-pulse" /></div>
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[220px] bg-slate-100 rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[260px] bg-surface-alt rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[220px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
         ) : (reasonData || hourData) && (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* Reason donut */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">44</span>
-                  <List size={12} className="text-slate-400" />
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">44</span>
+                  <List size={12} className="text-muted" />
                   Appointments by Reason
                   <InfoIcon
                     title="Appointments by Reason"
@@ -1146,9 +1146,9 @@ export default function Appointments() {
                     return (
                       <div key={r.reason} className="flex items-center gap-1.5 text-[10px]">
                         <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
-                        <span className="truncate font-medium text-slate-700 leading-tight">{r.reason}</span>
-                        <span className="shrink-0 font-semibold text-slate-600">{r.count.toLocaleString()}</span>
-                        <span className="shrink-0 text-slate-400">({pct}%)</span>
+                        <span className="truncate font-medium text-body leading-tight">{r.reason}</span>
+                        <span className="shrink-0 font-semibold text-body">{r.count.toLocaleString()}</span>
+                        <span className="shrink-0 text-muted">({pct}%)</span>
                       </div>
                     );
                   })}
@@ -1157,11 +1157,11 @@ export default function Appointments() {
             </div>
 
             {/* Hour bar */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">45</span>
-                  <Clock size={12} className="text-slate-400" />
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">45</span>
+                  <Clock size={12} className="text-muted" />
                   Appointments by Hour
                   <InfoIcon
                     title="Appointments by Hour"
@@ -1183,17 +1183,17 @@ export default function Appointments() {
         {/* ======= DAY + PRACTITIONER COMPLETION RATE ======= */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[220px] bg-slate-100 rounded-lg animate-pulse" /></div>
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[260px] bg-slate-100 rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[220px] bg-surface-alt rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[260px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
         ) : (dayData || practitionerData) && (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* Day bar */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">46</span>
-                  <CalendarRange size={12} className="text-slate-400" />
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">46</span>
+                  <CalendarRange size={12} className="text-muted" />
                   Appointments by Day
                   <InfoIcon
                     title="Appointments by Day"
@@ -1211,11 +1211,11 @@ export default function Appointments() {
             </div>
 
             {/* Practitioner completion */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">47</span>
-                  <UserCheck size={12} className="text-slate-400" />
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">47</span>
+                  <UserCheck size={12} className="text-muted" />
                   Practitioner Completion Rate
                   <InfoIcon
                     title="Practitioner Completion Rate"
@@ -1240,17 +1240,17 @@ export default function Appointments() {
         {/* ======= CANCELLATIONS BY DAY + RATE ======= */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[260px] bg-slate-100 rounded-lg animate-pulse" /></div>
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[260px] bg-slate-100 rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[260px] bg-surface-alt rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[260px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
         ) : cancelByDay && (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* Cancellations count by day */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">48</span>
-                  <XCircle size={12} className="text-slate-400" />
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">48</span>
+                  <XCircle size={12} className="text-muted" />
                   Cancelled by Day
                   <InfoIcon
                     title="Cancelled by Day"
@@ -1268,11 +1268,11 @@ export default function Appointments() {
             </div>
 
             {/* Appointment Lifecycle */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">49</span>
-                  <Activity size={12} className="text-slate-400" />
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">49</span>
+                  <Activity size={12} className="text-muted" />
                   Appointment Lifecycle
                   <InfoIcon
                     title="Appointment Lifecycle"
@@ -1294,17 +1294,17 @@ export default function Appointments() {
         {/* ======= DURATION + HEATMAP ======= */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" /></div>
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[280px] bg-slate-100 rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[200px] bg-surface-alt rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[280px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
         ) : (durationData || heatmapData) && (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* Duration bar */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">50</span>
-                  <Clock size={12} className="text-slate-400" />
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">50</span>
+                  <Clock size={12} className="text-muted" />
                   Actual Appointment Duration
                   <InfoIcon
                     title="Actual Duration"
@@ -1322,11 +1322,11 @@ export default function Appointments() {
             </div>
 
             {/* Heatmap */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">51</span>
-                  <Grid3x3 size={12} className="text-slate-400" />
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">51</span>
+                  <Grid3x3 size={12} className="text-muted" />
                   Weekly Activity Heatmap
                   <InfoIcon
                     title="Activity Heatmap"

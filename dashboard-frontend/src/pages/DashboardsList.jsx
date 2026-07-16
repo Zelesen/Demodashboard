@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import { Plus, Eye, ArrowUpRight, Sparkles, Image } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -91,16 +91,16 @@ export default function DashboardsList() {
                   <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
                 </svg>
               </div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">Dashboards</h1>
+              <h1 className="text-xl font-bold text-heading tracking-tight">Dashboards</h1>
             </div>
-            <p className="text-[13px] text-slate-500">
+            <p className="text-[13px] text-muted">
               {loading ? "Loading..." : `${dashboards.length} dashboard${dashboards.length !== 1 ? "s" : ""} available`}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate("/start-dashboard")}
-              className="inline-flex items-center gap-2 px-5 h-9 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all active:scale-[0.97] shadow-md shadow-slate-900/10 hover:shadow-lg hover:shadow-slate-900/20"
+              className="inline-flex items-center gap-2 px-5 h-9 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all active:scale-[0.97] shadow-md shadow-heading/10 hover:shadow-lg hover:shadow-heading/20"
             >
               <Plus size={14} />
               New dashboard
@@ -115,9 +115,9 @@ export default function DashboardsList() {
               <div className="w-5 h-5 rounded-md bg-indigo-100 flex items-center justify-center">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
               </div>
-              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Built-in Pages</h2>
-              <div className="h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
-              <span className="text-[9px] font-medium text-slate-400">Always available</span>
+              <h2 className="text-xs font-bold text-muted uppercase tracking-wider">Built-in Pages</h2>
+              <div className="h-px flex-1 bg-gradient-to-r from-card-border to-transparent" />
+              <span className="text-[9px] font-medium text-muted">Always available</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -130,20 +130,20 @@ export default function DashboardsList() {
                     onMouseEnter={() => setHoveredId(d.id)}
                     onMouseLeave={() => setHoveredId(null)}
                     onClick={() => navigate(d.path || "/")}
-                    className="group relative bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                    className="group relative bg-card rounded-2xl border border-card-border/60 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
                     style={{ transform: isHovered ? 'translateY(-2px)' : 'translateY(0)' }}
                   >
                     {d.preview_image_url ? (
-                      <div className="relative h-28 overflow-hidden bg-slate-100">
+                      <div className="relative h-28 overflow-hidden bg-surface-alt">
                         <img src={`${API}${d.preview_image_url}`} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       </div>
                     ) : (
                       <div className={`relative h-28 bg-gradient-to-br ${p.card} flex items-center justify-center overflow-hidden`}>
-                        <div className="absolute inset-0 bg-white/10" />
+                        <div className="absolute inset-0 bg-card/10" />
                         <svg className="absolute w-20 h-20 text-white/20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                           <path d={systemIcon(d.name)} />
                         </svg>
-                        <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-white/25 backdrop-blur-sm border border-white/30 shadow-lg">
+                        <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-card/25 backdrop-blur-sm border border-white/30 shadow-lg">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                             <path d={systemIcon(d.name)} />
                           </svg>
@@ -152,15 +152,15 @@ export default function DashboardsList() {
                     )}
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <h3 className="text-sm font-bold text-slate-900">{d.name}</h3>
+                        <h3 className="text-sm font-bold text-heading">{d.name}</h3>
                         <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-md border ${p.label}`}>{d.type}</span>
                       </div>
-                      <p className="text-[11px] text-slate-500 leading-relaxed mb-3 line-clamp-2">{d.description}</p>
+                      <p className="text-[11px] text-muted leading-relaxed mb-3 line-clamp-2">{d.description}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-medium text-slate-400">{d.path}</span>
+                        <span className="text-[10px] font-medium text-muted">{d.path}</span>
                         <button
                           onClick={(e) => { e.stopPropagation(); navigate(d.path || "/"); }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-lg text-[9px] font-semibold text-slate-500 hover:text-slate-800 transition-all active:scale-95"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 bg-surface hover:bg-surface-alt border border-card-border/60 rounded-lg text-[9px] font-semibold text-muted hover:text-heading transition-all active:scale-95"
                         >
                           <Eye size={10} />
                           Open
@@ -180,31 +180,31 @@ export default function DashboardsList() {
             <div className="w-5 h-5 rounded-md bg-amber-100 flex items-center justify-center">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
             </div>
-            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Your Dashboards</h2>
-            <div className="h-px flex-1 bg-gradient-to-r from-slate-200 to-transparent" />
+            <h2 className="text-xs font-bold text-muted uppercase tracking-wider">Your Dashboards</h2>
+            <div className="h-px flex-1 bg-gradient-to-r from-card-border to-transparent" />
           </div>
 
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3].map(i => (
-                <div key={i} className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden animate-pulse">
-                  <div className="h-[140px] bg-slate-200" />
+                <div key={i} className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden animate-pulse">
+                  <div className="h-[140px] bg-surface-alt" />
                   <div className="p-4 space-y-2">
-                    <div className="h-4 w-24 bg-slate-200 rounded" />
-                    <div className="h-3 w-full bg-slate-200 rounded" />
-                    <div className="h-3 w-16 bg-slate-200 rounded" />
+                    <div className="h-4 w-24 bg-surface-alt rounded" />
+                    <div className="h-3 w-full bg-surface-alt rounded" />
+                    <div className="h-3 w-16 bg-surface-alt rounded" />
                   </div>
                 </div>
               ))}
             </div>
           ) : userDashboards.length === 0 ? (
-            <div className="flex items-center gap-3 py-3 px-4 bg-white/40 rounded-xl border border-slate-200/40">
+            <div className="flex items-center gap-3 py-3 px-4 bg-card/40 rounded-xl border border-card-border/40">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-100 to-orange-50 flex items-center justify-center shadow-inner">
                 <Plus size={14} className="text-amber-500" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-semibold text-slate-600">No custom dashboards yet</p>
-                <p className="text-[10px] text-slate-400">Create your own to track what matters most.</p>
+                <p className="text-xs font-semibold text-body">No custom dashboards yet</p>
+                <p className="text-[10px] text-muted">Create your own to track what matters most.</p>
               </div>
               <button
                 onClick={() => navigate("/start-dashboard")}
@@ -224,20 +224,20 @@ export default function DashboardsList() {
                     key={d.id}
                     onMouseEnter={() => setHoveredId(d.id)}
                     onMouseLeave={() => setHoveredId(null)}
-                    className="group relative bg-white rounded-2xl border border-slate-200/60 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
+                    className="group relative bg-card rounded-2xl border border-card-border/60 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
                     style={{ transform: isHovered ? 'translateY(-3px)' : 'translateY(0)' }}
                     onClick={() => navigate(`/dashboard-view/${d.id}`)}
                   >
-                    <div className={`relative h-[140px] overflow-hidden ${d.preview_image_url ? "bg-slate-100" : `bg-gradient-to-br ${p.card}`}`}>
+                    <div className={`relative h-[140px] overflow-hidden ${d.preview_image_url ? "bg-surface-alt" : `bg-gradient-to-br ${p.card}`}`}>
                       {d.preview_image_url ? (
                         <img src={`${API}${d.preview_image_url}`} alt={d.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       ) : (
-                        <div className="absolute inset-0 bg-white/5" />
+                        <div className="absolute inset-0 bg-card/5" />
                       )}
                       <label className="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/30 transition-all duration-300 cursor-pointer group/upload" onClick={e => e.stopPropagation()}>
                         <div className="opacity-0 group-hover/upload:opacity-100 transition-opacity duration-300 flex flex-col items-center gap-1">
-                          <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
-                            <Image size={14} className="text-slate-700" />
+                          <div className="w-8 h-8 rounded-full bg-card/90 flex items-center justify-center shadow-lg">
+                            <Image size={14} className="text-body" />
                           </div>
                           <span className="text-[8px] font-bold text-white drop-shadow-lg">Set preview</span>
                         </div>
@@ -248,20 +248,20 @@ export default function DashboardsList() {
 
                     <div className="p-3">
                       <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-sm font-bold text-slate-900">{d.name}</h3>
+                        <h3 className="text-sm font-bold text-heading">{d.name}</h3>
                         <div className="flex items-center gap-1">
                           <button
                             onClick={(e) => { e.stopPropagation(); navigate(`/dashboard-view/${d.id}`); }}
-                            className="p-1 hover:bg-slate-100 rounded-md transition-colors" title="View"
+                            className="p-1 hover:bg-surface-alt rounded-md transition-colors" title="View"
                           >
-                            <Eye size={12} className="text-slate-400 hover:text-slate-700" />
+                            <Eye size={12} className="text-muted hover:text-body" />
                           </button>
                         </div>
                       </div>
-                      <p className="text-[10px] text-slate-500 leading-relaxed mb-2 line-clamp-2">{d.description}</p>
+                      <p className="text-[10px] text-muted leading-relaxed mb-2 line-clamp-2">{d.description}</p>
                       <div className="flex items-center gap-1.5">
                         <div className={`w-1.5 h-1.5 rounded-full ${d.status === "Live" ? "bg-emerald-400" : "bg-amber-400"}`} />
-                        <span className="text-[9px] font-medium text-slate-400">{d.status || "Draft"}</span>
+                        <span className="text-[9px] font-medium text-muted">{d.status || "Draft"}</span>
                       </div>
                     </div>
                   </div>
@@ -273,8 +273,8 @@ export default function DashboardsList() {
 
         {/* ---- Bottom CTA ---- */}
         <div className="mt-12 text-center">
-          <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-white/40 backdrop-blur-sm border border-slate-200/40 rounded-2xl shadow-sm">
-            <span className="text-[11px] text-slate-400">Want to build something new?</span>
+          <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-card/40 backdrop-blur-sm border border-card-border/40 rounded-2xl shadow-sm">
+            <span className="text-[11px] text-muted">Want to build something new?</span>
             <button
               onClick={() => navigate("/start-dashboard")}
               className="inline-flex items-center gap-1.5 px-3.5 h-7 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-[10px] font-bold transition-all active:scale-95"
@@ -282,10 +282,10 @@ export default function DashboardsList() {
               <Plus size={11} />
               Start from scratch
             </button>
-            <span className="text-slate-300">or</span>
+            <span className="text-muted">or</span>
             <button
               onClick={() => navigate("/start-dashboard")}
-              className="inline-flex items-center gap-1.5 px-3.5 h-7 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-lg text-[10px] font-semibold text-slate-600 hover:text-slate-800 transition-all active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3.5 h-7 bg-card hover:bg-surface border border-card-border hover:border-card-border rounded-lg text-[10px] font-semibold text-body hover:text-heading transition-all active:scale-95"
             >
               <Sparkles size={11} />
               Chat with IDA

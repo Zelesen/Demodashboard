@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Send, Sparkles, Loader2, CornerDownLeft } from "lucide-react";
 
@@ -68,17 +68,17 @@ export default function ChatIDA() {
         <div className="mb-6">
           <button
             onClick={() => navigate("/start-dashboard")}
-            className="group inline-flex items-center gap-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors duration-200"
+            className="group inline-flex items-center gap-2.5 text-xs font-semibold text-muted hover:text-heading transition-colors duration-200"
           >
-            <div className="p-1.5 rounded-xl bg-white border border-slate-200 shadow-sm group-hover:border-slate-300 group-hover:shadow transition-all duration-200 group-hover:-translate-x-0.5">
-              <ArrowLeft size={13} className="text-slate-600" />
+            <div className="p-1.5 rounded-xl bg-card border border-card-border shadow-sm group-hover:border-card-border group-hover:shadow transition-all duration-200 group-hover:-translate-x-0.5">
+              <ArrowLeft size={13} className="text-body" />
             </div>
             Back to dashboard methods
           </button>
         </div>
 
         {/* Main Chat Interface Window */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col flex-1 min-h-[500px] overflow-hidden">
+        <div className="bg-card rounded-2xl border border-card-border shadow-sm flex flex-col flex-1 min-h-[500px] overflow-hidden">
           
           {/* Chat Messages Stream */}
           <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6">
@@ -98,13 +98,13 @@ export default function ChatIDA() {
 
                   <div className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
                     {!isUser && index === 0 && (
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 ml-1">IDA AI Assistant</span>
+                      <span className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1 ml-1">IDA AI Assistant</span>
                     )}
                     <div
                       className={`rounded-2xl px-4 py-3 text-sm font-medium leading-relaxed shadow-sm ${
                         isUser
                           ? "bg-slate-900 text-white rounded-tr-none"
-                          : "bg-slate-50 text-slate-800 border border-slate-100 rounded-tl-none"
+                          : "bg-surface text-heading border border-card-border rounded-tl-none"
                       }`}
                     >
                       <p>{message.content}</p>
@@ -117,11 +117,11 @@ export default function ChatIDA() {
             {/* Thinking Loader */}
             {isLoading && (
               <div className="flex gap-3 items-center justify-start max-w-2xl">
-                <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-surface-alt flex items-center justify-center text-muted shrink-0">
                   <Loader2 size={14} className="animate-spin text-indigo-600" />
                 </div>
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-sm">
-                  <span className="text-sm text-slate-500 font-medium tracking-wide">Assembling dashboard modules...</span>
+                <div className="bg-surface border border-card-border rounded-2xl rounded-tl-none px-4 py-3 shadow-sm">
+                  <span className="text-sm text-muted font-medium tracking-wide">Assembling dashboard modules...</span>
                 </div>
               </div>
             )}
@@ -132,8 +132,8 @@ export default function ChatIDA() {
           {/* Core Dynamic Content / Suggestions Area */}
           {!isLoading && messages.length === 1 && (
             <div className="px-5 sm:px-8 pb-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <div className="border-t border-slate-100 my-4" />
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+              <div className="border-t border-card-border my-4" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-muted mb-3">
                 Suggested Targets for Your Dashboard
               </h2>
 
@@ -142,12 +142,12 @@ export default function ChatIDA() {
                   <button
                     key={index}
                     onClick={() => handleSuggestionClick(suggestion)}
-                    className="group flex items-center gap-3 p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-left transition-all duration-200 hover:border-slate-300 hover:shadow-sm"
+                    className="group flex items-center gap-3 p-3 bg-card hover:bg-surface border border-card-border rounded-xl text-left transition-all duration-200 hover:border-card-border hover:shadow-sm"
                   >
                     <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100/50 flex items-center justify-center shrink-0 group-hover:bg-indigo-100/70 transition-colors">
                       <Sparkles size={12} className="text-indigo-500" />
                     </div>
-                    <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-900 transition-colors">
+                    <span className="text-xs font-semibold text-body group-hover:text-heading transition-colors">
                       {suggestion}
                     </span>
                   </button>
@@ -157,15 +157,15 @@ export default function ChatIDA() {
           )}
 
           {/* Bottom Chat Input Form Container */}
-          <div className="p-4 sm:p-6 bg-slate-50 border-t border-slate-100">
-            <form onSubmit={handleSubmit} className="relative bg-white border border-slate-200 rounded-xl shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all overflow-hidden">
+          <div className="p-4 sm:p-6 bg-surface border-t border-card-border">
+            <form onSubmit={handleSubmit} className="relative bg-card border border-card-border rounded-xl shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all overflow-hidden">
               <textarea
                 ref={textareaRef}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Describe your analytics goal (e.g., 'Track active growth vs drop-off metrics this month')..."
                 rows={2}
-                className="w-full resize-none text-sm p-4 pb-12 bg-transparent text-slate-800 placeholder:text-slate-400 focus:outline-none font-medium leading-relaxed"
+                className="w-full resize-none text-sm p-4 pb-12 bg-transparent text-heading placeholder:text-muted focus:outline-none font-medium leading-relaxed"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -176,14 +176,14 @@ export default function ChatIDA() {
               
               {/* Controls bar inside input block */}
               <div className="absolute bottom-2 left-4 right-2 flex items-center justify-between pointer-events-none">
-                <span className="text-[10px] text-slate-400 font-medium hidden sm:inline-flex items-center gap-1">
-                  Press <kbd className="px-1 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-500 font-sans text-[9px] flex items-center gap-0.5">Enter <CornerDownLeft size={8} /></kbd> to send
+                <span className="text-[10px] text-muted font-medium hidden sm:inline-flex items-center gap-1">
+                  Press <kbd className="px-1 py-0.5 bg-surface-alt border border-card-border rounded text-muted font-sans text-[9px] flex items-center gap-0.5">Enter <CornerDownLeft size={8} /></kbd> to send
                 </span>
                 
                 <button
                   type="submit"
                   disabled={!prompt.trim() || isLoading}
-                  className="pointer-events-auto ml-auto w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:bg-slate-100 text-white disabled:text-slate-400 flex items-center justify-center transition-all active:scale-95 disabled:cursor-not-allowed shadow-sm"
+                  className="pointer-events-auto ml-auto w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 disabled:bg-surface-alt text-white disabled:text-muted flex items-center justify-center transition-all active:scale-95 disabled:cursor-not-allowed shadow-sm"
                 >
                   <Send size={13} strokeWidth={2.5} />
                 </button>

@@ -16,13 +16,13 @@ import {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-lg text-xs leading-relaxed font-sans">
-        <p className="font-bold text-slate-800 mb-1.5">{label}</p>
+      <div className="bg-card border border-card-border p-3 rounded-xl shadow-lg text-xs leading-relaxed font-sans">
+        <p className="font-bold text-heading mb-1.5">{label}</p>
         {payload.map((entry, index) => (
           <div key={index} className="flex items-center gap-2 mb-1 last:mb-0">
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
-            <span className="text-slate-500 font-medium">{entry.name}:</span>
-            <span className="text-slate-800 font-bold">{entry.value}</span>
+            <span className="text-muted font-medium">{entry.name}:</span>
+            <span className="text-heading font-bold">{entry.value}</span>
           </div>
         ))}
       </div>
@@ -381,7 +381,7 @@ export default function Clinicians() {
   ] : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 sm:p-6 lg:p-8 animate-fadeIn">
+    <div className="min-h-screen bg-gradient-to-br from-surface to-blue-50 p-4 sm:p-6 lg:p-8 animate-fadeIn">
       <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6 select-none animate-in fade-in slide-in-from-top-4 duration-500 ease-out">
         
         {/* ================= HEADER SECTION ================= */}
@@ -393,22 +393,22 @@ export default function Clinicians() {
                 <Users size={18} className="animate-pulse" />
               </div>
               {/* Live Operational Status Pulse Indicator */}
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-slate-50 rounded-full shadow-sm" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-card rounded-full shadow-sm" />
             </div>
 
             <div>
               <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 bg-clip-text">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-heading bg-clip-text">
                   Clinicians
                 </h1>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/60 shadow-sm">
-                  <Building2 size={11} className="text-slate-400" /> 10 Practices active
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-alt text-body border border-card-border/60 shadow-sm">
+                  <Building2 size={11} className="text-muted" /> 10 Practices active
                 </span>
               </div>
               
-              <p className="text-xs sm:text-sm font-medium text-slate-400 mt-1 flex items-center gap-1.5">
-                <CalendarRange size={13} className="text-slate-300" />
-                Clinician Performance & Coaching Telemetry <span className="text-slate-300">•</span> <span className="text-slate-600 font-semibold">{
+              <p className="text-xs sm:text-sm font-medium text-muted mt-1 flex items-center gap-1.5">
+                <CalendarRange size={13} className="text-muted" />
+                Clinician Performance & Coaching Telemetry <span className="text-muted">•</span> <span className="text-body font-semibold">{
                   activeFilter === "Today" ? "25 Jun 2026" :
                   activeFilter === "Last 7 days" ? "19 Jun to 25 Jun 2026" :
                   activeFilter === "Last 30 days" ? "26 May to 25 Jun 2026" :
@@ -424,11 +424,11 @@ export default function Clinicians() {
           <button 
             onClick={handleRefresh}
             disabled={isRefreshing || cooldownSecs > 0}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 h-10 bg-white border border-slate-200 hover:border-slate-300/80 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 h-10 bg-card border border-card-border hover:border-card-border/80 rounded-xl text-xs font-semibold text-body hover:text-heading hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none"
           >
             <RefreshCw 
               size={14} 
-              className={`text-slate-400 transition-transform duration-700 ease-out ${
+              className={`text-muted transition-transform duration-700 ease-out ${
                 isRefreshing ? "rotate-180 text-blue-500" : ""
               }`} 
             />
@@ -437,7 +437,7 @@ export default function Clinicians() {
         </div>
 
         {/* ================= DATE FILTER / SEGMENTED CONTROL ================= */}
-        <div className="inline-flex p-1 bg-white border border-slate-200/60 rounded-xl shadow-sm sticky top-16 z-30">
+        <div className="inline-flex p-1 bg-card border border-card-border/60 rounded-xl shadow-sm sticky top-16 z-30">
           <div className="flex gap-0.5 relative min-w-max">
             {filters.map((filter) => {
               const isSelected = activeFilter === filter;
@@ -449,8 +449,8 @@ export default function Clinicians() {
                     relative px-4 h-8 text-[12px] font-semibold tracking-tight rounded-lg transition-all duration-300 outline-none
                     ${ 
                       isSelected 
-                        ? "bg-white text-slate-900 shadow-[0_2px_4px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60" 
-                        : "text-slate-500 hover:text-slate-900 hover:bg-white/40" 
+                        ? "bg-card text-heading shadow-[0_2px_4px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.03)] border border-card-border/60" 
+                        : "text-muted hover:text-heading hover:bg-card/40" 
                     } 
                   `} 
                 >
@@ -463,23 +463,23 @@ export default function Clinicians() {
 
         {/* Custom Date Range Picker */}
         {activeFilter === "Custom" && (
-          <div className="flex items-center gap-2 bg-white border border-slate-200/60 rounded-lg p-2 shadow-sm">
+          <div className="flex items-center gap-2 bg-card border border-card-border/60 rounded-lg p-2 shadow-sm">
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">From:</label>
+              <label className="text-[10px] font-semibold text-body">From:</label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">To:</label>
+              <label className="text-[10px] font-semibold text-body">To:</label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -489,10 +489,10 @@ export default function Clinicians() {
         {!cliniciansData ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-6 select-none">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-4.5 animate-pulse">
-                <div className="h-3 sm:h-4 bg-slate-200 rounded w-3/4 mb-2 sm:mb-3"></div>
-                <div className="h-6 sm:h-8 bg-slate-200 rounded w-1/2 mb-2"></div>
-                <div className="h-2 sm:h-3 bg-slate-200 rounded w-full"></div>
+              <div key={i} className="bg-card border border-card-border/80 rounded-xl p-3 sm:p-4.5 animate-pulse">
+                <div className="h-3 sm:h-4 bg-surface-alt rounded w-3/4 mb-2 sm:mb-3"></div>
+                <div className="h-6 sm:h-8 bg-surface-alt rounded w-1/2 mb-2"></div>
+                <div className="h-2 sm:h-3 bg-surface-alt rounded w-full"></div>
               </div>
             ))}
           </div>
@@ -507,7 +507,7 @@ export default function Clinicians() {
             return (
               <div
                 key={index}
-                className="group relative bg-white border border-slate-200/80 rounded-xl p-3 sm:p-4.5 flex flex-col justify-between hover:border-slate-300 hover:shadow-[0_2px_8px_rgba(0,0,0,0.01),0_12px_24px_-4px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
+                className="group relative bg-card border border-card-border/80 rounded-xl p-3 sm:p-4.5 flex flex-col justify-between hover:border-card-border hover:shadow-[0_2px_8px_rgba(0,0,0,0.01),0_12px_24px_-4px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
               >
                 {/* Subtle backing ambient glow */}
                 <div 
@@ -517,14 +517,14 @@ export default function Clinicians() {
                 
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10.5px] font-bold text-slate-400 uppercase tracking-wider font-mono truncate">
+                    <span className="text-[10.5px] font-bold text-muted uppercase tracking-wider font-mono truncate">
                       {m.title}
                     </span>
                     <InfoTooltip text={m.tooltip} />
                   </div>
 
                   <div className="flex items-baseline justify-between gap-1 mt-2 sm:mt-2.5">
-                    <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-800 font-sans">
+                    <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-heading font-sans">
                       {m.value}
                     </h2>
                     {m.change && (
@@ -570,9 +570,9 @@ export default function Clinicians() {
                   </svg>
                 </div>
 
-                <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] sm:text-[10.5px] font-medium text-slate-400 tracking-tight">
+                <div className="mt-2.5 pt-2 border-t border-card-border flex items-center justify-between text-[10px] sm:text-[10.5px] font-medium text-muted tracking-tight">
                   <span className="truncate">Live data</span>
-                  <span className="text-[9px] font-bold text-slate-300 group-hover:text-slate-400 font-mono transition-colors">LIVE</span>
+                  <span className="text-[9px] font-bold text-muted group-hover:text-muted font-mono transition-colors">LIVE</span>
                 </div>
               </div>
             );
@@ -582,29 +582,29 @@ export default function Clinicians() {
 
       {/* Clinician League Table */}
       {filteredClinicians.length > 0 ? (
-      <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 mb-6 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-2">
+      <div className="bg-card rounded-xl border border-card-border/80 p-4 sm:p-5 mb-6 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
-            <h2 className="font-bold text-sm sm:text-base text-slate-800">
+            <h2 className="font-bold text-sm sm:text-base text-heading">
               Clinician league table
               <InfoTooltip text="Clinicians ranked by performance metrics" />
             </h2>
-            <p className="text-[10px] sm:text-sm text-slate-500 mt-1">
+            <p className="text-[10px] sm:text-sm text-muted mt-1">
               45 clinicians across 10 practices, 19-06-2026 to 25-06-2026 - sort any column
             </p>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Tabs */}
-            <div className="flex bg-slate-100 rounded-lg p-1">
+            <div className="flex bg-surface-alt rounded-lg p-1">
               {["All", "Dentist", "Hygienist", "Therapist"].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setLeagueTab(tab)}
                   className={`px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all duration-200 cursor-pointer ${
                     leagueTab === tab
-                      ? "bg-white text-slate-800 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "bg-card text-heading shadow-sm"
+                      : "text-muted hover:text-body"
                   }`}
                 >
                   {tab}
@@ -613,21 +613,21 @@ export default function Clinicians() {
             </div>
 
           <div className="text-right">
-            <p className="text-[10px] sm:text-xs text-slate-500 font-medium">
+            <p className="text-[10px] sm:text-xs text-muted font-medium">
               reconciles to group
             </p>
-            <p className="text-xs sm:text-sm font-bold text-slate-800">
+            <p className="text-xs sm:text-sm font-bold text-heading">
               {filteredClinicians.reduce((sum, c) => sum + (c.prodVal || 0), 0) > 0 
                 ? `${formatUKCurrencyFromThousands(filteredClinicians.reduce((sum, c) => sum + (c.prodVal || 0), 0), 0)} · ${filteredClinicians.reduce((sum, c) => sum + (c.sessionsNum || 0), 0)} sessions`
                 : '£0 · 0 sessions'}
             </p>
           </div>
 
-            <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-              <Download className="w-4 h-4 text-slate-500" />
+            <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+              <Download className="w-4 h-4 text-muted" />
             </button>
-            <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-              <Maximize2 className="w-4 h-4 text-slate-500" />
+            <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+              <Maximize2 className="w-4 h-4 text-muted" />
             </button>
           </div>
         </div>
@@ -636,29 +636,29 @@ export default function Clinicians() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200">
-                <th className="text-left py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">#</th>
-                <th className="text-left py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Clinician</th>
-                <th className="text-left py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Practice</th>
-                <th className="text-right py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Sess.</th>
-                <th className="text-right py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Production</th>
-                <th className="text-right py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Prod/Sess</th>
-                <th className="text-right py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Priv %</th>
-                <th className="text-right py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Accept %</th>
-                <th className="text-right py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Recall %</th>
-                <th className="text-right py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">FTA %</th>
-                <th className="text-right py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Compl.</th>
-                <th className="text-right py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Index ↓</th>
-                <th className="text-center py-3 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Prod Trend</th>
+              <tr className="border-b border-card-border">
+                <th className="text-left py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">#</th>
+                <th className="text-left py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Clinician</th>
+                <th className="text-left py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Practice</th>
+                <th className="text-right py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Sess.</th>
+                <th className="text-right py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Production</th>
+                <th className="text-right py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Prod/Sess</th>
+                <th className="text-right py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Priv %</th>
+                <th className="text-right py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Accept %</th>
+                <th className="text-right py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Recall %</th>
+                <th className="text-right py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">FTA %</th>
+                <th className="text-right py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Compl.</th>
+                <th className="text-right py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Index ↓</th>
+                <th className="text-center py-3 px-2 text-xs font-semibold text-muted uppercase tracking-wider">Prod Trend</th>
               </tr>
             </thead>
             <tbody>
               {filteredClinicians.map((clinician) => (
-                <tr key={clinician.rank} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                  <td className="py-3 px-2 text-slate-600 font-medium">{clinician.rank}</td>
+                <tr key={clinician.rank} className="border-b border-card-border hover:bg-surface transition-colors">
+                  <td className="py-3 px-2 text-body font-medium">{clinician.rank}</td>
                   <td className="py-3 px-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-800">{clinician.name}</span>
+                      <span className="font-semibold text-heading">{clinician.name}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         clinician.role === 'Dentist' ? 'bg-blue-100 text-blue-700' :
                         clinician.role === 'Hygienist' ? 'bg-emerald-100 text-emerald-700' :
@@ -666,13 +666,13 @@ export default function Clinicians() {
                       }`}>
                         {clinician.role}
                       </span>
-                      <span className="text-xs text-slate-400">{clinician.sessions}</span>
+                      <span className="text-xs text-muted">{clinician.sessions}</span>
                     </div>
                   </td>
-                  <td className="py-3 px-2 text-slate-600">{clinician.practice}</td>
-                  <td className="py-3 px-2 text-right text-slate-600">{clinician.sessionsNum}</td>
-                  <td className="py-3 px-2 text-right font-semibold text-slate-800">{clinician.production}</td>
-                  <td className="py-3 px-2 text-right text-slate-600">{clinician.prodPerSess}</td>
+                  <td className="py-3 px-2 text-body">{clinician.practice}</td>
+                  <td className="py-3 px-2 text-right text-body">{clinician.sessionsNum}</td>
+                  <td className="py-3 px-2 text-right font-semibold text-heading">{clinician.production}</td>
+                  <td className="py-3 px-2 text-right text-body">{clinician.prodPerSess}</td>
                   <td className="py-3 px-2 text-right">
                     <span className={`px-2 py-1 rounded-lg text-xs font-medium ${
                       clinician.privMixVal >= 85 ? 'bg-emerald-50 text-emerald-700' :
@@ -700,8 +700,8 @@ export default function Clinicians() {
                       {clinician.fta}
                     </span>
                   </td>
-                  <td className="py-3 px-2 text-right text-slate-600">{clinician.compl}</td>
-                  <td className="py-3 px-2 text-right font-bold text-slate-800">{clinician.index}</td>
+                  <td className="py-3 px-2 text-right text-body">{clinician.compl}</td>
+                  <td className="py-3 px-2 text-right font-bold text-heading">{clinician.index}</td>
                   <td className="py-3 px-2">
                     <div className="flex justify-center">
                       <svg width="60" height="20" className="overflow-visible">
@@ -733,12 +733,12 @@ export default function Clinicians() {
         </div>
       </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 mb-6 animate-pulse">
-          <div className="h-6 bg-slate-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-slate-200 rounded w-1/2 mb-4"></div>
+        <div className="bg-card rounded-xl border border-card-border/80 p-5 mb-6 animate-pulse">
+          <div className="h-6 bg-surface-alt rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-surface-alt rounded w-1/2 mb-4"></div>
           <div className="space-y-2">
             {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="h-12 bg-slate-200 rounded"></div>
+              <div key={i} className="h-12 bg-surface-alt rounded"></div>
             ))}
           </div>
         </div>
@@ -746,29 +746,29 @@ export default function Clinicians() {
 
       {/* Case Acceptance vs Plan Value */}
       {cliniciansData && caseAcceptanceData ? (
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 mb-6 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-3">
+        <div className="bg-card rounded-xl border border-card-border/80 p-4 sm:p-5 mb-6 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-3">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
             <div>
-              <h2 className="font-bold text-sm sm:text-base text-slate-800">
+              <h2 className="font-bold text-sm sm:text-base text-heading">
                 Case acceptance vs plan value (signature)
                 <InfoTooltip text="Plan value presented per session against acceptance, sized by plans presented" />
               </h2>
-              <p className="text-[10px] sm:text-sm text-slate-500 mt-1">
+              <p className="text-[10px] sm:text-sm text-muted mt-1">
                 plan value presented per session against acceptance, sized by plans presented
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] sm:text-xs text-slate-500 font-medium">
+              <p className="text-[10px] sm:text-xs text-muted font-medium">
                 recoverable if leakers hit median acceptance
               </p>
               <p className="text-lg font-bold text-blue-600">£494.8k/yr</p>
             </div>
             <div className="flex gap-2">
-              <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-                <Download className="w-4 h-4 text-slate-500" />
+              <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+                <Download className="w-4 h-4 text-muted" />
               </button>
-              <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-                <Maximize2 className="w-4 h-4 text-slate-500" />
+              <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+                <Maximize2 className="w-4 h-4 text-muted" />
               </button>
             </div>
           </div>
@@ -776,11 +776,11 @@ export default function Clinicians() {
           <div className="flex items-center gap-4 sm:gap-6 mb-4">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-600 rounded-full"></span>
-              <span className="text-[10px] sm:text-xs text-slate-600 font-medium">Dentist</span>
+              <span className="text-[10px] sm:text-xs text-body font-medium">Dentist</span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-amber-500 rounded-full"></span>
-              <span className="text-[10px] sm:text-xs text-slate-600 font-medium">Therapist</span>
+              <span className="text-[10px] sm:text-xs text-body font-medium">Therapist</span>
             </div>
           </div>
 
@@ -815,7 +815,7 @@ export default function Clinicians() {
             </ResponsiveContainer>
           </div>
 
-          <div className="flex justify-between text-[10px] sm:text-xs text-slate-400 mt-2 px-2 sm:px-4">
+          <div className="flex justify-between text-[10px] sm:text-xs text-muted mt-2 px-2 sm:px-4">
             <span>£288</span>
             <span>£859</span>
             <span>£1.4k</span>
@@ -825,41 +825,41 @@ export default function Clinicians() {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 mb-6 animate-pulse">
-          <div className="h-6 bg-slate-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-slate-200 rounded w-1/2 mb-6"></div>
-          <div className="h-[350px] bg-slate-200 rounded"></div>
+        <div className="bg-card rounded-xl border border-card-border/80 p-5 mb-6 animate-pulse">
+          <div className="h-6 bg-surface-alt rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-surface-alt rounded w-1/2 mb-6"></div>
+          <div className="h-[350px] bg-surface-alt rounded"></div>
         </div>
       )}
 
       {/* Treatment-Plan Conversion by Tier */}
         {cliniciansData ? (
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 mb-6 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-4">
+        <div className="bg-card rounded-xl border border-card-border/80 p-4 sm:p-5 mb-6 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-4">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
             <div>
-              <h2 className="font-bold text-sm sm:text-base text-slate-800">
+              <h2 className="font-bold text-sm sm:text-base text-heading">
                 Treatment-plan conversion by tier
                 <InfoTooltip text="Conversion funnel from presented to completed, split by plan tier" />
               </h2>
-              <p className="text-[10px] sm:text-sm text-slate-500 mt-1">
+              <p className="text-[10px] sm:text-sm text-muted mt-1">
                 presented → accepted → started → completed, split by plan tier
               </p>
             </div>
             <div className="flex gap-2">
-              <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-                <Download className="w-4 h-4 text-slate-500" />
+              <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+                <Download className="w-4 h-4 text-muted" />
               </button>
-              <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-                <Maximize2 className="w-4 h-4 text-slate-500" />
+              <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+                <Maximize2 className="w-4 h-4 text-muted" />
               </button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {[].map((tier, idx) => (
-              <div key={idx} className="border border-slate-200 rounded-xl p-4">
+              <div key={idx} className="border border-card-border rounded-xl p-4">
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="font-bold text-slate-800">{tier.title} · {tier.value}</h3>
+                  <h3 className="font-bold text-heading">{tier.title} · {tier.value}</h3>
                   <span className="text-xs font-medium text-rose-600 bg-rose-50 px-2 py-1 rounded-lg">
                     {tier.change}
                   </span>
@@ -870,10 +870,10 @@ export default function Clinicians() {
                   {tier.stages.map((stage, sIdx) => (
                     <div key={sIdx} className="relative">
                       <div className="flex justify-between text-xs mb-1">
-                        <span className="text-slate-500 font-medium">{stage.name}</span>
-                        <span className="text-slate-600 font-bold">{stage.value} <span className="text-slate-400 font-normal">({stage.pct})</span></span>
+                        <span className="text-muted font-medium">{stage.name}</span>
+                        <span className="text-body font-bold">{stage.value} <span className="text-muted font-normal">({stage.pct})</span></span>
                       </div>
-                      <div className="h-8 bg-slate-100 rounded-lg overflow-hidden relative">
+                      <div className="h-8 bg-surface-alt rounded-lg overflow-hidden relative">
                         <div
                           className="h-full rounded-lg transition-all duration-500"
                           style={{
@@ -887,7 +887,7 @@ export default function Clinicians() {
                   ))}
                 </div>
 
-                <div className="flex justify-between text-xs text-slate-400 mt-3">
+                <div className="flex justify-between text-xs text-muted mt-3">
                   <span>0%</span>
                   <span>100%</span>
                 </div>
@@ -896,12 +896,12 @@ export default function Clinicians() {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 mb-6 animate-pulse">
-          <div className="h-6 bg-slate-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-slate-200 rounded w-1/2 mb-6"></div>
+        <div className="bg-card rounded-xl border border-card-border/80 p-5 mb-6 animate-pulse">
+          <div className="h-6 bg-surface-alt rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-surface-alt rounded w-1/2 mb-6"></div>
           <div className="grid grid-cols-3 gap-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-48 bg-slate-200 rounded"></div>
+              <div key={i} className="h-48 bg-surface-alt rounded"></div>
             ))}
           </div>
         </div>
@@ -911,27 +911,27 @@ export default function Clinicians() {
       {cliniciansData && hygieneData ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
         {/* Hygiene Team Utilisation */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-5">
+        <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/80 p-4 sm:p-5 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-5">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
             <div>
-              <h2 className="font-bold text-sm sm:text-base text-slate-800">
+              <h2 className="font-bold text-sm sm:text-base text-heading">
                 Hygiene team utilisation
                 <InfoTooltip text="Booked vs available hygiene time, RAG against 85% target" />
               </h2>
-              <p className="text-[10px] sm:text-sm text-slate-500 mt-1">
+              <p className="text-[10px] sm:text-sm text-muted mt-1">
                 booked vs available hygiene time, RAG against 85% target
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] sm:text-xs text-slate-500 font-medium">lost contribution</p>
+              <p className="text-[10px] sm:text-xs text-muted font-medium">lost contribution</p>
               <p className="text-lg font-bold text-rose-600">£4.1k</p>
             </div>
             <div className="flex gap-2">
-              <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-                <Download className="w-4 h-4 text-slate-500" />
+              <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+                <Download className="w-4 h-4 text-muted" />
               </button>
-              <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-                <Maximize2 className="w-4 h-4 text-slate-500" />
+              <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+                <Maximize2 className="w-4 h-4 text-muted" />
               </button>
             </div>
           </div>
@@ -941,7 +941,7 @@ export default function Clinicians() {
               <div key={index} className="flex items-center gap-4">
                 <div className="flex-1">
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-600 font-medium">{item.name}</span>
+                    <span className="text-body font-medium">{item.name}</span>
                     <span className={`font-bold ${
                       item.value >= 85 ? 'text-emerald-600' :
                       item.value >= 70 ? 'text-amber-600' :
@@ -950,7 +950,7 @@ export default function Clinicians() {
                       {item.value}%
                     </span>
                   </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-surface-alt rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
                         item.value >= 85 ? 'bg-blue-600' :
@@ -967,19 +967,19 @@ export default function Clinicians() {
         </div>
 
         {/* Hygiene-to-Dentist Ratio */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-6">
+        <div className="bg-card rounded-xl border border-card-border/80 p-4 sm:p-5 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-6">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
             <div>
-              <h2 className="font-bold text-sm sm:text-base text-slate-800">
+              <h2 className="font-bold text-sm sm:text-base text-heading">
                 Hygiene-to-dentist ratio
                 <InfoTooltip text="Recommended band 0.5-0.7 hygienists per dentist" />
               </h2>
-              <p className="text-[10px] sm:text-sm text-slate-500 mt-1">
+              <p className="text-[10px] sm:text-sm text-muted mt-1">
                 recommended band 0.5-0.7
               </p>
             </div>
-            <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-              <Maximize2 className="w-4 h-4 text-slate-500" />
+            <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+              <Maximize2 className="w-4 h-4 text-muted" />
             </button>
           </div>
 
@@ -999,13 +999,13 @@ export default function Clinicians() {
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-[10px] sm:text-xs text-slate-500 font-medium">of target band</span>
-                <span className="text-3xl sm:text-4xl font-bold text-slate-800">43%</span>
+                <span className="text-[10px] sm:text-xs text-muted font-medium">of target band</span>
+                <span className="text-3xl sm:text-4xl font-bold text-heading">43%</span>
               </div>
             </div>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-body">
                 <span className="font-bold">0.3</span> / 0.7 target
               </p>
               <p className="text-sm font-medium text-rose-500 mt-1">
@@ -1017,41 +1017,41 @@ export default function Clinicians() {
       </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 p-5 animate-pulse">
-            <div className="h-6 bg-slate-200 rounded w-1/3 mb-4"></div>
-            <div className="h-4 bg-slate-200 rounded w-1/2 mb-4"></div>
+          <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/80 p-5 animate-pulse">
+            <div className="h-6 bg-surface-alt rounded w-1/3 mb-4"></div>
+            <div className="h-4 bg-surface-alt rounded w-1/2 mb-4"></div>
             <div className="space-y-2">
               {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="h-12 bg-slate-200 rounded"></div>
+                <div key={i} className="h-12 bg-surface-alt rounded"></div>
               ))}
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200/80 p-5 animate-pulse">
-            <div className="h-6 bg-slate-200 rounded w-1/3 mb-4"></div>
-            <div className="h-[200px] bg-slate-200 rounded"></div>
+          <div className="bg-card rounded-xl border border-card-border/80 p-5 animate-pulse">
+            <div className="h-6 bg-surface-alt rounded w-1/3 mb-4"></div>
+            <div className="h-[200px] bg-surface-alt rounded"></div>
           </div>
         </div>
       )}
 
       {/* Treatment Mix by Clinician */}
       {cliniciansData ? (
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-7">
+        <div className="bg-card rounded-xl border border-card-border/80 p-4 sm:p-5 hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.02)] transition-shadow duration-300 animate-slideUp stagger-7">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
             <div>
-              <h2 className="font-bold text-sm sm:text-base text-slate-800">
+              <h2 className="font-bold text-sm sm:text-base text-heading">
                 Treatment mix by clinician
                 <InfoTooltip text="Delivered-value composition for the top producers, with high-value share" />
               </h2>
-              <p className="text-[10px] sm:text-sm text-slate-500 mt-1">
+              <p className="text-[10px] sm:text-sm text-muted mt-1">
                 delivered-value composition for the top producers, with high-value share
               </p>
             </div>
             <div className="flex gap-2">
-              <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-                <Download className="w-4 h-4 text-slate-500" />
+              <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+                <Download className="w-4 h-4 text-muted" />
               </button>
-              <button className="p-2 bg-white border border-slate-200/70 hover:border-slate-300 rounded-lg transition-colors">
-                <Maximize2 className="w-4 h-4 text-slate-500" />
+              <button className="p-2 bg-card border border-card-border/70 hover:border-card-border rounded-lg transition-colors">
+                <Maximize2 className="w-4 h-4 text-muted" />
               </button>
             </div>
           </div>
@@ -1071,7 +1071,7 @@ export default function Clinicians() {
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-1.5 sm:gap-2">
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm" style={{ backgroundColor: item.color }}></span>
-                <span className="text-[10px] sm:text-xs text-slate-600 font-medium">{item.label}</span>
+                <span className="text-[10px] sm:text-xs text-body font-medium">{item.label}</span>
               </div>
             ))}
           </div>
@@ -1082,10 +1082,10 @@ export default function Clinicians() {
               const total = Object.values(clinician).slice(1).reduce((a, b) => a + b, 0);
               return (
                 <div key={index} className="flex items-center gap-3 sm:gap-4">
-                  <div className="w-28 sm:w-32 text-xs sm:text-sm font-medium text-slate-700 shrink-0">
+                  <div className="w-28 sm:w-32 text-xs sm:text-sm font-medium text-body shrink-0">
                     {clinician.name}
                   </div>
-                  <div className="flex-1 h-8 bg-slate-100 rounded-lg overflow-hidden flex">
+                  <div className="flex-1 h-8 bg-surface-alt rounded-lg overflow-hidden flex">
                     {Object.entries(clinician).slice(1).map(([key, value], i) => {
                       const colors = ["#3b82f6", "#10b981", "#22c55e", "#eab308", "#94a3b8", "#6366f1", "#ec4899", "#06b6d4", "#f97316"];
                       const width = (value / total) * 100;
@@ -1107,18 +1107,18 @@ export default function Clinicians() {
             })}
           </div>
 
-          <div className="flex justify-between text-[10px] sm:text-xs text-slate-400 mt-4 px-4 sm:px-36">
+          <div className="flex justify-between text-[10px] sm:text-xs text-muted mt-4 px-4 sm:px-36">
             <span>0%</span>
             <span>100%</span>
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200/80 p-5 mb-6 animate-pulse">
-          <div className="h-6 bg-slate-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-slate-200 rounded w-1/2 mb-6"></div>
+        <div className="bg-card rounded-xl border border-card-border/80 p-5 mb-6 animate-pulse">
+          <div className="h-6 bg-surface-alt rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-surface-alt rounded w-1/2 mb-6"></div>
           <div className="space-y-2">
             {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="h-12 bg-slate-200 rounded"></div>
+              <div key={i} className="h-12 bg-surface-alt rounded"></div>
             ))}
           </div>
         </div>

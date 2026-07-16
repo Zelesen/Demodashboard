@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+﻿import { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, CalendarRange, RefreshCw, LayoutDashboard, Edit3, X,
@@ -18,8 +18,6 @@ import { metricCards, sections } from "../components/dashboard/widgetDefinitions
 const API = "http://localhost:8000";
 const ROW_HEIGHT = 100;
 const COLS = 12;
-
-const FILTERS = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "Custom"];
 
 const PERIOD_MAP = {
   "Today": "today",
@@ -48,7 +46,16 @@ export default function DashboardViewer() {
   const [containerWidth, setContainerWidth] = useState(800);
   const [widgets, setWidgets] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [cooldownSecs, setCooldownSecs] = useState(0);
+  const [cooldownSecs, setCooldownSecs] = useState(() => {
+    const stored = sessionStorage.getItem("dashboard_refresh_cooldown");
+    if (!stored) return 0;
+    const until = parseInt(stored, 10);
+    if (Date.now() >= until) {
+      sessionStorage.removeItem("dashboard_refresh_cooldown");
+      return 0;
+    }
+    return Math.floor((until - Date.now()) / 1000);
+  });
   const containerRef = useRef(null);
   const [fullscreenWidgetId, setFullscreenWidgetId] = useState(null);
   const [modalFilter, setModalFilter] = useState("Last 7 days");
@@ -76,11 +83,24 @@ export default function DashboardViewer() {
   const { dataMap: modalDataMap, loading: modalDataLoading } = useDashboardData(modalWidgetArr, modalPeriod, modalStartDate, modalEndDate);
 
   const [widgetMeta, setWidgetMeta] = useState([]);
+  const [availableFilters, setAvailableFilters] = useState([]);
   useEffect(() => {
     fetch(`${API}/api/widgets`)
       .then(r => r.json())
-      .then(d => setWidgetMeta(d.widgets || []))
-      .catch(() => setWidgetMeta([]));
+      .then(d => {
+        setWidgetMeta(d.widgets || []);
+        // Extract available filters from widget metadata if provided
+        if (d.filters && Array.isArray(d.filters)) {
+          setAvailableFilters(d.filters);
+        } else {
+          // Fallback to default filters
+          setAvailableFilters(["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "Custom"]);
+        }
+      })
+      .catch(() => {
+        setWidgetMeta([]);
+        setAvailableFilters(["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "Custom"]);
+      });
   }, []);
 
   const modalWidgetData = fullscreenWidget ? {
@@ -172,7 +192,6 @@ export default function DashboardViewer() {
       sessionStorage.removeItem("dashboard_refresh_cooldown");
       return;
     }
-    setCooldownSecs(Math.floor((until - Date.now()) / 1000));
     const interval = setInterval(() => {
       const remaining = Math.max(0, Math.floor((until - Date.now()) / 1000));
       setCooldownSecs(remaining);
@@ -210,7 +229,7 @@ export default function DashboardViewer() {
       <style>{`.viewer-grid .react-resizable-handle { display: none !important; } .viewer-grid .react-grid-item { cursor: default !important; user-select: none !important; -webkit-user-drag: none !important; } .viewer-grid .react-grid-item > * { user-select: none !important; -webkit-user-drag: none !important; }`}</style>
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-to-br from-indigo-200/20 via-blue-100/10 to-transparent rounded-full blur-3xl" />
-        <div className="absolute -bottom-60 -left-40 w-[500px] h-[500px] bg-gradient-to-tr from-emerald-100/15 via-slate-100/10 to-transparent rounded-full blur-3xl" />
+        <div className="absolute -bottom-60 -left-40 w-[500px] h-[500px] bg-gradient-to-tr from-emerald-100/15 via-surface-alt/10 to-transparent rounded-full blur-3xl" />
       </div>
 
       <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-5 space-y-4 relative z-10">
@@ -218,22 +237,22 @@ export default function DashboardViewer() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/dashboards")}
-              className="group p-2 text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl transition-all shadow-sm hover:shadow"
+              className="group p-2 text-muted hover:text-heading bg-card border border-card-border rounded-xl transition-all shadow-sm hover:shadow"
             >
               <ArrowLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
             </button>
-            <div className="h-6 w-px bg-slate-200" />
+            <div className="h-6 w-px bg-surface-alt" />
             <div>
-              <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none">
+              <h1 className="text-lg font-bold text-heading tracking-tight leading-none">
                 {dashboardTitle}
               </h1>
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 {dashboardDescription && (
-                  <p className="text-xs text-slate-500 font-medium max-w-lg truncate">
+                  <p className="text-xs text-muted font-medium max-w-lg truncate">
                     {dashboardDescription}
                   </p>
                 )}
-                <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                <span className="text-[10px] text-muted font-medium flex items-center gap-1">
                   <CalendarRange size={10} />
                   {dateLabel}
                 </span>
@@ -252,26 +271,26 @@ export default function DashboardViewer() {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing || cooldownSecs > 0}
-              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-card border border-card-border/80 hover:border-card-border rounded-xl text-[10px] font-semibold text-body hover:text-heading hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
             >
               <RefreshCw
                 size={11}
-                className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-blue-500" : "text-slate-400"}`}
+                className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-blue-500" : "text-muted"}`}
               />
               {isRefreshing ? "Syncing..." : cooldownSecs > 0 ? `${Math.floor(cooldownSecs / 60)}:${String(cooldownSecs % 60).padStart(2, "0")} left` : "Refresh"}
             </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
-          {FILTERS.map(f => (
+        <div className="flex items-center gap-1 bg-card border border-card-border/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
+          {availableFilters.map(f => (
             <button
               key={f}
               onClick={() => setActiveFilter(f)}
               className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all duration-200 ${
                 activeFilter === f
                   ? "bg-slate-900 text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                  : "text-muted hover:text-heading hover:bg-surface"
               }`}
             >
               {f}
@@ -283,14 +302,14 @@ export default function DashboardViewer() {
                 type="date"
                 value={customStartDate}
                 onChange={e => setCustomStartDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
-              <span className="text-[10px] text-slate-400">–</span>
+              <span className="text-[10px] text-muted">–</span>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={e => setCustomEndDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
             </div>
           )}
@@ -307,25 +326,25 @@ export default function DashboardViewer() {
           <div className="flex items-center justify-center min-h-[500px]">
             <div className="text-center">
               <div className="w-8 h-8 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-sm text-slate-500 font-medium">Loading dashboard...</p>
+              <p className="text-sm text-muted font-medium">Loading dashboard...</p>
             </div>
           </div>
         ) : (
           <div>
             <div
               ref={containerRef}
-              className="relative rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden bg-white"
+              className="relative rounded-2xl border border-card-border/60 shadow-sm overflow-hidden bg-card"
               style={{ minHeight: `${canvasHeight}px` }}
             >
               <div className="relative z-10 w-full h-full">
                 {widgetsWithData.length === 0 ? (
                   <div className="flex flex-col items-center justify-center min-h-[500px]">
-                    <div className="text-center max-w-sm p-6 rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-100/60">
-                      <div className="w-11 h-11 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center mx-auto mb-3.5 text-slate-400">
+                    <div className="text-center max-w-sm p-6 rounded-2xl border border-card-border bg-card shadow-xl shadow-card-border/60">
+                      <div className="w-11 h-11 bg-surface border border-card-border rounded-xl flex items-center justify-center mx-auto mb-3.5 text-muted">
                         <LayoutDashboard size={18} strokeWidth={2} />
                       </div>
-                      <h3 className="text-sm font-bold text-slate-900 tracking-tight mb-1">Empty Dashboard</h3>
-                      <p className="text-xs text-slate-500 leading-relaxed px-2">This dashboard has no widgets yet.</p>
+                      <h3 className="text-sm font-bold text-heading tracking-tight mb-1">Empty Dashboard</h3>
+                      <p className="text-xs text-muted leading-relaxed px-2">This dashboard has no widgets yet.</p>
                     </div>
                   </div>
                 ) : (
@@ -372,11 +391,11 @@ export default function DashboardViewer() {
           onClick={() => setFullscreenWidgetId(null)}
         >
           <div
-            className="relative bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-            style={{ width: "92vw", maxWidth: 1100, maxHeight: 800 }}
+            className="relative bg-card rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            style={{ width: "100vw", height: "100vh", maxWidth: "100vw", maxHeight: "100vh" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 shrink-0">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-card-border shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 {modalMeta?.icon && (
                   <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-md shadow-indigo-200 shrink-0">
@@ -384,20 +403,20 @@ export default function DashboardViewer() {
                   </div>
                 )}
                 <div className="min-w-0">
-                  <h2 className="text-sm font-bold text-slate-900 truncate">{modalMeta?.title || modalWidgetData.title}</h2>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{modalMeta?.section || "Appointments"}</span>
+                  <h2 className="text-sm font-bold text-heading truncate">{modalMeta?.title || modalWidgetData.title}</h2>
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider">{modalMeta?.section || "Appointments"}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <div className="flex items-center gap-0.5 bg-white border border-slate-200/60 rounded-md p-0.5">
-                  {FILTERS.map(f => (
+                <div className="flex items-center gap-0.5 bg-card border border-card-border/60 rounded-md p-0.5">
+                  {availableFilters.map(f => (
                     <button
                       key={f}
                       onClick={() => setModalFilter(f)}
                       className={`px-2 h-6 text-[9px] font-semibold tracking-tight rounded transition-all duration-200 ${
                         modalFilter === f
                           ? "bg-slate-900 text-white shadow-sm"
-                          : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                          : "text-muted hover:text-heading hover:bg-surface"
                       }`}
                     >
                       {f}
@@ -405,13 +424,13 @@ export default function DashboardViewer() {
                   ))}
                   {modalFilter === "Custom" && (
                     <div className="flex items-center gap-1 px-1.5">
-                      <input type="date" value={modalCustomStart} onChange={e => setModalCustomStart(e.target.value)} className="px-1.5 py-0.5 text-[9px] border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300" />
-                      <span className="text-[9px] text-slate-400">–</span>
-                      <input type="date" value={modalCustomEnd} onChange={e => setModalCustomEnd(e.target.value)} className="px-1.5 py-0.5 text-[9px] border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300" />
+                      <input type="date" value={modalCustomStart} onChange={e => setModalCustomStart(e.target.value)} className="px-1.5 py-0.5 text-[9px] border border-card-border rounded focus:outline-none focus:ring-1 focus:ring-indigo-300" />
+                      <span className="text-[9px] text-muted">–</span>
+                      <input type="date" value={modalCustomEnd} onChange={e => setModalCustomEnd(e.target.value)} className="px-1.5 py-0.5 text-[9px] border border-card-border rounded focus:outline-none focus:ring-1 focus:ring-indigo-300" />
                     </div>
                   )}
                 </div>
-                <button onClick={() => setFullscreenWidgetId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all">
+                <button onClick={() => setFullscreenWidgetId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-body hover:bg-surface-alt transition-all">
                   <X size={15} />
                 </button>
               </div>
@@ -425,7 +444,7 @@ export default function DashboardViewer() {
               ) : (
                 <div className="p-5">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                    <div className={`rounded-xl border border-slate-100 bg-slate-50/50 p-3 ${modalMeta?.type === "metric" ? "lg:col-span-1" : "lg:col-span-2"}`}>
+                    <div className={`rounded-xl border border-card-border bg-surface/50 p-3 ${modalMeta?.type === "metric" ? "lg:col-span-1" : "lg:col-span-2"}`}>
                       <div className={`w-full ${modalMeta?.type === "metric" ? "h-[160px]" : "h-[340px]"}`}>
                         {modalMeta?.type === "metric" ? (
                           <AppointmentMetricCard
@@ -460,7 +479,7 @@ export default function DashboardViewer() {
                     <div className={`space-y-4 ${modalMeta?.type === "metric" ? "lg:col-span-2" : "lg:col-span-1"}`}>
                       {modalMeta?.api && (
                         <div>
-                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
                             <Database size={11} /> Dentally API Source
                           </h4>
                           <div className="space-y-1.5">
@@ -476,24 +495,24 @@ export default function DashboardViewer() {
 
                       {modalMeta?.api_fields && modalMeta.api_fields.length > 0 && (
                         <div>
-                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
                             <Tag size={11} /> Response Fields Used
                           </h4>
-                          <div className="rounded-lg overflow-hidden border border-slate-200">
+                          <div className="rounded-lg overflow-hidden border border-card-border">
                             {modalMeta.api_fields.map((f, i) => (
-                              <div key={i} className={`flex items-start gap-2 px-3 py-2 ${i % 2 === 0 ? "bg-slate-50" : "bg-white"}`}>
+                              <div key={i} className={`flex items-start gap-2 px-3 py-2 ${i % 2 === 0 ? "bg-surface" : "bg-card"}`}>
                                 <span className="font-mono text-amber-600 text-[11px] whitespace-nowrap shrink-0 pt-px">{f.field}</span>
-                                <span className="text-slate-500 text-[10px] leading-relaxed">{f.role}</span>
+                                <span className="text-muted text-[10px] leading-relaxed">{f.role}</span>
                               </div>
                             ))}
                           </div>
-                          <div className="text-[9px] text-slate-400 mt-1 text-right">via developer.dentally.co</div>
+                          <div className="text-[9px] text-muted mt-1 text-right">via developer.dentally.co</div>
                         </div>
                       )}
 
                       {modalMeta?.database_tables && (
                         <div>
-                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                          <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                             <Database size={11} /> Database Tables
                           </h4>
                           <div className="flex flex-wrap gap-1.5">
@@ -506,19 +525,19 @@ export default function DashboardViewer() {
 
                       {modalMeta?.calculations && (
                         <div>
-                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                          <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                             <Calculator size={11} /> Calculations
                           </h4>
-                          <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50 rounded-lg border border-slate-100 px-3 py-2">{modalMeta.calculations}</p>
+                          <p className="text-[11px] text-body leading-relaxed bg-surface rounded-lg border border-card-border px-3 py-2">{modalMeta.calculations}</p>
                         </div>
                       )}
 
                       {modalMeta?.description && (
                         <div>
-                          <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                          <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
                             <Info size={11} /> Additional Info
                           </h4>
-                          <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50 rounded-lg border border-slate-100 px-3 py-2">{modalMeta.description}</p>
+                          <p className="text-[11px] text-body leading-relaxed bg-surface rounded-lg border border-card-border px-3 py-2">{modalMeta.description}</p>
                         </div>
                       )}
                     </div>

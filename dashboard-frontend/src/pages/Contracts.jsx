@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { RefreshCw, FileText, Building2, CalendarRange, Target, CheckCircle2, TrendingUp, Users, Activity, DollarSign } from 'lucide-react';
 import InfoIcon from '../components/InfoIcon';
@@ -324,12 +324,12 @@ export default function Contracts() {
               <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-tight">Contracts</h1>
+              <h1 className="text-xl font-bold text-heading leading-tight">Contracts</h1>
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100/60">
                   <FileText size={10} /> NHS Dental
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                <span className="text-[10px] text-muted font-medium flex items-center gap-1">
                   <CalendarRange size={10} />
                   {dateLabel}
                 </span>
@@ -338,51 +338,51 @@ export default function Contracts() {
           </div>
 
           <button onClick={handleRefresh} disabled={isRefreshing || cooldownSecs > 0}
-            className="inline-flex items-center gap-1.5 px-3 h-8 bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50">
-            <RefreshCw size={11} className={`transition-transform duration-700 ${isRefreshing ? "rotate-180 text-indigo-500" : "text-slate-400"}`} />
+            className="inline-flex items-center gap-1.5 px-3 h-8 bg-card border border-card-border/80 hover:border-card-border rounded-xl text-[10px] font-semibold text-body hover:text-heading hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50">
+            <RefreshCw size={11} className={`transition-transform duration-700 ${isRefreshing ? "rotate-180 text-indigo-500" : "text-muted"}`} />
             {isRefreshing ? "Refreshing..." : cooldownSecs > 0 ? `${Math.floor(cooldownSecs / 60)}:${String(cooldownSecs % 60).padStart(2, '0')} left` : "Refresh"}
           </button>
         </div>
 
         {/* ======= FILTERS ======= */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
+        <div className="flex items-center gap-1 bg-card border border-card-border/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
           {filters.map((f) => {
             const sel = activeFilter === f;
             return (
               <button key={f} onClick={() => setActiveFilter(f)}
-                className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all ${sel ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"}`}>{f}</button>
+                className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all ${sel ? "bg-slate-900 text-white shadow-sm" : "text-muted hover:text-heading hover:bg-surface"}`}>{f}</button>
             );
           })}
           {activeFilter === "Custom" && (
             <div className="flex items-center gap-2 px-2">
               <input type="date" value={customStartDate} onChange={e => setCustomStartDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300" />
-              <span className="text-[10px] text-slate-400">–</span>
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+              <span className="text-[10px] text-muted">–</span>
               <input type="date" value={customEndDate} onChange={e => setCustomEndDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300" />
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-300" />
             </div>
           )}
         </div>
 
         {/* ======= KPI STRIP ======= */}
         {loading ? (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="p-3.5 flex flex-col justify-between">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-slate-200 animate-pulse" />
-                    <div className="h-2.5 w-14 bg-slate-200 rounded animate-pulse" />
+                    <div className="w-6 h-6 rounded-lg bg-surface-alt animate-pulse" />
+                    <div className="h-2.5 w-14 bg-surface-alt rounded animate-pulse" />
                   </div>
-                  <div className="h-7 w-16 bg-slate-200 rounded animate-pulse mb-1.5" />
-                  <div className="h-2.5 w-12 bg-slate-200 rounded animate-pulse" />
+                  <div className="h-7 w-16 bg-surface-alt rounded animate-pulse mb-1.5" />
+                  <div className="h-2.5 w-12 bg-surface-alt rounded animate-pulse" />
                 </div>
               ))}
             </div>
           </div>
         ) : kpiData && (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[
                 {
                   title: "Active Contracts",
@@ -450,20 +450,20 @@ export default function Contracts() {
                 const textAccent = m.positive ? "text-emerald-600" : "text-rose-500";
 
                 return (
-                  <div key={index} className="group p-3.5 hover:bg-slate-50/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
+                  <div key={index} className="group p-3.5 hover:bg-surface/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
                     <div className="flex items-center gap-1.5 mb-2">
                       <div className={`w-6 h-6 rounded-md ${bgAccent} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200`}>
                         <Icon size={11} className={textAccent} />
                       </div>
                       <div className="flex items-center gap-1 min-w-0">
-                        <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-slate-200 text-[7px] font-bold text-slate-500 mr-1 shrink-0 self-center">{index + 52}</span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none truncate">{m.title}</span>
+                        <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-surface-alt text-[7px] font-bold text-muted mr-1 shrink-0 self-center">{index + 52}</span>
+                        <span className="text-[9px] font-bold text-muted uppercase tracking-wider leading-none truncate">{m.title}</span>
                         <InfoIcon title={m.title} additionalInfo={m.tooltip} apiEndpoint="/api/dashboard/contracts/kpis" databaseTables={['dentally_contracts']} calculations={m.calc} />
                       </div>
                     </div>
 
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-[1.25rem] font-bold tracking-tight text-slate-900 leading-none">{m.value}</span>
+                      <span className="text-[1.25rem] font-bold tracking-tight text-heading leading-none">{m.value}</span>
                       <span className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-bold shrink-0 ${m.positive ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"}`}>{m.change}</span>
                     </div>
 
@@ -490,7 +490,7 @@ export default function Contracts() {
                       })()}
                     </div>
 
-                    <p className="text-[9px] font-medium text-slate-400 mt-1 truncate">{m.footer}</p>
+                    <p className="text-[9px] font-medium text-muted mt-1 truncate">{m.footer}</p>
                   </div>
                 );
               })}
@@ -501,17 +501,17 @@ export default function Contracts() {
         {/* ======= STATUS DONUT + UDA TARGETS BY SITE ======= */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[260px] bg-slate-100 rounded-lg animate-pulse" /></div>
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[280px] bg-slate-100 rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[260px] bg-surface-alt rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[280px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* Status donut */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">58</span>
-                  <CheckCircle2 size={12} className="text-slate-400" />
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">58</span>
+                  <CheckCircle2 size={12} className="text-muted" />
                   Contract Status
                   <InfoIcon title="Contract Status" additionalInfo="Active vs inactive contract distribution" apiEndpoint="/api/dashboard/contracts/kpis" databaseTables={['dentally_contracts']} calculations="Counts contracts grouped by active=true/false. Shown as a donut chart." />
                 </h3>
@@ -520,17 +520,17 @@ export default function Contracts() {
                 <ReactApexChart options={statusDonutOptions} series={statusDonutOptions.series} type="donut" height={260} />
                 <div className="flex items-center gap-4 mt-2 text-[10px]">
                   <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" />{activeContracts} Active</span>
-                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-300" />{inactiveContracts} Inactive</span>
+                  <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-muted" />{inactiveContracts} Inactive</span>
                 </div>
               </div>
             </div>
 
             {/* UDA Targets by Site */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">59</span>
-                  <Building2 size={12} className="text-slate-400" />
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">59</span>
+                  <Building2 size={12} className="text-muted" />
                   UDA Targets by Site
                   <InfoIcon title="UDA Targets by Site" additionalInfo="Sum of UDA targets grouped by dental practice site" apiEndpoint="/api/dashboard/contracts/by-site" databaseTables={['dentally_contracts', 'dentally_sites']} calculations="Groups contracts by site_id, joins with dentally_sites for names. Shows total UDA targets per site as horizontal bar chart." />
                 </h3>
@@ -545,17 +545,17 @@ export default function Contracts() {
         {/* ======= PDS PLUS DONUT + UDA VALUE DISTRIBUTION ======= */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[260px] bg-slate-100 rounded-lg animate-pulse" /></div>
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[220px] bg-slate-100 rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[260px] bg-surface-alt rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[220px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* PDS Plus Donut */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">60</span>
-                  <Building2 size={12} className="text-slate-400" />
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">60</span>
+                  <Building2 size={12} className="text-muted" />
                   PDS Plus vs Standard
                   <InfoIcon title="PDS Plus" additionalInfo="Contracts with Personal Dental Services (PDS) Plus enabled" apiEndpoint="/api/dashboard/contracts/kpis" databaseTables={['dentally_contracts']} calculations="Counts contracts where pds_plus = true vs false. Shown as a donut chart." />
                 </h3>
@@ -570,11 +570,11 @@ export default function Contracts() {
             </div>
 
             {/* UDA Value Distribution */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">61</span>
-                  <DollarSign size={12} className="text-slate-400" />
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">61</span>
+                  <DollarSign size={12} className="text-muted" />
                   UDA Value Distribution
                   <InfoIcon title="UDA Value Distribution" additionalInfo="Contract count by UDA monetary value bands" apiEndpoint="/api/dashboard/contracts/value-distribution" databaseTables={['dentally_contracts']} calculations="Groups contracts by uda_value field, counts contracts in each value band. Shown as a column chart." />
                 </h3>
@@ -589,17 +589,17 @@ export default function Contracts() {
         {/* ======= DELIVERY RATE CHART + CONTRACT TIMELINE ======= */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[260px] bg-slate-100 rounded-lg animate-pulse" /></div>
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 p-5"><div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[260px] bg-surface-alt rounded-lg animate-pulse" /></div>
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 p-5"><div className="w-full h-[200px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
         ) : deliveryData?.contracts?.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* Delivery Rate by Contract */}
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">62</span>
-                  <TrendingUp size={12} className="text-slate-400" />
+            <div className="lg:col-span-2 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">62</span>
+                  <TrendingUp size={12} className="text-muted" />
                   Delivery Rate by Contract
                   <InfoIcon title="Delivery Rate" additionalInfo="UDA delivery percentage per contract" apiEndpoint="/api/dashboard/contracts/uda-delivery" databaseTables={['dentally_contracts', 'dentally_nhs_claims']} calculations="For each contract: (delivered UDAs / target UDAs) × 100. Joined with dentally_nhs_claims via contract_id." />
                 </h3>
@@ -610,17 +610,17 @@ export default function Contracts() {
             </div>
 
             {/* Delivery Trend Area */}
-            <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
+            <div className="lg:col-span-3 bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">63</span>
-                      <Activity size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">63</span>
+                      <Activity size={12} className="text-muted" />
                       Contract Delivery Performance
                       <InfoIcon title="Delivery Performance" additionalInfo="Overview of delivery rates across all contracts" apiEndpoint="/api/dashboard/contracts/uda-delivery" databaseTables={['dentally_contracts', 'dentally_nhs_claims']} calculations="Delivery rate per contract displayed as an area chart to compare performance across contracts." />
                     </h3>
-                    <p className="text-[9px] text-slate-400 font-medium">UDA delivery rate per contract</p>
+                    <p className="text-[9px] text-muted font-medium">UDA delivery rate per contract</p>
                   </div>
                 </div>
               </div>
@@ -630,27 +630,27 @@ export default function Contracts() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-slate-200/50 p-8 text-center">
-            <p className="text-xs text-slate-400">No delivery data available</p>
+          <div className="bg-card rounded-xl border border-card-border/50 p-8 text-center">
+            <p className="text-xs text-muted">No delivery data available</p>
           </div>
         )}
 
         {/* ======= CONTRACT TIMELINE ======= */}
         {loading ? (
-          <div className="bg-white rounded-xl border border-slate-200/50 p-5">
-            <div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" />
+          <div className="bg-card rounded-xl border border-card-border/50 p-5">
+            <div className="w-full h-[200px] bg-surface-alt rounded-lg animate-pulse" />
           </div>
         ) : timelineData?.timeline?.length > 0 && (
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100">
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">64</span>
-                  <CalendarRange size={12} className="text-slate-400" />
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">64</span>
+                  <CalendarRange size={12} className="text-muted" />
                   Contract Timeline
                   <InfoIcon title="Contract Timeline" additionalInfo="Visual timeline of contract start/end dates with progress" apiEndpoint="/api/dashboard/contracts/timeline" databaseTables={['dentally_contracts']} calculations="Each contract is shown as a bar from start_date to end_date. Progress is calculated as elapsed days / total duration × 100." />
                 </h3>
-                <span className="text-[9px] font-medium text-slate-400">{timelineData.total} contracts</span>
+                <span className="text-[9px] font-medium text-muted">{timelineData.total} contracts</span>
               </div>
             </div>
             <div className="p-4">
@@ -662,21 +662,21 @@ export default function Contracts() {
                   return (
                     <div key={contract.id} className="flex items-center gap-3">
                       <div className="w-36 shrink-0">
-                        <p className="text-[11px] font-semibold text-slate-700 truncate leading-tight">{contract.name}</p>
-                        <p className="text-[9px] text-slate-400 truncate">{contract.site_name || 'Unknown'}</p>
+                        <p className="text-[11px] font-semibold text-body truncate leading-tight">{contract.name}</p>
+                        <p className="text-[9px] text-muted truncate">{contract.site_name || 'Unknown'}</p>
                       </div>
-                      <div className="flex-1 h-6 bg-slate-100 rounded-md overflow-hidden relative">
+                      <div className="flex-1 h-6 bg-surface-alt rounded-md overflow-hidden relative">
                         <div className="absolute inset-0" style={{ backgroundColor: barColor, opacity: 0.15 }}></div>
                         <div className="h-full rounded-md transition-all duration-500" style={{ width: `${Math.min(progressPct, 100)}%`, backgroundColor: progressColor, opacity: 0.8 }}></div>
                         <div className="absolute inset-0 flex items-center px-2">
-                          <span className="text-[9px] font-semibold text-slate-700 drop-shadow-sm">{contract.start_date} – {contract.end_date}</span>
+                          <span className="text-[9px] font-semibold text-body drop-shadow-sm">{contract.start_date} – {contract.end_date}</span>
                         </div>
                       </div>
                       <div className="w-12 text-right shrink-0">
-                        <span className="text-[11px] font-bold text-slate-700">{Math.round(progressPct)}%</span>
+                        <span className="text-[11px] font-bold text-body">{Math.round(progressPct)}%</span>
                       </div>
                       <div className="w-16 text-right shrink-0">
-                        <span className="text-[9px] text-slate-500 font-medium">{(contract.target || 0).toLocaleString()} UDAs</span>
+                        <span className="text-[9px] text-muted font-medium">{(contract.target || 0).toLocaleString()} UDAs</span>
                       </div>
                       <div className="w-12 shrink-0 flex justify-center">
                         {contract.pds_plus ? (
@@ -684,7 +684,7 @@ export default function Contracts() {
                         ) : contract.active ? (
                           <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">A</span>
                         ) : (
-                          <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">I</span>
+                          <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-surface-alt text-muted">I</span>
                         )}
                       </div>
                     </div>
@@ -697,43 +697,43 @@ export default function Contracts() {
 
         {/* ======= DELIVERY TABLE ======= */}
         {loading ? (
-          <div className="bg-white rounded-xl border border-slate-200/50 p-5">
-            <div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" />
+          <div className="bg-card rounded-xl border border-card-border/50 p-5">
+            <div className="w-full h-[200px] bg-surface-alt rounded-lg animate-pulse" />
           </div>
         ) : deliveryData?.contracts?.length > 0 && (
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100">
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border">
               <div className="flex items-center justify-between">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">65</span>
-                  <Users size={12} className="text-slate-400" />
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">65</span>
+                  <Users size={12} className="text-muted" />
                   Contract Delivery Details
                   <InfoIcon title="Contract Delivery" additionalInfo="Per-contract UDA target, delivered, and remaining" apiEndpoint="/api/dashboard/contracts/uda-delivery" databaseTables={['dentally_contracts', 'dentally_nhs_claims']} calculations="Full breakdown of UDA target vs delivered vs remaining per contract." />
                 </h3>
-                <span className="text-[9px] font-medium text-slate-400">{deliveryData.total} contracts</span>
+                <span className="text-[9px] font-medium text-muted">{deliveryData.total} contracts</span>
               </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-[10px]">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/50">
-                    <th className="text-left py-2.5 px-3 font-semibold text-slate-500">Contract</th>
-                    <th className="text-left py-2.5 px-3 font-semibold text-slate-500">Site</th>
-                    <th className="text-right py-2.5 px-3 font-semibold text-slate-500">UDA Target</th>
-                    <th className="text-right py-2.5 px-3 font-semibold text-slate-500">UDA Value</th>
-                    <th className="text-right py-2.5 px-3 font-semibold text-slate-500">Delivered</th>
-                    <th className="text-right py-2.5 px-3 font-semibold text-slate-500">Remaining</th>
-                    <th className="text-right py-2.5 px-3 font-semibold text-slate-500">Rate</th>
-                    <th className="text-center py-2.5 px-3 font-semibold text-slate-500">Status</th>
+                  <tr className="border-b border-card-border bg-surface/50">
+                    <th className="text-left py-2.5 px-3 font-semibold text-muted">Contract</th>
+                    <th className="text-left py-2.5 px-3 font-semibold text-muted">Site</th>
+                    <th className="text-right py-2.5 px-3 font-semibold text-muted">UDA Target</th>
+                    <th className="text-right py-2.5 px-3 font-semibold text-muted">UDA Value</th>
+                    <th className="text-right py-2.5 px-3 font-semibold text-muted">Delivered</th>
+                    <th className="text-right py-2.5 px-3 font-semibold text-muted">Remaining</th>
+                    <th className="text-right py-2.5 px-3 font-semibold text-muted">Rate</th>
+                    <th className="text-center py-2.5 px-3 font-semibold text-muted">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-surface">
                   {deliveryData.contracts.map((c, i) => (
-                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="py-2.5 px-3 font-semibold text-slate-700">{c.name}</td>
-                      <td className="py-2.5 px-3 text-slate-500">{c.site_name || 'N/A'}</td>
-                      <td className="py-2.5 px-3 text-right font-semibold text-slate-700">{c.target.toLocaleString()}</td>
-                      <td className="py-2.5 px-3 text-right text-slate-600">£{c.uda_value.toFixed(2)}</td>
+                    <tr key={i} className="hover:bg-surface/50 transition-colors">
+                      <td className="py-2.5 px-3 font-semibold text-body">{c.name}</td>
+                      <td className="py-2.5 px-3 text-muted">{c.site_name || 'N/A'}</td>
+                      <td className="py-2.5 px-3 text-right font-semibold text-body">{c.target.toLocaleString()}</td>
+                      <td className="py-2.5 px-3 text-right text-body">£{c.uda_value.toFixed(2)}</td>
                       <td className="py-2.5 px-3 text-right font-semibold text-emerald-600">{c.uda_delivered.toLocaleString()}</td>
                       <td className="py-2.5 px-3 text-right text-amber-600">{c.remaining.toLocaleString()}</td>
                       <td className="py-2.5 px-3 text-right font-bold" style={{ color: c.delivery_rate >= 90 ? '#10b981' : c.delivery_rate >= 70 ? '#f59e0b' : '#ef4444' }}>{c.delivery_rate}%</td>
@@ -743,7 +743,7 @@ export default function Contracts() {
                             <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Active
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">Inactive</span>
+                          <span className="inline-flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 rounded bg-surface-alt text-muted">Inactive</span>
                         )}
                       </td>
                     </tr>
