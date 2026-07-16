@@ -214,7 +214,7 @@ export default function WidgetPanel({ onAddWidget }) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="overflow-hidden border-b border-indigo-100/60 bg-gradient-to-b from-indigo-50/30 to-white"
+            className="overflow-hidden border-b border-indigo-100/60 bg-gradient-to-b from-indigo-50/30"
           >
             <div className="px-3.5 py-3">
               <div className="flex items-center justify-between mb-2">

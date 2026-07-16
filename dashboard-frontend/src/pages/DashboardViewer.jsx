@@ -226,7 +226,117 @@ export default function DashboardViewer() {
 
   return (
     <div className="font-sans antialiased min-h-screen">
-      <style>{`.viewer-grid .react-resizable-handle { display: none !important; } .viewer-grid .react-grid-item { cursor: default !important; user-select: none !important; -webkit-user-drag: none !important; } .viewer-grid .react-grid-item > * { user-select: none !important; -webkit-user-drag: none !important; }`}</style>
+      <style>{`
+        .viewer-grid .react-resizable-handle { display: none !important; }
+        .viewer-grid .react-grid-item { cursor: default !important; user-select: none !important; -webkit-user-drag: none !important; }
+        .viewer-grid .react-grid-item > * { user-select: none !important; -webkit-user-drag: none !important; }
+        @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes gradientSpin { from { --angle: 0deg; } to { --angle: 360deg; } }
+        @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes orbFloat { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.05); } }
+        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.12), 0 0 60px rgba(99,102,241,0.04); } 50% { box-shadow: 0 0 30px rgba(99,102,241,0.2), 0 0 80px rgba(99,102,241,0.08); } }
+
+        .fs-modal-card { animation: fadeSlideUp 0.4s ease-out both; }
+        .fs-modal-card:nth-child(1) { animation-delay: 0.05s; }
+        .fs-modal-card:nth-child(2) { animation-delay: 0.1s; }
+        .fs-modal-card:nth-child(3) { animation-delay: 0.15s; }
+        .fs-modal-card:nth-child(4) { animation-delay: 0.2s; }
+        .fs-modal-card:nth-child(5) { animation-delay: 0.25s; }
+
+        .fs-backdrop { background: var(--c-page); }
+        .dark .fs-backdrop { background: rgba(8,12,24,0.92); backdrop-filter: blur(48px); }
+
+        .fs-dots { background-image: radial-gradient(circle, rgba(0,0,0,0.07) 1px, transparent 1px); }
+        .dark .fs-dots { background-image: radial-gradient(circle, rgba(255,255,255,0.018) 1px, transparent 1px); }
+
+        .fs-orb-i { background: rgba(99,102,241,0.03); }
+        .dark .fs-orb-i { background: rgba(99,102,241,0.08); }
+        .fs-orb-v { background: rgba(139,92,246,0.025); }
+        .dark .fs-orb-v { background: rgba(139,92,246,0.06); }
+        .fs-orb-b { background: rgba(59,130,246,0.015); }
+        .dark .fs-orb-b { background: rgba(59,130,246,0.04); }
+
+        .fs-chart-surface { background: var(--c-card); }
+        .dark .fs-chart-surface { background: linear-gradient(145deg, #0d1117, #0f1420, #111827); }
+
+        .fs-filter-bar { background: var(--c-surface); border-color: var(--c-card-border); }
+        .dark .fs-filter-bar { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
+
+        .fs-filter-pill { color: var(--c-muted); }
+        .fs-filter-pill:hover { color: var(--c-heading); background: var(--c-surface-alt); }
+        .dark .fs-filter-pill { color: rgba(255,255,255,0.3); }
+        .dark .fs-filter-pill:hover { color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.04); }
+
+        .fs-filter-pill-active { background: var(--c-heading); color: var(--c-card); }
+        .dark .fs-filter-pill-active { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+
+        .fs-close-btn { color: var(--c-muted); }
+        .fs-close-btn:hover { color: var(--c-heading); background: var(--c-surface-alt); }
+        .dark .fs-close-btn { color: rgba(255,255,255,0.3); }
+        .dark .fs-close-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
+
+        .fs-badge { background: var(--c-brand-tint); color: var(--c-brand); border-color: color-mix(in srgb, var(--c-brand) 25%, transparent); }
+        .dark .fs-badge { background: rgba(99,102,241,0.15); color: #a5b4fc; border-color: rgba(99,102,241,0.2); }
+
+        .fs-badge-v { background: var(--c-brand-tint); color: var(--c-brand); border-color: color-mix(in srgb, var(--c-brand) 25%, transparent); }
+        .dark .fs-badge-v { background: rgba(139,92,246,0.15); color: #c4b5fd; border-color: rgba(139,92,246,0.2); }
+
+        .fs-section-label { color: var(--c-muted); }
+        .dark .fs-section-label { color: rgba(165,180,252,0.6); }
+
+        .fs-card { background: var(--c-card); border-color: var(--c-card-border); }
+        .dark .fs-card { background: rgba(255,255,255,0.025); border-color: rgba(255,255,255,0.06); }
+        .fs-card:hover { border-color: color-mix(in srgb, var(--c-card-border) 100%, var(--c-heading) 20%); }
+        .dark .fs-card:hover { border-color: rgba(255,255,255,0.1); }
+
+        .fs-card-row-even { background: var(--c-surface); }
+        .dark .fs-card-row-even { background: rgba(255,255,255,0.02); }
+        .fs-card-row-odd { background: var(--c-card); }
+        .dark .fs-card-row-odd { background: rgba(255,255,255,0.04); }
+
+        .fs-api-badge { background: var(--c-brand-tint); color: var(--c-brand); }
+        .dark .fs-api-badge { background: rgba(52,211,153,0.15); color: #6ee7b7; }
+
+        .fs-api-path { color: var(--c-brand); }
+        .dark .fs-api-path { color: rgba(110,231,183,0.7); }
+
+        .fs-field-name { color: #d97706; }
+        .dark .fs-field-name { color: rgba(251,191,36,0.8); }
+
+        .fs-field-role { color: var(--c-muted); }
+        .dark .fs-field-role { color: rgba(255,255,255,0.35); }
+
+        .fs-table-pill { background: var(--c-brand-tint); color: var(--c-brand); border-color: color-mix(in srgb, var(--c-brand) 25%, transparent); }
+        .dark .fs-table-pill { background: rgba(96,165,250,0.1); color: rgba(147,197,253,0.8); border-color: rgba(96,165,250,0.2); }
+
+        .fs-code-block { background: var(--c-surface); color: var(--c-body); border-color: var(--c-card-border); }
+        .dark .fs-code-block { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.05); }
+
+        .fs-info-block { background: var(--c-surface); color: var(--c-body); border-color: var(--c-card-border); }
+        .dark .fs-info-block { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.45); border-color: rgba(255,255,255,0.05); }
+
+        .fs-heading { color: var(--c-heading); }
+        .fs-body { color: var(--c-body); }
+        .fs-muted { color: var(--c-muted); }
+        .dark .fs-heading { color: #fff; }
+        .dark .fs-body { color: rgba(255,255,255,0.6); }
+        .dark .fs-muted { color: rgba(255,255,255,0.3); }
+
+        .fs-input { background: var(--c-surface); color: var(--c-heading); border-color: var(--c-card-border); }
+        .dark .fs-input { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.08); }
+
+        .fs-dot-indicator-i { background: var(--c-brand); }
+        .dark .fs-dot-indicator-i { background: rgba(165,180,252,0.6); }
+        .fs-dot-indicator-a { background: #f59e0b; }
+        .dark .fs-dot-indicator-a { background: rgba(251,191,36,0.6); }
+        .fs-dot-indicator-b { background: var(--c-brand); }
+        .dark .fs-dot-indicator-b { background: rgba(96,165,250,0.6); }
+        .fs-dot-indicator-v { background: #8b5cf6; }
+        .dark .fs-dot-indicator-v { background: rgba(196,181,253,0.6); }
+        .fs-dot-indicator-s { background: #0ea5e9; }
+        .dark .fs-dot-indicator-s { background: rgba(56,189,248,0.6); }
+      `}</style>
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-to-br from-indigo-200/20 via-blue-100/10 to-transparent rounded-full blur-3xl" />
         <div className="absolute -bottom-60 -left-40 w-[500px] h-[500px] bg-gradient-to-tr from-emerald-100/15 via-surface-alt/10 to-transparent rounded-full blur-3xl" />
@@ -387,106 +497,186 @@ export default function DashboardViewer() {
 
       {modalWidgetData && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50"
           onClick={() => setFullscreenWidgetId(null)}
         >
+          <div className="absolute inset-0 fs-backdrop" />
           <div
-            className="relative bg-card rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-            style={{ width: "100vw", height: "100vh", maxWidth: "100vw", maxHeight: "100vh" }}
+            className="absolute inset-0 fs-dots"
+            style={{ backgroundSize: "28px 28px" }}
+          />
+
+          <div className="absolute top-16 -left-40 w-[500px] h-[500px] fs-orb-i rounded-full blur-[140px] pointer-events-none" style={{ animation: "orbFloat 8s ease-in-out infinite" }} />
+          <div className="absolute bottom-16 -right-40 w-[400px] h-[400px] fs-orb-v rounded-full blur-[120px] pointer-events-none" style={{ animation: "orbFloat 10s ease-in-out infinite 2s" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] fs-orb-b rounded-full blur-[160px] pointer-events-none" />
+
+          <div
+            className="relative h-full flex flex-col"
+            style={{ animation: "modalIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-3 border-b border-card-border shrink-0">
-              <div className="flex items-center gap-3 min-w-0">
-                {modalMeta?.icon && (
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-md shadow-indigo-200 shrink-0">
-                    <modalMeta.icon size={16} className="text-white" />
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <h2 className="text-sm font-bold text-heading truncate">{modalMeta?.title || modalWidgetData.title}</h2>
-                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider">{modalMeta?.section || "Appointments"}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="flex items-center gap-0.5 bg-card border border-card-border/60 rounded-md p-0.5">
-                  {availableFilters.map(f => (
-                    <button
-                      key={f}
-                      onClick={() => setModalFilter(f)}
-                      className={`px-2 h-6 text-[9px] font-semibold tracking-tight rounded transition-all duration-200 ${
-                        modalFilter === f
-                          ? "bg-slate-900 text-white shadow-sm"
-                          : "text-muted hover:text-heading hover:bg-surface"
-                      }`}
-                    >
-                      {f}
-                    </button>
-                  ))}
-                  {modalFilter === "Custom" && (
-                    <div className="flex items-center gap-1 px-1.5">
-                      <input type="date" value={modalCustomStart} onChange={e => setModalCustomStart(e.target.value)} className="px-1.5 py-0.5 text-[9px] border border-card-border rounded focus:outline-none focus:ring-1 focus:ring-indigo-300" />
-                      <span className="text-[9px] text-muted">–</span>
-                      <input type="date" value={modalCustomEnd} onChange={e => setModalCustomEnd(e.target.value)} className="px-1.5 py-0.5 text-[9px] border border-card-border rounded focus:outline-none focus:ring-1 focus:ring-indigo-300" />
+            <div className="relative shrink-0">
+              <div className="px-5 py-3.5 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  {modalMeta?.icon && (
+                    <div className="relative shrink-0">
+                      <div
+                        className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-600 flex items-center justify-center"
+                        style={{ animation: "pulseGlow 3s ease-in-out infinite" }}
+                      >
+                        <modalMeta.icon size={18} className="text-white drop-shadow-sm" />
+                      </div>
+                      <div className="absolute -inset-1 rounded-xl bg-gradient-to-br from-indigo-400 to-violet-500 opacity-20 blur-md -z-10" />
                     </div>
                   )}
+                  <div className="min-w-0">
+                    <h2 className="text-sm font-bold fs-heading truncate drop-shadow-sm">{modalMeta?.title || modalWidgetData.title}</h2>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest fs-badge border">
+                        {modalMeta?.section || "Appointments"}
+                      </span>
+                      {modalMeta?.type && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest fs-badge-v border">
+                          {modalMeta.type}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <button onClick={() => setFullscreenWidgetId(null)} className="w-7 h-7 rounded-lg flex items-center justify-center text-muted hover:text-body hover:bg-surface-alt transition-all">
-                  <X size={15} />
-                </button>
+
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <div className="hidden sm:flex items-center gap-0.5 fs-filter-bar border rounded-lg p-0.5">
+                    {availableFilters.map(f => (
+                      <button
+                        key={f}
+                        onClick={() => setModalFilter(f)}
+                        className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all duration-200 ${
+                          modalFilter === f
+                            ? "fs-filter-pill-active shadow-sm"
+                            : "fs-filter-pill"
+                        }`}
+                      >
+                        {f}
+                      </button>
+                    ))}
+                    {modalFilter === "Custom" && (
+                      <div className="flex items-center gap-1 px-1.5">
+                        <input type="date" value={modalCustomStart} onChange={e => setModalCustomStart(e.target.value)} className="px-1.5 py-0.5 text-[9px] fs-input border rounded focus:outline-none focus:ring-1 focus:ring-indigo-400/50" />
+                        <span className="text-[9px] fs-muted">–</span>
+                        <input type="date" value={modalCustomEnd} onChange={e => setModalCustomEnd(e.target.value)} className="px-1.5 py-0.5 text-[9px] fs-input border rounded focus:outline-none focus:ring-1 focus:ring-indigo-400/50" />
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => setFullscreenWidgetId(null)}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center fs-close-btn border border-transparent transition-all duration-200 group/close"
+                    title="Close"
+                  >
+                    <X size={17} className="group-hover/close:rotate-90 transition-transform duration-300" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 h-px">
+                <div className="h-full bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
+                <div className="absolute inset-0 h-px bg-gradient-to-r from-transparent via-violet-400/15 to-transparent blur-sm" />
+              </div>
+            </div>
+
+            <div className="sm:hidden px-5 pb-2 shrink-0">
+              <div className="flex items-center gap-0.5 fs-filter-bar border rounded-lg p-0.5 overflow-x-auto">
+                {availableFilters.map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setModalFilter(f)}
+                    className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md whitespace-nowrap transition-all duration-200 ${
+                      modalFilter === f
+                        ? "fs-filter-pill-active shadow-sm"
+                        : "fs-filter-pill"
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
               </div>
             </div>
 
             <div className="flex-1 min-h-0 overflow-y-auto">
               {modalDataLoading ? (
                 <div className="flex items-center justify-center h-full">
-                  <div className="w-6 h-6 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="relative">
+                      <div className="w-10 h-10 border-2 border-indigo-400/30 border-t-indigo-400 rounded-full animate-spin" />
+                      <div className="absolute inset-0 w-10 h-10 border-2 border-violet-400/10 border-b-violet-400 rounded-full animate-spin" style={{ animationDuration: "1.5s", animationDirection: "reverse" }} />
+                    </div>
+                    <span className="text-xs fs-muted font-medium tracking-wide">Loading data...</span>
+                  </div>
                 </div>
               ) : (
-                <div className="p-5">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                    <div className={`rounded-xl border border-card-border bg-surface/50 p-3 ${modalMeta?.type === "metric" ? "lg:col-span-1" : "lg:col-span-2"}`}>
-                      <div className={`w-full ${modalMeta?.type === "metric" ? "h-[160px]" : "h-[340px]"}`}>
-                        {modalMeta?.type === "metric" ? (
-                          <AppointmentMetricCard
-                            title={modalWidgetData.title}
-                            value={(() => {
-                              const d = modalWidgetData.data;
-                              if (!d) return modalMeta.value;
-                              switch (modalWidgetData.chartType) {
-                                case "totalAppointments": return String(d.totalAppointments ?? modalMeta.value);
-                                case "completedAppointments": return String(d.completedAppointments ?? modalMeta.value);
-                                case "cancelledAppointments": return String(d.cancelledAppointments ?? modalMeta.value);
-                                case "dnaRate": return `${d.dnaRate ?? modalMeta.value}%`;
-                                case "avgDuration": return `${d.avgDuration ?? modalMeta.value} min`;
-                                case "dnaCount": return String(d.dnaCount ?? modalMeta.value);
-                                default: return modalMeta.value;
-                              }
-                            })()}
-                            change={modalMeta.change}
-                            positive={modalMeta.positive}
-                            footer={modalMeta.footer}
-                            icon={modalMeta.icon}
-                          />
-                        ) : (
-                          <EnhancedWidgetChart
-                            chartType={modalWidgetData.chartType}
-                            data={modalWidgetData.data}
-                          />
-                        )}
+                <div className="p-4 lg:p-5">
+                  <div className="flex flex-col lg:flex-row gap-4 lg:gap-5 h-full">
+                    <div className={`flex-1 min-w-0 ${modalMeta?.type === "metric" ? "lg:max-w-[45%]" : ""}`}>
+                      <div className="relative group/chart rounded-2xl overflow-hidden" style={{ animation: "pulseGlow 4s ease-in-out infinite" }}>
+                        <div
+                          className="absolute -inset-px rounded-2xl opacity-25 group-hover/chart:opacity-50 transition-opacity duration-700"
+                          style={{
+                            background: "conic-gradient(from var(--angle), #6366f1, #8b5cf6, #a855f7, #6366f1)",
+                            animation: "gradientSpin 6s linear infinite",
+                          }}
+                        />
+                        <div className="absolute -inset-1 rounded-2xl bg-indigo-500/10 blur-xl opacity-0 group-hover/chart:opacity-100 transition-opacity duration-700" />
+
+                        <div className="relative rounded-2xl p-[1px] fs-chart-surface">
+                          <div className="rounded-[15px] fs-chart-surface overflow-hidden">
+                            {modalMeta?.type === "metric" ? (
+                              <div className="p-5">
+                                <AppointmentMetricCard
+                                  title={modalWidgetData.title}
+                                  value={(() => {
+                                    const d = modalWidgetData.data;
+                                    if (!d) return modalMeta.value;
+                                    switch (modalWidgetData.chartType) {
+                                      case "totalAppointments": return String(d.totalAppointments ?? modalMeta.value);
+                                      case "completedAppointments": return String(d.completedAppointments ?? modalMeta.value);
+                                      case "cancelledAppointments": return String(d.cancelledAppointments ?? modalMeta.value);
+                                      case "dnaRate": return `${d.dnaRate ?? modalMeta.value}%`;
+                                      case "avgDuration": return `${d.avgDuration ?? modalMeta.value} min`;
+                                      case "dnaCount": return String(d.dnaCount ?? modalMeta.value);
+                                      default: return modalMeta.value;
+                                    }
+                                  })()}
+                                  change={modalMeta.change}
+                                  positive={modalMeta.positive}
+                                  footer={modalMeta.footer}
+                                  icon={modalMeta.icon}
+                                />
+                              </div>
+                            ) : (
+                              <EnhancedWidgetChart
+                                chartType={modalWidgetData.chartType}
+                                data={modalWidgetData.data}
+                                height={480}
+                              />
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div className={`space-y-4 ${modalMeta?.type === "metric" ? "lg:col-span-2" : "lg:col-span-1"}`}>
+                    <div className={`lg:w-[340px] shrink-0 space-y-3 ${modalMeta?.type === "metric" ? "lg:w-full" : ""}`}>
                       {modalMeta?.api && (
-                        <div>
-                          <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                            <Database size={11} /> Dentally API Source
+                        <div className="fs-modal-card rounded-xl fs-card border p-4 transition-colors duration-300">
+                          <h4 className="text-[9px] font-bold fs-section-label uppercase tracking-[0.15em] mb-2.5 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full fs-dot-indicator-i" />
+                            <Database size={10} className="fs-section-label" />
+                            Dentally API Source
                           </h4>
                           <div className="space-y-1.5">
                             {modalMeta.api.split(",").map((ep, i) => (
-                              <div key={i} className="flex items-center gap-2 bg-slate-800 rounded-lg px-3 py-2">
-                                <span className="text-[8px] font-bold px-1.5 py-0.5 bg-indigo-600/30 text-indigo-300 rounded uppercase tracking-wider">GET</span>
-                                <span className="text-indigo-200 text-[11px] font-mono">{ep.trim().replace("https://api.dentally.co", "")}</span>
+                              <div key={i} className="flex items-center gap-2 fs-card-row-even rounded-lg px-3 py-2 border border-card-border/40 hover:border-card-border transition-colors">
+                                <span className="text-[7px] font-bold px-1.5 py-0.5 fs-api-badge rounded uppercase tracking-widest">GET</span>
+                                <span className="fs-api-path text-[10px] font-mono truncate">{ep.trim().replace("https://api.dentally.co", "")}</span>
                               </div>
                             ))}
                           </div>
@@ -494,50 +684,58 @@ export default function DashboardViewer() {
                       )}
 
                       {modalMeta?.api_fields && modalMeta.api_fields.length > 0 && (
-                        <div>
-                          <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                            <Tag size={11} /> Response Fields Used
+                        <div className="fs-modal-card rounded-xl fs-card border p-4 transition-colors duration-300">
+                          <h4 className="text-[9px] font-bold fs-section-label uppercase tracking-[0.15em] mb-2.5 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full fs-dot-indicator-a" />
+                            <Tag size={10} className="fs-section-label" />
+                            Response Fields Used
                           </h4>
-                          <div className="rounded-lg overflow-hidden border border-card-border">
+                          <div className="rounded-lg overflow-hidden border border-card-border/40">
                             {modalMeta.api_fields.map((f, i) => (
-                              <div key={i} className={`flex items-start gap-2 px-3 py-2 ${i % 2 === 0 ? "bg-surface" : "bg-card"}`}>
-                                <span className="font-mono text-amber-600 text-[11px] whitespace-nowrap shrink-0 pt-px">{f.field}</span>
-                                <span className="text-muted text-[10px] leading-relaxed">{f.role}</span>
+                              <div key={i} className={`flex items-start gap-2 px-3 py-2 ${i % 2 === 0 ? "fs-card-row-even" : "fs-card-row-odd"}`}>
+                                <span className="font-mono fs-field-name text-[10px] whitespace-nowrap shrink-0 pt-px">{f.field}</span>
+                                <span className="fs-field-role text-[9px] leading-relaxed">{f.role}</span>
                               </div>
                             ))}
                           </div>
-                          <div className="text-[9px] text-muted mt-1 text-right">via developer.dentally.co</div>
+                          <div className="text-[8px] fs-muted mt-1.5 text-right italic">via developer.dentally.co</div>
                         </div>
                       )}
 
                       {modalMeta?.database_tables && (
-                        <div>
-                          <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                            <Database size={11} /> Database Tables
+                        <div className="fs-modal-card rounded-xl fs-card border p-4 transition-colors duration-300">
+                          <h4 className="text-[9px] font-bold fs-section-label uppercase tracking-[0.15em] mb-2.5 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full fs-dot-indicator-b" />
+                            <Database size={10} className="fs-section-label" />
+                            Database Tables
                           </h4>
                           <div className="flex flex-wrap gap-1.5">
                             {modalMeta.database_tables.split(",").map((t, i) => (
-                              <span key={i} className="text-[11px] font-mono bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md">{t.trim()}</span>
+                              <span key={i} className="text-[10px] font-mono fs-table-pill px-2 py-0.5 rounded-md transition-colors">{t.trim()}</span>
                             ))}
                           </div>
                         </div>
                       )}
 
                       {modalMeta?.calculations && (
-                        <div>
-                          <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                            <Calculator size={11} /> Calculations
+                        <div className="fs-modal-card rounded-xl fs-card border p-4 transition-colors duration-300">
+                          <h4 className="text-[9px] font-bold fs-section-label uppercase tracking-[0.15em] mb-2.5 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full fs-dot-indicator-v" />
+                            <Calculator size={10} className="fs-section-label" />
+                            Calculations
                           </h4>
-                          <p className="text-[11px] text-body leading-relaxed bg-surface rounded-lg border border-card-border px-3 py-2">{modalMeta.calculations}</p>
+                          <p className="text-[10px] fs-body leading-relaxed fs-code-block rounded-lg px-3 py-2.5 font-mono">{modalMeta.calculations}</p>
                         </div>
                       )}
 
                       {modalMeta?.description && (
-                        <div>
-                          <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                            <Info size={11} /> Additional Info
+                        <div className="fs-modal-card rounded-xl fs-card border p-4 transition-colors duration-300">
+                          <h4 className="text-[9px] font-bold fs-section-label uppercase tracking-[0.15em] mb-2.5 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full fs-dot-indicator-s" />
+                            <Info size={10} className="fs-section-label" />
+                            Additional Info
                           </h4>
-                          <p className="text-[11px] text-body leading-relaxed bg-surface rounded-lg border border-card-border px-3 py-2">{modalMeta.description}</p>
+                          <p className="text-[10px] fs-body leading-relaxed fs-info-block rounded-lg px-3 py-2.5">{modalMeta.description}</p>
                         </div>
                       )}
                     </div>
