@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+﻿import { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -159,16 +159,16 @@ export default function NewDashboard() {
 
       <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-5 space-y-4 relative z-10">
         {/* Editor Actions Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-slate-200/60">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-card-border/60">
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
               onClick={() => navigate(isEditing ? `/dashboard-view/${id}` : "/dashboards")}
-              className="p-2 text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-xl transition-all shadow-sm"
+              className="p-2 text-muted hover:text-heading bg-card border border-card-border rounded-xl transition-all shadow-sm"
               title="Cancel editing"
             >
               <ArrowLeft size={15} />
             </button>
-            <div className="h-6 w-px bg-slate-200 hidden sm:block" />
+            <div className="h-6 w-px bg-surface-alt hidden sm:block" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <input
@@ -176,7 +176,7 @@ export default function NewDashboard() {
                   value={dashboardTitle}
                   onChange={e => { setDashboardTitle(e.target.value); setValidationErrors(v => ({ ...v, title: null })); }}
                   placeholder="Enter Dashboard Title..."
-                  className="text-lg font-bold text-slate-900 tracking-tight leading-none bg-transparent hover:bg-slate-100/50 focus:bg-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-2 py-1 outline-none w-full max-w-[320px] sm:max-w-[420px] transition-all"
+                  className="text-lg font-bold text-heading tracking-tight leading-none bg-transparent hover:bg-surface-alt/50 focus:bg-card focus:ring-2 focus:ring-indigo-400 rounded-lg px-2 py-1 outline-none w-full max-w-[320px] sm:max-w-[420px] transition-all"
                 />
                 {isFromAI && (
                   <span className="inline-flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-600 rounded-md border border-emerald-100/50 shrink-0">
@@ -192,7 +192,7 @@ export default function NewDashboard() {
                 value={dashboardDescription}
                 onChange={e => { setDashboardDescription(e.target.value); setValidationErrors(v => ({ ...v, description: null })); }}
                 placeholder="Add a description of this dashboard..."
-                className="text-xs text-slate-500 bg-transparent hover:bg-slate-100/50 focus:bg-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-2 py-0.5 outline-none w-full max-w-[320px] sm:max-w-[420px] mt-1 transition-all"
+                className="text-xs text-muted bg-transparent hover:bg-surface-alt/50 focus:bg-card focus:ring-2 focus:ring-indigo-400 rounded-lg px-2 py-0.5 outline-none w-full max-w-[320px] sm:max-w-[420px] mt-1 transition-all"
               />
               {validationErrors.description && (
                 <p className="text-[10px] font-semibold text-rose-500 mt-1 ml-2">{validationErrors.description}</p>
@@ -203,14 +203,14 @@ export default function NewDashboard() {
           <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end">
             <button
               onClick={() => setShowPanel(!showPanel)}
-              className="inline-flex items-center gap-1.5 px-3 h-[34px] bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-[11px] font-bold text-slate-600 transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 h-[34px] bg-card border border-card-border hover:border-card-border rounded-xl text-[11px] font-bold text-body transition-all shadow-sm"
             >
               {showPanel ? <PanelRightClose size={13} /> : <PanelRightOpen size={13} />}
               {showPanel ? "Hide Library" : "Show Library"}
             </button>
             <button
               onClick={resetDashboard}
-              className="inline-flex items-center gap-1.5 px-3 h-[34px] bg-white border border-slate-200 text-slate-400 hover:text-rose-600 rounded-xl text-[11px] font-bold transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 h-[34px] bg-card border border-card-border text-muted hover:text-rose-600 rounded-xl text-[11px] font-bold transition-all shadow-sm"
               title="Clear all widgets"
             >
               <RotateCcw size={12} />
@@ -232,7 +232,7 @@ export default function NewDashboard() {
           <div className="flex items-center justify-center min-h-[500px]">
             <div className="text-center">
               <div className="w-8 h-8 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-sm text-slate-500 font-medium">Loading dashboard...</p>
+              <p className="text-sm text-muted font-medium">Loading dashboard...</p>
             </div>
           </div>
         ) : (
@@ -248,7 +248,7 @@ export default function NewDashboard() {
                     addWidget(data);
                   } catch {}
                 }}
-                className="relative rounded-2xl border border-slate-200 bg-white shadow-inner overflow-hidden"
+                className="relative rounded-2xl border border-card-border bg-card shadow-inner overflow-hidden"
                 style={{ minHeight: `${canvasHeight}px` }}
               >
                 {/* Visual grid guide lines */}
@@ -264,7 +264,7 @@ export default function NewDashboard() {
                     <div 
                       key={`bg-grid-cell-${idx}`} 
                       style={{ height: `${ROW_HEIGHT}px` }}
-                      className="border border-slate-100/60 bg-slate-50/20 rounded-xl"
+                      className="border border-card-border/60 bg-surface/20 rounded-xl"
                     />
                   ))}
                 </div>
@@ -272,12 +272,12 @@ export default function NewDashboard() {
                 <div className="relative z-10 w-full h-full">
                   {widgets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center min-h-[500px]">
-                      <div className="text-center max-w-xs p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/80 shadow-md">
+                      <div className="text-center max-w-xs p-6 bg-card/80 backdrop-blur-sm rounded-2xl border border-card-border/80 shadow-md">
                         <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-3 text-indigo-500">
                           <LayoutDashboard size={16} />
                         </div>
-                        <h3 className="text-xs font-bold text-slate-800 mb-1">Canvas is empty</h3>
-                        <p className="text-[10px] text-slate-500 leading-relaxed">
+                        <h3 className="text-xs font-bold text-heading mb-1">Canvas is empty</h3>
+                        <p className="text-[10px] text-muted leading-relaxed">
                           Drag and drop widgets from the library on the right, or click them to append them to your dashboard canvas.
                         </p>
                       </div>
@@ -301,7 +301,7 @@ export default function NewDashboard() {
                       {widgets.map(widget => (
                         <div 
                           key={widget.i} 
-                          className="rounded-xl bg-white border border-slate-200 shadow-sm transition-all duration-200 overflow-hidden hover:border-indigo-400 hover:shadow-md hover:ring-4 hover:ring-indigo-500/5"
+                          className="rounded-xl bg-card border border-card-border shadow-sm transition-all duration-200 overflow-hidden hover:border-indigo-400 hover:shadow-md hover:ring-4 hover:ring-indigo-500/5"
                         >
                           <WidgetFrame
                             widget={widget}

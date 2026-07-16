@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { RefreshCw, TrendingUp, Activity, DollarSign, FileText, Clock, CheckCircle2, CreditCard, Building2, CalendarRange, Stethoscope, UserCheck } from 'lucide-react';
 import InfoIcon from '../components/InfoIcon';
@@ -27,7 +27,7 @@ function RevenueBySiteChart({ data }) {
     return (
       <div className="space-y-2 p-1">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-10 bg-slate-50 rounded-xl animate-pulse" />
+          <div key={i} className="h-10 bg-surface rounded-xl animate-pulse" />
         ))}
       </div>
     );
@@ -56,29 +56,29 @@ function RevenueBySiteChart({ data }) {
         return (
           <div
             key={item.name}
-            className="group flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-slate-200/70 hover:bg-white hover:shadow-sm hover:shadow-slate-200/40 active:scale-[0.99] transition-all duration-200 cursor-default"
+            className="group flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-card-border/70 hover:bg-card hover:shadow-sm hover:shadow-card-border/40 active:scale-[0.99] transition-all duration-200 cursor-default"
           >
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold border shrink-0 transition-all duration-200 group-hover:scale-105 bg-slate-50 text-slate-700 border-slate-100">
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold border shrink-0 transition-all duration-200 group-hover:scale-105 bg-surface text-body border-card-border">
                 {index + 1}
               </span>
               <div className="relative">
                 <span className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border-[1.5px] border-white shrink-0 ${statusDot}`} />
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-700 bg-slate-100 border border-slate-200/60">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-body bg-surface-alt border border-card-border/60">
                   {item.name.charAt(0)}
                 </div>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[12px] font-semibold text-slate-800 truncate group-hover:text-slate-900 transition-colors">
+                <p className="text-[12px] font-semibold text-heading truncate group-hover:text-heading transition-colors">
                   {item.name}
                 </p>
-                <p className="text-[10px] text-slate-400 font-medium truncate">
+                <p className="text-[10px] text-muted font-medium truncate">
                   {item.invoices || 0} invoices · {((item.revenue / totalRevenue) * 100).toFixed(1)}% of total
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0 ml-3">
-              <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="w-16 h-1.5 bg-surface-alt rounded-full overflow-hidden">
                 <div 
                   className="h-full rounded-full transition-all duration-500"
                   style={{ width: `${pctOfMax}%`, backgroundColor: getUtilisationColor(pctOfMax) }}
@@ -99,7 +99,7 @@ function RevenueBySiteChart({ data }) {
 
 function RevenueByTreatmentChart({ data }) {
   if (!data || !data.treatments || data.treatments.length === 0) {
-    return <div className="text-center py-8 text-slate-400 text-xs">No treatment data available</div>;
+    return <div className="text-center py-8 text-muted text-xs">No treatment data available</div>;
   }
 
   const gradientColors = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef'];
@@ -194,18 +194,18 @@ function RevenueByTreatmentChart({ data }) {
       <ReactApexChart options={treatmentChartOptions} series={treatmentChartOptions.series} type="donut" height={340} />
       <div className="flex items-center justify-center gap-3 pt-1">
         <div className="text-center">
-          <p className="text-[10px] font-medium text-slate-400">Times Performed</p>
-          <p className="text-xs font-bold text-slate-800">{treatments.reduce((s, t) => s + t.timesPerformed, 0)}</p>
+          <p className="text-[10px] font-medium text-muted">Times Performed</p>
+          <p className="text-xs font-bold text-heading">{treatments.reduce((s, t) => s + t.timesPerformed, 0)}</p>
         </div>
-        <div className="w-px h-6 bg-slate-200" />
+        <div className="w-px h-6 bg-surface-alt" />
         <div className="text-center">
-          <p className="text-[10px] font-medium text-slate-400">Avg Price</p>
-          <p className="text-xs font-bold text-slate-800">£{Math.round(treatments.reduce((s, t) => s + t.avgPrice, 0) / treatments.length)}</p>
+          <p className="text-[10px] font-medium text-muted">Avg Price</p>
+          <p className="text-xs font-bold text-heading">£{Math.round(treatments.reduce((s, t) => s + t.avgPrice, 0) / treatments.length)}</p>
         </div>
-        <div className="w-px h-6 bg-slate-200" />
+        <div className="w-px h-6 bg-surface-alt" />
         <div className="text-center">
-          <p className="text-[10px] font-medium text-slate-400">Total Revenue</p>
-          <p className="text-xs font-bold text-slate-800">{formatUKCurrency(totalRev, 0)}</p>
+          <p className="text-[10px] font-medium text-muted">Total Revenue</p>
+          <p className="text-xs font-bold text-heading">{formatUKCurrency(totalRev, 0)}</p>
         </div>
       </div>
     </div>
@@ -214,7 +214,7 @@ function RevenueByTreatmentChart({ data }) {
 
 function TopPatientsByRevenueChart({ data }) {
   if (!data || !data.patients || data.patients.length === 0) {
-    return <div className="text-center py-8 text-slate-400 text-xs">No patient data available</div>;
+    return <div className="text-center py-8 text-muted text-xs">No patient data available</div>;
   }
 
   const patientColors = ['#ec4899', '#f43f5e', '#e11d48', '#fb7185', '#f472b6'];
@@ -294,17 +294,17 @@ function TopPatientsByRevenueChart({ data }) {
       <div className="flex items-center justify-center gap-4 pt-1">
         <div className="text-center">
           <p className="text-[15px] font-bold text-pink-600">{formatUKCurrency(totalPatientRev, 0)}</p>
-          <p className="text-[8px] font-medium text-slate-400">Combined Revenue</p>
+          <p className="text-[8px] font-medium text-muted">Combined Revenue</p>
         </div>
-        <div className="w-px h-7 bg-slate-200" />
+        <div className="w-px h-7 bg-surface-alt" />
         <div className="text-center">
           <p className="text-[15px] font-bold text-pink-600">{patients.reduce((s, p) => s + p.invoiceCount, 0)}</p>
-          <p className="text-[8px] font-medium text-slate-400">Total Invoices</p>
+          <p className="text-[8px] font-medium text-muted">Total Invoices</p>
         </div>
-        <div className="w-px h-7 bg-slate-200" />
+        <div className="w-px h-7 bg-surface-alt" />
         <div className="text-center">
           <p className="text-[15px] font-bold text-pink-600">£{Math.round(patients.reduce((s, p) => s + p.avgInvoiceValue, 0) / patients.length)}</p>
-          <p className="text-[8px] font-medium text-slate-400">Avg Invoice</p>
+          <p className="text-[8px] font-medium text-muted">Avg Invoice</p>
         </div>
       </div>
     </div>
@@ -771,7 +771,7 @@ export default function Invoices() {
           <div className="flex items-center gap-3">
             <div className="relative group/logo">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl blur-md opacity-30 group-hover/logo:opacity-50 transition-opacity duration-500" />
-              <div className="relative w-10 h-10 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center shadow-sm">
+              <div className="relative w-10 h-10 rounded-2xl bg-card border border-card-border/80 flex items-center justify-center shadow-sm">
                 <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                   <FileText size={14} className="text-white" />
                 </div>
@@ -781,13 +781,13 @@ export default function Invoices() {
 
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-[1.3rem] font-bold tracking-tight text-slate-900 leading-tight">Invoices</h1>
+                <h1 className="text-[1.3rem] font-bold tracking-tight text-heading leading-tight">Invoices</h1>
               </div>
               <div className="flex items-center gap-1.5 mt-0">
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100/60">
                   <Building2 size={10} /> 10 Practices Active
                 </span>
-                <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                <span className="text-[10px] font-medium text-muted flex items-center gap-1">
                   <CalendarRange size={10} />
                   {dateLabel}
                 </span>
@@ -799,11 +799,11 @@ export default function Invoices() {
             <button 
               onClick={handleRefresh}
               disabled={isRefreshing || cooldownSecs > 0}
-              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-card border border-card-border/80 hover:border-card-border rounded-xl text-[10px] font-semibold text-body hover:text-heading hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
             >
               <RefreshCw 
                 size={11} 
-                className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-blue-500" : "text-slate-400"}`} 
+                className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-blue-500" : "text-muted"}`} 
               />
               {isRefreshing ? "Syncing..." : cooldownSecs > 0 ? `${Math.floor(cooldownSecs / 60)}:${String(cooldownSecs % 60).padStart(2, '0')} left` : "Refresh"}
             </button>
@@ -811,7 +811,7 @@ export default function Invoices() {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
+        <div className="flex items-center gap-1 bg-card border border-card-border/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
           {filters.map((filter) => {
             const isSelected = activeFilter === filter;
             return (
@@ -821,7 +821,7 @@ export default function Invoices() {
                 className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all duration-200 ${
                   isSelected
                     ? "bg-slate-900 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                    : "text-muted hover:text-heading hover:bg-surface"
                 }`}
               >
                 {filter}
@@ -833,21 +833,21 @@ export default function Invoices() {
         {activeFilter === "Custom" && (
           <div className="flex items-center gap-2 bg-transparent  rounded-lg p-2 ">
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">From:</label>
+              <label className="text-[10px] font-semibold text-body">From:</label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">To:</label>
+              <label className="text-[10px] font-semibold text-body">To:</label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -858,23 +858,23 @@ export default function Invoices() {
 
         {/* KPI Metrics Strip */}
         {loading ? (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="p-3.5 flex flex-col justify-between">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-slate-200 animate-pulse" />
-                    <div className="h-2.5 w-14 bg-slate-200 rounded animate-pulse" />
+                    <div className="w-6 h-6 rounded-lg bg-surface-alt animate-pulse" />
+                    <div className="h-2.5 w-14 bg-surface-alt rounded animate-pulse" />
                   </div>
-                  <div className="h-7 w-16 bg-slate-200 rounded animate-pulse mb-1.5" />
-                  <div className="h-2.5 w-12 bg-slate-200 rounded animate-pulse" />
+                  <div className="h-7 w-16 bg-surface-alt rounded animate-pulse mb-1.5" />
+                  <div className="h-2.5 w-12 bg-surface-alt rounded animate-pulse" />
                 </div>
               ))}
             </div>
           </div>
         ) : invoiceData && (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[
                 {
                   title: "Total Invoices",
@@ -940,14 +940,14 @@ export default function Invoices() {
                 const textAccent = m.positive ? "text-emerald-600" : "text-rose-500";
                 
                 return (
-                  <div key={index} className="group p-3.5 hover:bg-slate-50/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
+                  <div key={index} className="group p-3.5 hover:bg-surface/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
                 <div className="flex items-center gap-1.5 mb-2">
                       <div className={`w-6 h-6 rounded-md ${bgAccent} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200`}>
                         <Icon size={11} className={textAccent} />
                       </div>
                       <div className="flex items-center gap-1 min-w-0">
-                        <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-slate-200 text-[7px] font-bold text-slate-500 mr-1 shrink-0 self-center">{index + 11}</span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none truncate">
+                        <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-surface-alt text-[7px] font-bold text-muted mr-1 shrink-0 self-center">{index + 11}</span>
+                        <span className="text-[9px] font-bold text-muted uppercase tracking-wider leading-none truncate">
                           {m.title}
                         </span>
                         <InfoIcon 
@@ -962,7 +962,7 @@ export default function Invoices() {
                     </div>
 
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-[1.25rem] font-bold tracking-tight text-slate-900 leading-none">
+                      <span className="text-[1.25rem] font-bold tracking-tight text-heading leading-none">
                         {m.value}
                       </span>
                       <span className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-bold shrink-0 ${
@@ -995,7 +995,7 @@ export default function Invoices() {
                       })()}
                     </div>
 
-                    <p className="text-[9px] font-medium text-slate-400 mt-1 truncate">
+                    <p className="text-[9px] font-medium text-muted mt-1 truncate">
                       {m.footer}
                     </p>
                   </div>
@@ -1007,23 +1007,23 @@ export default function Invoices() {
 
         {/* Invoice Trend Chart */}
         {loading ? (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-5 py-3 border-b border-slate-100">
-              <div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" />
-              <div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" />
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-card-border">
+              <div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" />
+              <div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" />
             </div>
             <div className="p-5">
-              <div className="w-full h-[350px] bg-slate-100 rounded-lg animate-pulse" />
+              <div className="w-full h-[350px] bg-surface-alt rounded-lg animate-pulse" />
             </div>
           </div>
         ) : trendData && (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-5 py-3 border-b border-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-card-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">17</span>
-                    <Activity size={12} className="text-slate-400" />
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">17</span>
+                    <Activity size={12} className="text-muted" />
                     Invoice Trend
                     <InfoIcon 
                       title="Invoice Trend" 
@@ -1033,7 +1033,7 @@ export default function Invoices() {
                       additionalInfo="Invoice volume and value over time" 
                     />
                   </h3>
-                  <p className="text-[9px] text-slate-400 font-medium">Track invoicing activity and payment patterns</p>
+                  <p className="text-[9px] text-muted font-medium">Track invoicing activity and payment patterns</p>
                 </div>
               </div>
             </div>
@@ -1046,23 +1046,23 @@ export default function Invoices() {
         {/* Payment Status & Revenue by Site Charts */}
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-              <div className="px-5 py-3 border-b border-slate-100">
-                <div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" />
-                <div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" />
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+              <div className="px-5 py-3 border-b border-card-border">
+                <div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" />
+                <div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" />
               </div>
               <div className="p-5">
-                <div className="w-full h-[280px] bg-slate-100 rounded-lg animate-pulse" />
+                <div className="w-full h-[280px] bg-surface-alt rounded-lg animate-pulse" />
               </div>
             </div>
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-              <div className="px-5 py-3 border-b border-slate-100">
-                <div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" />
-                <div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" />
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+              <div className="px-5 py-3 border-b border-card-border">
+                <div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" />
+                <div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" />
               </div>
               <div className="p-3 space-y-2">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="h-10 bg-slate-100 rounded-xl animate-pulse" />
+                  <div key={i} className="h-10 bg-surface-alt rounded-xl animate-pulse" />
                 ))}
               </div>
             </div>
@@ -1071,11 +1071,11 @@ export default function Invoices() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Payment Status Split */}
             {invoiceData && (
-              <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-                <div className="px-5 py-3 border-b border-slate-100">
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">18</span>
-                    <DollarSign size={12} className="text-slate-400" />
+              <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-card-border">
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">18</span>
+                    <DollarSign size={12} className="text-muted" />
                     Payment Status
                     <InfoIcon 
                       title="Payment Status Breakdown" 
@@ -1090,7 +1090,7 @@ export default function Invoices() {
                       additionalInfo="Breakdown of paid vs outstanding revenue" 
                     />
                   </h3>
-                  <p className="text-[9px] text-slate-400 font-medium">Revenue by payment status</p>
+                  <p className="text-[9px] text-muted font-medium">Revenue by payment status</p>
                 </div>
                 <div className="p-5 flex flex-col items-center">
                   <ReactApexChart options={paymentStatusOptions} series={paymentStatusOptions.series} type="donut" height={320} />
@@ -1102,8 +1102,8 @@ export default function Invoices() {
                         <div className="flex items-center gap-2.5">
                           <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/30"></div>
                           <div>
-                            <p className="text-[11px] font-semibold text-slate-800">Paid</p>
-                            <p className="text-[9px] text-slate-500 font-medium">
+                            <p className="text-[11px] font-semibold text-heading">Paid</p>
+                            <p className="text-[9px] text-muted font-medium">
                               {invoiceData.paidInvoices || 0} invoices
                             </p>
                           </div>
@@ -1122,8 +1122,8 @@ export default function Invoices() {
                         <div className="flex items-center gap-2.5">
                           <div className="w-3 h-3 rounded-full bg-amber-500 shadow-sm shadow-amber-500/30"></div>
                           <div>
-                            <p className="text-[11px] font-semibold text-slate-800">Outstanding</p>
-                            <p className="text-[9px] text-slate-500 font-medium">
+                            <p className="text-[11px] font-semibold text-heading">Outstanding</p>
+                            <p className="text-[9px] text-muted font-medium">
                               Awaiting payment
                             </p>
                           </div>
@@ -1144,13 +1144,13 @@ export default function Invoices() {
             )}
 
             {/* Revenue by Site Chart */}
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-              <div className="px-5 py-3 border-b border-slate-100">
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+              <div className="px-5 py-3 border-b border-card-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">19</span>
-                      <Building2 size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">19</span>
+                      <Building2 size={12} className="text-muted" />
                       Revenue by Site
                       <InfoIcon 
                         title="Revenue by Site" 
@@ -1165,7 +1165,7 @@ export default function Invoices() {
                         additionalInfo="Revenue breakdown across all active practices"
                       />
                     </h3>
-                    <p className="text-[9px] text-slate-400 font-medium">Invoice revenue by practice location</p>
+                    <p className="text-[9px] text-muted font-medium">Invoice revenue by practice location</p>
                   </div>
                 </div>
               </div>
@@ -1181,18 +1181,18 @@ export default function Invoices() {
           <div className="space-y-4 sm:gap-6">
             <div className="flex items-center gap-2 px-1">
               <Stethoscope size={16} className="text-blue-600" />
-              <h2 className="text-base font-bold text-slate-900">Treatment Analytics</h2>
-              <span className="text-[10px] font-medium text-slate-500">Powered by invoice_items</span>
+              <h2 className="text-base font-bold text-heading">Treatment Analytics</h2>
+              <span className="text-[10px] font-medium text-muted">Powered by invoice_items</span>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Revenue by Treatment */}
-              <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-                <div className="px-5 py-3 border-b border-slate-100">
+              <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-card-border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">20</span>
+                      <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">20</span>
                         <TrendingUp size={12} className="text-blue-500" />
                         Revenue by Treatment
                         <InfoIcon 
@@ -1208,7 +1208,7 @@ export default function Invoices() {
                           additionalInfo="Identify highest-grossing treatments"
                         />
                       </h3>
-                      <p className="text-[9px] text-slate-400 font-medium">Top treatments by revenue generated</p>
+                      <p className="text-[9px] text-muted font-medium">Top treatments by revenue generated</p>
                     </div>
                   </div>
                 </div>
@@ -1218,12 +1218,12 @@ export default function Invoices() {
               </div>
 
               {/* Top 5 Patients by Revenue */}
-              <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-                <div className="px-5 py-3 border-b border-slate-100">
+              <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-card-border">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">21</span>
+                      <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                        <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">21</span>
                         <UserCheck size={12} className="text-pink-500" />
                         Top 5 Patients by Revenue
                         <InfoIcon 
@@ -1240,7 +1240,7 @@ export default function Invoices() {
                           additionalInfo="Highest-value patients by revenue generated"
                         />
                       </h3>
-                      <p className="text-[9px] text-slate-400 font-medium">Top-performing patients by revenue</p>
+                      <p className="text-[9px] text-muted font-medium">Top-performing patients by revenue</p>
                     </div>
                   </div>
                 </div>

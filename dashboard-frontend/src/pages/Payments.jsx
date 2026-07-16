@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { RefreshCw, TrendingUp, Activity, DollarSign, CreditCard, Building2, CalendarRange, Wallet, Banknote, PiggyBank, ArrowDownUp, Table } from 'lucide-react';
 import InfoIcon from '../components/InfoIcon';
@@ -24,7 +24,7 @@ function sparklinePath(values, width = 80, height = 32) {
 
 function PaymentsBySiteChart({ data }) {
   if (!data || !data.sites || data.sites.length === 0) {
-    return <div className="text-center py-8 text-slate-400 text-xs">No site data available</div>;
+    return <div className="text-center py-8 text-muted text-xs">No site data available</div>;
   }
 
   const maxTotal = Math.max(...data.sites.map(s => s.total), 1);
@@ -35,19 +35,19 @@ function PaymentsBySiteChart({ data }) {
       {data.sites.slice(0, 6).map((item, index) => {
         const pctOfMax = (item.total / maxTotal) * 100;
         return (
-          <div key={item.name} className="group flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-slate-200/70 hover:bg-white hover:shadow-sm transition-all duration-200 cursor-default">
+          <div key={item.name} className="group flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-card-border/70 hover:bg-card hover:shadow-sm transition-all duration-200 cursor-default">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold border bg-slate-50 text-slate-700 border-slate-100 shrink-0">{index + 1}</span>
+              <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold border bg-surface text-body border-card-border shrink-0">{index + 1}</span>
               <div className="min-w-0 flex-1">
-                <p className="text-[12px] font-semibold text-slate-800 truncate">{item.name}</p>
-                <p className="text-[10px] text-slate-400 font-medium truncate">{item.count} payments</p>
+                <p className="text-[12px] font-semibold text-heading truncate">{item.name}</p>
+                <p className="text-[10px] text-muted font-medium truncate">{item.count} payments</p>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0 ml-3">
-              <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="w-16 h-1.5 bg-surface-alt rounded-full overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pctOfMax}%`, backgroundColor: pctOfMax >= 75 ? "#10b981" : pctOfMax >= 40 ? "#f59e0b" : "#ef4444" }} />
               </div>
-              <span className="text-[11px] font-bold px-2 py-1 rounded-lg border shrink-0 text-slate-700 bg-slate-50 border-slate-100">{formatUKCurrency(item.total, 0)}</span>
+              <span className="text-[11px] font-bold px-2 py-1 rounded-lg border shrink-0 text-body bg-surface border-card-border">{formatUKCurrency(item.total, 0)}</span>
             </div>
           </div>
         );
@@ -58,7 +58,7 @@ function PaymentsBySiteChart({ data }) {
 
 function PaymentsByPractitionerChart({ data }) {
   if (!data || !data.practitioners || data.practitioners.length === 0) {
-    return <div className="text-center py-8 text-slate-400 text-xs">No practitioner data available</div>;
+    return <div className="text-center py-8 text-muted text-xs">No practitioner data available</div>;
   }
 
   const colors = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e', '#e11d48', '#fb7185', '#f472b6', '#10b981', '#059669', '#f59e0b', '#d97706', '#ef4444'];
@@ -85,7 +85,7 @@ function PaymentsByPractitionerChart({ data }) {
 
 function MethodDonutChart({ data }) {
   if (!data || !data.methods || data.methods.length === 0) {
-    return <div className="text-center py-8 text-slate-400 text-xs">No payment method data available</div>;
+    return <div className="text-center py-8 text-muted text-xs">No payment method data available</div>;
   }
 
   const colors = ['#3b82f6', '#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#94a3b8'];
@@ -111,13 +111,13 @@ function MethodDonutChart({ data }) {
       <ReactApexChart options={donutOptions} series={donutOptions.series} type="donut" height={320} />
       <div className="mt-3 flex items-center justify-center gap-3">
         <div className="text-center">
-          <p className="text-[10px] font-medium text-slate-400">Total Payments</p>
-          <p className="text-xs font-bold text-slate-800">{methods.reduce((s, m) => s + m.count, 0).toLocaleString()}</p>
+          <p className="text-[10px] font-medium text-muted">Total Payments</p>
+          <p className="text-xs font-bold text-heading">{methods.reduce((s, m) => s + m.count, 0).toLocaleString()}</p>
         </div>
-        <div className="w-px h-6 bg-slate-200" />
+        <div className="w-px h-6 bg-surface-alt" />
         <div className="text-center">
-          <p className="text-[10px] font-medium text-slate-400">Total Value</p>
-          <p className="text-xs font-bold text-slate-800">{formatUKCurrency(totalAmount, 0)}</p>
+          <p className="text-[10px] font-medium text-muted">Total Value</p>
+          <p className="text-xs font-bold text-heading">{formatUKCurrency(totalAmount, 0)}</p>
         </div>
       </div>
     </div>
@@ -126,7 +126,7 @@ function MethodDonutChart({ data }) {
 
 function MethodCountChart({ data }) {
   if (!data || !data.methods || data.methods.length === 0) {
-    return <div className="text-center py-8 text-slate-400 text-xs">No method data available</div>;
+    return <div className="text-center py-8 text-muted text-xs">No method data available</div>;
   }
   const methods = data.methods.slice(0, 8);
   const maxCount = Math.max(...methods.map(m => m.count), 1);
@@ -135,12 +135,12 @@ function MethodCountChart({ data }) {
       {methods.map((item) => {
         const pct = (item.count / maxCount) * 100;
         return (
-          <div key={item.method} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
-            <span className="w-24 text-[10px] font-semibold text-slate-700 truncate text-right shrink-0">{item.method}</span>
-            <div className="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
+          <div key={item.method} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface transition-colors">
+            <span className="w-24 text-[10px] font-semibold text-body truncate text-right shrink-0">{item.method}</span>
+            <div className="flex-1 h-5 bg-surface-alt rounded-full overflow-hidden">
               <div className="h-full rounded-full bg-gradient-to-r from-indigo-400 to-indigo-500 transition-all duration-500" style={{ width: `${pct}%` }} />
             </div>
-            <span className="text-[10px] font-bold text-slate-600 w-14 text-right shrink-0 tabular-nums">{item.count.toLocaleString()}</span>
+            <span className="text-[10px] font-bold text-body w-14 text-right shrink-0 tabular-nums">{item.count.toLocaleString()}</span>
           </div>
         );
       })}
@@ -150,7 +150,7 @@ function MethodCountChart({ data }) {
 
 function SiteRevenueDonutChart({ data }) {
   if (!data || !data.sites || data.sites.length === 0) {
-    return <div className="text-center py-8 text-slate-400 text-xs">No site data available</div>;
+    return <div className="text-center py-8 text-muted text-xs">No site data available</div>;
   }
   const colors = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#94a3b8', '#06b6d4'];
   const sites = data.sites.slice(0, 6);
@@ -176,7 +176,7 @@ function SiteRevenueDonutChart({ data }) {
 
 function PractitionerRevenueDonutChart({ data }) {
   if (!data || !data.practitioners || data.practitioners.length === 0) {
-    return <div className="text-center py-8 text-slate-400 text-xs">No practitioner data available</div>;
+    return <div className="text-center py-8 text-muted text-xs">No practitioner data available</div>;
   }
   const colors = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#94a3b8', '#06b6d4'];
   const practitioners = data.practitioners.slice(0, 6);
@@ -202,7 +202,7 @@ function PractitionerRevenueDonutChart({ data }) {
 
 function CumulativeRevenueChart({ trendData }) {
   if (!trendData || !trendData.chart_data || trendData.chart_data.length < 2) {
-    return <div className="text-center py-8 text-slate-400 text-xs">Insufficient trend data</div>;
+    return <div className="text-center py-8 text-muted text-xs">Insufficient trend data</div>;
   }
   const cumulative = [];
   let runningTotal = 0;
@@ -228,7 +228,7 @@ function CumulativeRevenueChart({ trendData }) {
 
 function AverageBySiteChart({ data }) {
   if (!data || !data.sites || data.sites.length === 0) {
-    return <div className="text-center py-8 text-slate-400 text-xs">No site data available</div>;
+    return <div className="text-center py-8 text-muted text-xs">No site data available</div>;
   }
   const sites = data.sites.slice(0, 6).map(s => ({ ...s, avg: s.count > 0 ? s.total / s.count : 0 }));
   const maxAvg = Math.max(...sites.map(s => s.avg), 1);
@@ -237,12 +237,12 @@ function AverageBySiteChart({ data }) {
       {sites.map((item, i) => {
         const pct = (item.avg / maxAvg) * 100;
         return (
-          <div key={item.name} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
-            <span className="w-20 text-[10px] font-semibold text-slate-700 truncate text-right shrink-0">{item.name}</span>
-            <div className="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
+          <div key={item.name} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface transition-colors">
+            <span className="w-20 text-[10px] font-semibold text-body truncate text-right shrink-0">{item.name}</span>
+            <div className="flex-1 h-5 bg-surface-alt rounded-full overflow-hidden">
               <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-500" style={{ width: `${pct}%` }} />
             </div>
-            <span className="text-[10px] font-bold text-slate-600 w-16 text-right shrink-0 tabular-nums">{formatUKCurrency(item.avg, 0)}</span>
+            <span className="text-[10px] font-bold text-body w-16 text-right shrink-0 tabular-nums">{formatUKCurrency(item.avg, 0)}</span>
           </div>
         );
       })}
@@ -252,7 +252,7 @@ function AverageBySiteChart({ data }) {
 
 function AverageByPractitionerChart({ data }) {
   if (!data || !data.practitioners || data.practitioners.length === 0) {
-    return <div className="text-center py-8 text-slate-400 text-xs">No practitioner data available</div>;
+    return <div className="text-center py-8 text-muted text-xs">No practitioner data available</div>;
   }
   const practitioners = data.practitioners.slice(0, 8).map(p => ({ ...p, avg: p.count > 0 ? p.total / p.count : 0 }));
   const maxAvg = Math.max(...practitioners.map(p => p.avg), 1);
@@ -261,12 +261,12 @@ function AverageByPractitionerChart({ data }) {
       {practitioners.map((item, i) => {
         const pct = (item.avg / maxAvg) * 100;
         return (
-          <div key={item.name} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
-            <span className="w-24 text-[10px] font-semibold text-slate-700 truncate text-right shrink-0">{item.name}</span>
-            <div className="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
+          <div key={item.name} className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface transition-colors">
+            <span className="w-24 text-[10px] font-semibold text-body truncate text-right shrink-0">{item.name}</span>
+            <div className="flex-1 h-5 bg-surface-alt rounded-full overflow-hidden">
               <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500 transition-all duration-500" style={{ width: `${pct}%` }} />
             </div>
-            <span className="text-[10px] font-bold text-slate-600 w-16 text-right shrink-0 tabular-nums">{formatUKCurrency(item.avg, 0)}</span>
+            <span className="text-[10px] font-bold text-body w-16 text-right shrink-0 tabular-nums">{formatUKCurrency(item.avg, 0)}</span>
           </div>
         );
       })}
@@ -276,7 +276,7 @@ function AverageByPractitionerChart({ data }) {
 
 function PaymentCountTrendChart({ trendData }) {
   if (!trendData || !trendData.chart_data || trendData.chart_data.length < 2) {
-    return <div className="text-center py-8 text-slate-400 text-xs">Insufficient trend data</div>;
+    return <div className="text-center py-8 text-muted text-xs">Insufficient trend data</div>;
   }
   const chartOptions = {
     series: [{ name: "Payment Count", data: trendData.chart_data.map(d => d.count) }],
@@ -586,31 +586,31 @@ export default function Payments() {
             <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 leading-tight">Payments</h1>
+            <h1 className="text-xl font-bold text-heading leading-tight">Payments</h1>
             <div className="flex items-center gap-2 mt-0.5">
               <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100/60">
                 <Wallet size={10} /> Revenue
               </span>
-              <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+              <span className="text-[10px] text-muted font-medium flex items-center gap-1">
                 <CalendarRange size={10} /> {dateLabel}
               </span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleRefresh} disabled={isRefreshing || cooldownSecs > 0} className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none">
-            <RefreshCw size={11} className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-blue-500" : "text-slate-400"}`} />
+          <button onClick={handleRefresh} disabled={isRefreshing || cooldownSecs > 0} className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-card border border-card-border/80 hover:border-card-border rounded-xl text-[10px] font-semibold text-body hover:text-heading hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none">
+            <RefreshCw size={11} className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-blue-500" : "text-muted"}`} />
             {isRefreshing ? "Syncing..." : cooldownSecs > 0 ? `${Math.floor(cooldownSecs / 60)}:${String(cooldownSecs % 60).padStart(2, '0')} left` : "Refresh"}
           </button>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
+      <div className="flex items-center gap-1 bg-card border border-card-border/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
         {filters.map((filter) => {
           const isSelected = activeFilter === filter;
           return (
-            <button key={filter} onClick={() => setActiveFilter(filter)} className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all duration-200 ${isSelected ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"}`}>
+            <button key={filter} onClick={() => setActiveFilter(filter)} className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all duration-200 ${isSelected ? "bg-slate-900 text-white shadow-sm" : "text-muted hover:text-heading hover:bg-surface"}`}>
               {filter}
             </button>
           );
@@ -618,12 +618,12 @@ export default function Payments() {
         {activeFilter === "Custom" && (
           <div className="flex items-center gap-2 bg-transparent rounded-lg p-2">
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">From:</label>
-              <input type="date" value={customStartDate} onChange={(e) => setCustomStartDate(e.target.value)} className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <label className="text-[10px] font-semibold text-body">From:</label>
+              <input type="date" value={customStartDate} onChange={(e) => setCustomStartDate(e.target.value)} className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">To:</label>
-              <input type="date" value={customEndDate} onChange={(e) => setCustomEndDate(e.target.value)} className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <label className="text-[10px] font-semibold text-body">To:</label>
+              <input type="date" value={customEndDate} onChange={(e) => setCustomEndDate(e.target.value)} className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           </div>
         )}
@@ -631,37 +631,37 @@ export default function Payments() {
 
       {/* KPI Metrics Strip */}
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 divide-x divide-slate-100">
+        <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 divide-x divide-card-border">
             {[1, 2, 3, 4, 5, 6, 7].map((i) => (
               <div key={i} className="p-3.5 flex flex-col justify-between">
-                <div className="flex items-center gap-1.5 mb-2"><div className="w-6 h-6 rounded-lg bg-slate-200 animate-pulse" /><div className="h-2.5 w-14 bg-slate-200 rounded animate-pulse" /></div>
-                <div className="h-7 w-16 bg-slate-200 rounded animate-pulse mb-1.5" /><div className="h-2.5 w-12 bg-slate-200 rounded animate-pulse" />
+                <div className="flex items-center gap-1.5 mb-2"><div className="w-6 h-6 rounded-lg bg-surface-alt animate-pulse" /><div className="h-2.5 w-14 bg-surface-alt rounded animate-pulse" /></div>
+                <div className="h-7 w-16 bg-surface-alt rounded animate-pulse mb-1.5" /><div className="h-2.5 w-12 bg-surface-alt rounded animate-pulse" />
               </div>
             ))}
           </div>
         </div>
       ) : kpiData && (
-        <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 divide-x divide-slate-100">
+        <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 divide-x divide-card-border">
             {kpiMetrics.map((m, index) => {
               const Icon = m.icon;
               const bgAccent = m.positive ? "bg-emerald-50" : "bg-rose-50";
               const textAccent = m.positive ? "text-emerald-600" : "text-rose-500";
               return (
-                <div key={index} className="group p-3.5 hover:bg-slate-50/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
+                <div key={index} className="group p-3.5 hover:bg-surface/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
                   <div className="flex items-center gap-1.5 mb-2">
                     <div className={`w-6 h-6 rounded-md ${bgAccent} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200`}>
                       <Icon size={11} className={textAccent} />
                     </div>
                     <div className="flex items-center gap-1 min-w-0">
-                      <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-slate-200 text-[7px] font-bold text-slate-500 mr-1 shrink-0 self-center">{index + 55}</span>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none truncate">{m.title}</span>
+                      <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-surface-alt text-[7px] font-bold text-muted mr-1 shrink-0 self-center">{index + 55}</span>
+                      <span className="text-[9px] font-bold text-muted uppercase tracking-wider leading-none truncate">{m.title}</span>
                       <InfoIcon title={m.title} additionalInfo={m.tooltip} apiEndpoint={getDentallyEndpoint(m.title)} apiFields={getMetricApiFields(m.title)} databaseTables={getMetricTables(m.title)} calculations={getMetricCalculation(m.title)} />
                     </div>
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-[1.25rem] font-bold tracking-tight text-slate-900 leading-none">{m.value}</span>
+                    <span className="text-[1.25rem] font-bold tracking-tight text-heading leading-none">{m.value}</span>
                     {m.change && (
                       <span className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-bold shrink-0 ${m.positive ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"}`}>{m.change}</span>
                     )}
@@ -682,7 +682,7 @@ export default function Payments() {
                       );
                     })()}
                   </div>
-                  <p className="text-[9px] font-medium text-slate-400 mt-1 truncate">{m.footer}</p>
+                  <p className="text-[9px] font-medium text-muted mt-1 truncate">{m.footer}</p>
                 </div>
               );
             })}
@@ -692,22 +692,22 @@ export default function Payments() {
 
       {/* Payment Trend Chart */}
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-          <div className="p-3"><div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" /></div>
+        <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+          <div className="p-3"><div className="w-full h-[200px] bg-surface-alt rounded-lg animate-pulse" /></div>
         </div>
       ) : trendData && (
-        <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100">
+        <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-card-border">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">61</span>
-                  <Activity size={12} className="text-slate-400" />
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">61</span>
+                  <Activity size={12} className="text-muted" />
                   Payment Trend
                   <InfoIcon title="Payment Trend" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'amount', role: 'Summed per day/month' }, { field: 'dated_on', role: 'Grouped by date' }]} databaseTables={['dentally_payments']} calculations="Daily/monthly sum of payment amounts. Short periods group by day, longer periods by month." additionalInfo="Payment volume and value over time" />
                 </h3>
-                <p className="text-[9px] text-slate-400 font-medium">Track payment volume and value patterns</p>
+                <p className="text-[9px] text-muted font-medium">Track payment volume and value patterns</p>
               </div>
             </div>
           </div>
@@ -720,28 +720,28 @@ export default function Payments() {
       {/* Method & Site Charts */}
       {loading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-            <div className="p-3"><div className="w-full h-[280px] bg-slate-100 rounded-lg animate-pulse" /></div>
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+            <div className="p-3"><div className="w-full h-[280px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-            <div className="p-3 space-y-2">{[1, 2, 3, 4, 5].map((i) => (<div key={i} className="h-10 bg-slate-100 rounded-xl animate-pulse" />))}</div>
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+            <div className="p-3 space-y-2">{[1, 2, 3, 4, 5].map((i) => (<div key={i} className="h-10 bg-surface-alt rounded-xl animate-pulse" />))}</div>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Payment Methods Donut */}
           {methodData && (
-            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">62</span>
-                  <CreditCard size={12} className="text-slate-400" />
+            <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">62</span>
+                  <CreditCard size={12} className="text-muted" />
                   Payment Methods
                   <InfoIcon title="Payment Methods" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'method', role: 'Payment method type' }, { field: 'amount', role: 'Summed per method' }]} databaseTables={['dentally_payments']} calculations="Groups payments by method (debit card, credit card, stripe, cash, etc) and sums amounts." additionalInfo="Revenue distribution across payment methods" />
                 </h3>
-                <p className="text-[9px] text-slate-400 font-medium">Revenue by payment method</p>
+                <p className="text-[9px] text-muted font-medium">Revenue by payment method</p>
               </div>
               <div className="p-4 flex flex-col items-center">
                 <MethodDonutChart data={methodData} />
@@ -750,17 +750,17 @@ export default function Payments() {
           )}
 
           {/* Payments by Site */}
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100">
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">63</span>
-                    <Building2 size={12} className="text-slate-400" />
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">63</span>
+                    <Building2 size={12} className="text-muted" />
                     Payments by Site
                     <InfoIcon title="Payments by Site" apiEndpoint="https://api.dentally.co/v1/payments , https://api.dentally.co/v1/sites" apiFields={[{ field: 'site_id', role: 'Links to sites via dentally_id' }, { field: 'name', role: 'Site name from sites table' }, { field: 'amount', role: 'Summed per site' }]} databaseTables={['dentally_payments', 'dentally_sites']} calculations="Joins dentally_payments with dentally_sites on site_id = dentally_id, summing amounts grouped by site name." additionalInfo="Revenue collected per practice location" />
                   </h3>
-                  <p className="text-[9px] text-slate-400 font-medium">Payments collected by practice</p>
+                  <p className="text-[9px] text-muted font-medium">Payments collected by practice</p>
                 </div>
               </div>
             </div>
@@ -774,28 +774,28 @@ export default function Payments() {
       {/* Method Count & Site Distribution */}
       {loading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-            <div className="p-3 space-y-2">{[1, 2, 3, 4, 5].map((i) => (<div key={i} className="h-6 bg-slate-100 rounded-xl animate-pulse" />))}</div>
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+            <div className="p-3 space-y-2">{[1, 2, 3, 4, 5].map((i) => (<div key={i} className="h-6 bg-surface-alt rounded-xl animate-pulse" />))}</div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-            <div className="p-3"><div className="w-full h-[220px] bg-slate-100 rounded-lg animate-pulse" /></div>
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+            <div className="p-3"><div className="w-full h-[220px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Method Count Breakdown */}
           {methodData && (
-            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">66</span>
-                  <CreditCard size={12} className="text-slate-400" />
+            <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">66</span>
+                  <CreditCard size={12} className="text-muted" />
                   Method Volume
                   <InfoIcon title="Method Volume" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'method', role: 'Grouped and counted' }, { field: 'count', role: 'Number of payments per method' }]} databaseTables={['dentally_payments']} calculations="Groups payments by method and counts transactions. Shows which payment methods are most frequently used." additionalInfo="Payment transaction count by method" />
                 </h3>
-                <p className="text-[9px] text-slate-400 font-medium">Transaction count by payment method</p>
+                <p className="text-[9px] text-muted font-medium">Transaction count by payment method</p>
               </div>
               <div className="p-3">
                 <MethodCountChart data={methodData} />
@@ -805,17 +805,17 @@ export default function Payments() {
 
           {/* Site Revenue Distribution */}
           {siteData && (
-            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
+            <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">67</span>
-                      <Building2 size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">67</span>
+                      <Building2 size={12} className="text-muted" />
                       Site Revenue Split
                       <InfoIcon title="Site Revenue Split" apiEndpoint="https://api.dentally.co/v1/payments , https://api.dentally.co/v1/sites" apiFields={[{ field: 'site_id', role: 'Links to sites table' }, { field: 'amount', role: 'Summed per site' }, { field: 'name', role: 'Site name (dentally_sites)' }]} databaseTables={['dentally_payments', 'dentally_sites']} calculations="Joins payments with sites on site_id = dentally_id. Sums amount per site and shows as percentage of total." additionalInfo="How total revenue is distributed across practice locations" />
                     </h3>
-                    <p className="text-[9px] text-slate-400 font-medium">Revenue share by practice location</p>
+                    <p className="text-[9px] text-muted font-medium">Revenue share by practice location</p>
                   </div>
                 </div>
               </div>
@@ -829,22 +829,22 @@ export default function Payments() {
 
       {/* Payments by Practitioner */}
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-          <div className="p-3"><div className="w-full h-[280px] bg-slate-100 rounded-lg animate-pulse" /></div>
+        <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+          <div className="p-3"><div className="w-full h-[280px] bg-surface-alt rounded-lg animate-pulse" /></div>
         </div>
       ) : practitionerData && (
-        <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100">
+        <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-card-border">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">64</span>
-                  <ArrowDownUp size={12} className="text-slate-400" />
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">64</span>
+                  <ArrowDownUp size={12} className="text-muted" />
                   Payments by Practitioner
                   <InfoIcon title="Payments by Practitioner" apiEndpoint="https://api.dentally.co/v1/payments , https://api.dentally.co/v1/practitioners" apiFields={[{ field: 'practitioner_id', role: 'Links to practitioners' }, { field: 'amount', role: 'Summed per practitioner' }]} databaseTables={['dentally_payments', 'dentally_practitioners']} calculations="Groups payments by practitioner, summing amounts and counting transactions. Shows top 10 practitioners by revenue." additionalInfo="Revenue attributed per clinician" />
                 </h3>
-                <p className="text-[9px] text-slate-400 font-medium">Top practitioners by payment revenue</p>
+                <p className="text-[9px] text-muted font-medium">Top practitioners by payment revenue</p>
               </div>
             </div>
           </div>
@@ -857,30 +857,30 @@ export default function Payments() {
       {/* Practitioner Distribution & Average */}
       {loading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-            <div className="p-3"><div className="w-full h-[220px] bg-slate-100 rounded-lg animate-pulse" /></div>
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+            <div className="p-3"><div className="w-full h-[220px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-            <div className="p-3 space-y-2">{[1, 2, 3, 4, 5, 6].map((i) => (<div key={i} className="h-6 bg-slate-100 rounded-xl animate-pulse" />))}</div>
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+            <div className="p-3 space-y-2">{[1, 2, 3, 4, 5, 6].map((i) => (<div key={i} className="h-6 bg-surface-alt rounded-xl animate-pulse" />))}</div>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Practitioner Revenue Distribution */}
           {practitionerData && (
-            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
+            <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">68</span>
-                      <ArrowDownUp size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">68</span>
+                      <ArrowDownUp size={12} className="text-muted" />
                       Practitioner Revenue Split
                       <InfoIcon title="Practitioner Revenue Split" apiEndpoint="https://api.dentally.co/v1/payments , https://api.dentally.co/v1/practitioners" apiFields={[{ field: 'practitioner_id', role: 'Links to practitioners table' }, { field: 'amount', role: 'Summed per practitioner' }, { field: 'first_name', role: 'Practitioner first name' }, { field: 'last_name', role: 'Practitioner last name' }]} databaseTables={['dentally_payments', 'dentally_practitioners']} calculations="Joins payments with practitioners on practitioner_id = dentally_id. Sums amount per practitioner and shows proportional share." additionalInfo="Revenue distribution across clinicians" />
                     </h3>
-                    <p className="text-[9px] text-slate-400 font-medium">Revenue share by clinician</p>
+                    <p className="text-[9px] text-muted font-medium">Revenue share by clinician</p>
                   </div>
                 </div>
               </div>
@@ -892,17 +892,17 @@ export default function Payments() {
 
           {/* Average Payment by Practitioner */}
           {practitionerData && (
-            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
+            <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">69</span>
-                      <TrendingUp size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">69</span>
+                      <TrendingUp size={12} className="text-muted" />
                       Avg Payment by Practitioner
                       <InfoIcon title="Avg Payment by Practitioner" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'amount', role: 'Summed per practitioner' }, { field: 'count', role: 'Count of payments' }]} databaseTables={['dentally_payments']} calculations="For each practitioner, divides total amount by payment count to get average transaction value." additionalInfo="Average payment value per clinician" />
                     </h3>
-                    <p className="text-[9px] text-slate-400 font-medium">Average transaction value per clinician</p>
+                    <p className="text-[9px] text-muted font-medium">Average transaction value per clinician</p>
                   </div>
                 </div>
               </div>
@@ -917,30 +917,30 @@ export default function Payments() {
       {/* Trend Analysis: Cumulative & Count */}
       {loading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-            <div className="p-3"><div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" /></div>
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+            <div className="p-3"><div className="w-full h-[200px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-            <div className="p-3"><div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" /></div>
+          <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+            <div className="p-3"><div className="w-full h-[200px] bg-surface-alt rounded-lg animate-pulse" /></div>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Cumulative Revenue */}
           {trendData && (
-            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
+            <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">70</span>
-                      <TrendingUp size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">70</span>
+                      <TrendingUp size={12} className="text-muted" />
                       Cumulative Revenue
                       <InfoIcon title="Cumulative Revenue" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'amount', role: 'Summed per day/month and accumulated' }, { field: 'dated_on', role: 'Grouped by date' }]} databaseTables={['dentally_payments']} calculations="Running total of payment amounts over the selected period. Each data point adds the current period's total to the running sum." additionalInfo="Running total of revenue over time" />
                     </h3>
-                    <p className="text-[9px] text-slate-400 font-medium">Running total of payments collected</p>
+                    <p className="text-[9px] text-muted font-medium">Running total of payments collected</p>
                   </div>
                 </div>
               </div>
@@ -952,17 +952,17 @@ export default function Payments() {
 
           {/* Payment Count Trend */}
           {trendData && (
-            <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-              <div className="px-4 py-3 border-b border-slate-100">
+            <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+              <div className="px-4 py-3 border-b border-card-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">71</span>
-                      <Activity size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">71</span>
+                      <Activity size={12} className="text-muted" />
                       Payment Count Trend
                       <InfoIcon title="Payment Count Trend" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'count', role: 'Count of payments per period' }, { field: 'dated_on', role: 'Grouped by date' }]} databaseTables={['dentally_payments']} calculations="Counts payment transactions grouped by day (short periods) or month (long periods)." additionalInfo="Number of payment transactions over time" />
                     </h3>
-                    <p className="text-[9px] text-slate-400 font-medium">Transaction volume over time</p>
+                    <p className="text-[9px] text-muted font-medium">Transaction volume over time</p>
                   </div>
                 </div>
               </div>
@@ -976,50 +976,50 @@ export default function Payments() {
 
       {/* Recent Payments */}
       {loading ? (
-        <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100"><div className="h-3.5 w-32 bg-slate-200 rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-slate-200 rounded animate-pulse" /></div>
-          <div className="p-3"><div className="w-full h-[200px] bg-slate-100 rounded-lg animate-pulse" /></div>
+        <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-card-border"><div className="h-3.5 w-32 bg-surface-alt rounded animate-pulse mb-2" /><div className="h-2.5 w-48 bg-surface-alt rounded animate-pulse" /></div>
+          <div className="p-3"><div className="w-full h-[200px] bg-surface-alt rounded-lg animate-pulse" /></div>
         </div>
       ) : recentPayments && recentPayments.payments && recentPayments.payments.length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200/50 overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100">
+        <div className="bg-card rounded-xl border border-card-border/50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-card-border">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">65</span>
-                  <Table size={12} className="text-slate-400" />
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">65</span>
+                  <Table size={12} className="text-muted" />
                   Recent Payments
                   <InfoIcon title="Recent Payments" apiEndpoint="https://api.dentally.co/v1/payments" apiFields={[{ field: 'amount', role: 'Payment amount' }, { field: 'method', role: 'Payment method' }, { field: 'dated_on', role: 'Payment date' }, { field: 'reference', role: 'Payment reference' }]} databaseTables={['dentally_payments']} calculations="Latest 20 payment transactions with patient and practitioner details." additionalInfo="Most recent payment transactions" />
                 </h3>
-                <p className="text-[9px] text-slate-400 font-medium">Latest payment transactions</p>
+                <p className="text-[9px] text-muted font-medium">Latest payment transactions</p>
               </div>
             </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Date</th>
-                  <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Patient</th>
-                  <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Practitioner</th>
-                  <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Method</th>
-                  <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Amount</th>
-                  <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider">Site</th>
+                <tr className="border-b border-card-border">
+                  <th className="px-4 py-2 text-[9px] font-bold text-muted uppercase tracking-wider">Date</th>
+                  <th className="px-4 py-2 text-[9px] font-bold text-muted uppercase tracking-wider">Patient</th>
+                  <th className="px-4 py-2 text-[9px] font-bold text-muted uppercase tracking-wider">Practitioner</th>
+                  <th className="px-4 py-2 text-[9px] font-bold text-muted uppercase tracking-wider">Method</th>
+                  <th className="px-4 py-2 text-[9px] font-bold text-muted uppercase tracking-wider">Amount</th>
+                  <th className="px-4 py-2 text-[9px] font-bold text-muted uppercase tracking-wider">Site</th>
                 </tr>
               </thead>
               <tbody>
                 {recentPayments.payments.map((p, i) => (
-                  <tr key={p.id || i} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                    <td className="px-4 py-2.5 text-[11px] text-slate-600 font-medium">{p.datedOn}</td>
-                    <td className="px-4 py-2.5 text-[11px] text-slate-800 font-semibold">{p.patientName}</td>
-                    <td className="px-4 py-2.5 text-[11px] text-slate-600">{p.practitionerName}</td>
+                  <tr key={p.id || i} className="border-b border-card hover:bg-surface/50 transition-colors">
+                    <td className="px-4 py-2.5 text-[11px] text-body font-medium">{p.datedOn}</td>
+                    <td className="px-4 py-2.5 text-[11px] text-heading font-semibold">{p.patientName}</td>
+                    <td className="px-4 py-2.5 text-[11px] text-body">{p.practitionerName}</td>
                     <td className="px-4 py-2.5">
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-semibold text-slate-700">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-alt text-[10px] font-semibold text-body">
                         {p.method}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-[11px] font-bold text-slate-800">{formatUKCurrency(p.amount, 0)}</td>
-                    <td className="px-4 py-2.5 text-[11px] text-slate-500">{p.siteName}</td>
+                    <td className="px-4 py-2.5 text-[11px] font-bold text-heading">{formatUKCurrency(p.amount, 0)}</td>
+                    <td className="px-4 py-2.5 text-[11px] text-muted">{p.siteName}</td>
                   </tr>
                 ))}
               </tbody>

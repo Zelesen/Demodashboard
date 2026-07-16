@@ -19,13 +19,13 @@ import {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white border border-slate-200 p-3 rounded-xl shadow-lg text-xs leading-relaxed font-sans">
-        <p className="font-bold text-slate-800 mb-1.5">{label}</p>
+      <div className="bg-card border border-card-border p-3 rounded-xl shadow-lg text-xs leading-relaxed font-sans">
+        <p className="font-bold text-heading mb-1.5">{label}</p>
         {payload.map((entry, index) => (
           <div key={index} className="flex items-center gap-2 mb-1 last:mb-0">
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
-            <span className="text-slate-500 font-medium">{entry.name}:</span>
-            <span className="text-slate-800 font-bold">{entry.value}</span>
+            <span className="text-muted font-medium">{entry.name}:</span>
+            <span className="text-heading font-bold">{entry.value}</span>
           </div>
         ))}
       </div>
@@ -361,7 +361,7 @@ export default function Finance() {
   const kpiCards = getKpiCards();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 sm:p-6 lg:p-8 animate-fadeIn">
+    <div className="min-h-screen bg-gradient-to-br from-surface to-blue-50 p-4 sm:p-6 lg:p-8 animate-fadeIn">
       <div className="w-full max-w-7xl mx-auto space-y-4 sm:space-y-6 select-none animate-in fade-in slide-in-from-top-4 duration-500 ease-out">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
@@ -370,22 +370,22 @@ export default function Finance() {
               <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 border border-blue-400/20">
                 <Landmark size={18} className="animate-pulse" />
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-slate-50 rounded-full shadow-sm" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-card rounded-full shadow-sm" />
             </div>
 
             <div>
               <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 bg-clip-text">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-heading bg-clip-text">
                   Finance
                 </h1>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/60 shadow-sm">
-                  <Building2 size={11} className="text-slate-400" /> 10 Practices active
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface-alt text-body border border-card-border/60 shadow-sm">
+                  <Building2 size={11} className="text-muted" /> 10 Practices active
                 </span>
               </div>
 
-              <p className="text-xs sm:text-sm font-medium text-slate-400 mt-1 flex items-center gap-1.5">
-                <CalendarRange size={13} className="text-slate-300" />
-                Financial Control Centre <span className="text-slate-300">•</span> <span className="text-slate-600 font-semibold">{dateLabel}</span>
+              <p className="text-xs sm:text-sm font-medium text-muted mt-1 flex items-center gap-1.5">
+                <CalendarRange size={13} className="text-muted" />
+                Financial Control Centre <span className="text-muted">•</span> <span className="text-body font-semibold">{dateLabel}</span>
               </p>
             </div>
           </div>
@@ -393,11 +393,11 @@ export default function Finance() {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing || cooldownSecs > 0}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 h-10 bg-white border border-slate-200 hover:border-slate-300/80 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 h-10 bg-card border border-card-border hover:border-card-border/80 rounded-xl text-xs font-semibold text-body hover:text-heading hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] active:scale-[0.98] transition-all duration-200 disabled:opacity-60 disabled:pointer-events-none"
           >
             <RefreshCw
               size={14}
-              className={`text-slate-400 transition-transform duration-700 ease-out ${
+              className={`text-muted transition-transform duration-700 ease-out ${
                 isRefreshing ? "rotate-180 text-blue-500" : ""
               }`}
             />
@@ -406,7 +406,7 @@ export default function Finance() {
         </div>
 
         {/* Date Filter */}
-        <div className="inline-flex p-1 bg-white border border-slate-200/60 rounded-xl shadow-sm sticky top-16 z-30">
+        <div className="inline-flex p-1 bg-card border border-card-border/60 rounded-xl shadow-sm sticky top-16 z-30">
           <div className="flex gap-0.5 relative min-w-max">
             {filters.map((filter) => {
               const isSelected = activeFilter === filter;
@@ -416,8 +416,8 @@ export default function Finance() {
                   onClick={() => setActiveFilter(filter)}
                   className={`relative px-4 h-8 text-[12px] font-semibold tracking-tight rounded-lg transition-all duration-300 outline-none whitespace-nowrap ${
                     isSelected
-                      ? "bg-white text-slate-900 shadow-[0_2px_4px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.03)] border border-slate-200/60"
-                      : "text-slate-500 hover:text-slate-900 hover:bg-white/40"
+                      ? "bg-card text-heading shadow-[0_2px_4px_rgba(0,0,0,0.02),0_4px_12px_rgba(0,0,0,0.03)] border border-card-border/60"
+                      : "text-muted hover:text-heading hover:bg-card/40"
                   }`}
                 >
                   <span className="relative z-10">{filter}</span>
@@ -429,23 +429,23 @@ export default function Finance() {
 
         {/* Custom Date Range Picker */}
         {activeFilter === "Custom" && (
-          <div className="flex items-center gap-2 bg-white border border-slate-200/60 rounded-lg p-2 shadow-sm">
+          <div className="flex items-center gap-2 bg-card border border-card-border/60 rounded-lg p-2 shadow-sm">
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">From:</label>
+              <label className="text-[10px] font-semibold text-body">From:</label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">To:</label>
+              <label className="text-[10px] font-semibold text-body">To:</label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -455,10 +455,10 @@ export default function Finance() {
       {!financeData ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-white border border-slate-200/80 rounded-xl p-3 sm:p-5 animate-pulse">
-              <div className="h-3 sm:h-4 bg-slate-200 rounded w-3/4 mb-2 sm:mb-3"></div>
-              <div className="h-6 sm:h-8 bg-slate-200 rounded w-1/2 mb-2"></div>
-              <div className="h-2 sm:h-3 bg-slate-200 rounded w-full"></div>
+            <div key={i} className="bg-card border border-card-border/80 rounded-xl p-3 sm:p-5 animate-pulse">
+              <div className="h-3 sm:h-4 bg-surface-alt rounded w-3/4 mb-2 sm:mb-3"></div>
+              <div className="h-6 sm:h-8 bg-surface-alt rounded w-1/2 mb-2"></div>
+              <div className="h-2 sm:h-3 bg-surface-alt rounded w-full"></div>
             </div>
           ))}
         </div>
@@ -467,9 +467,9 @@ export default function Finance() {
         {kpiCards && kpiCards.map((card, index) => {
           const metricInfo = getMetricInfo(card.title);
           return (
-            <div key={index} className={`group bg-white border border-slate-200 rounded-xl p-3 sm:p-5 hover:border-blue-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-scaleIn stagger-${index + 1}`}>
+            <div key={index} className={`group bg-card border border-card-border rounded-xl p-3 sm:p-5 hover:border-blue-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-scaleIn stagger-${index + 1}`}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                <p className="text-[10px] sm:text-xs font-semibold text-muted uppercase tracking-wider flex items-center gap-1">
                   {card.title}
                   <InfoIcon 
                     title={card.title}
@@ -479,7 +479,7 @@ export default function Finance() {
                   />
                 </p>
               </div>
-              <h2 className="text-xl sm:text-3xl font-bold text-slate-800 mt-2">
+              <h2 className="text-xl sm:text-3xl font-bold text-heading mt-2">
                 {card.value}
               </h2>
               <div className="flex items-center gap-2 mt-2">
@@ -504,10 +504,10 @@ export default function Finance() {
 
       {/* Revenue by Stream Over Time */}
       {revenueData ? (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 mb-6 hover:shadow-md transition-shadow duration-300 animate-slideUp stagger-3">
+        <div className="bg-card rounded-2xl border border-card-border shadow-sm p-4 sm:p-6 mb-6 hover:shadow-md transition-shadow duration-300 animate-slideUp stagger-3">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
             <div>
-              <h2 className="font-bold text-sm sm:text-lg text-slate-800 flex items-center gap-1.5">
+              <h2 className="font-bold text-sm sm:text-lg text-heading flex items-center gap-1.5">
                 Revenue by stream over time
                 <InfoIcon 
                   title="Revenue by Stream"
@@ -517,22 +517,22 @@ export default function Finance() {
                   additionalInfo="Data is aggregated by day/week/month depending on the selected period filter."
                 />
               </h2>
-              <p className="text-[10px] sm:text-sm text-slate-500 mt-1">
+              <p className="text-[10px] sm:text-sm text-muted mt-1">
                 NHS contract, private FFS, plan, cosmetic and lab
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] sm:text-xs text-slate-500 font-medium">
+              <p className="text-[10px] sm:text-xs text-muted font-medium">
                 private share now
               </p>
               <p className="text-lg font-bold text-blue-600">61%</p>
             </div>
             <div className="flex gap-2">
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <Download className="w-4 h-4 text-slate-500" />
+              <button className="p-2 hover:bg-surface-alt rounded-lg transition-colors">
+                <Download className="w-4 h-4 text-muted" />
               </button>
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <Maximize2 className="w-4 h-4 text-slate-500" />
+              <button className="p-2 hover:bg-surface-alt rounded-lg transition-colors">
+                <Maximize2 className="w-4 h-4 text-muted" />
               </button>
             </div>
           </div>
@@ -547,7 +547,7 @@ export default function Finance() {
             ].map((item, index) => (
               <div key={index} className="flex items-center gap-1.5 sm:gap-2">
                 <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm" style={{ backgroundColor: item.color }}></span>
-                <span className="text-[10px] sm:text-xs text-slate-600 font-medium">{item.label}</span>
+                <span className="text-[10px] sm:text-xs text-body font-medium">{item.label}</span>
               </div>
             ))}
           </div>
@@ -592,25 +592,25 @@ export default function Finance() {
           </ResponsiveContainer>
         </div>
 
-        <div className="flex items-center gap-2 mt-4 text-[10px] sm:text-xs text-slate-500">
+        <div className="flex items-center gap-2 mt-4 text-[10px] sm:text-xs text-muted">
           <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
           <span>Private share of revenue, trend across the window</span>
         </div>
       </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 mb-6 animate-pulse">
-          <div className="h-6 bg-slate-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-slate-200 rounded w-1/2 mb-6"></div>
-          <div className="h-[200px] sm:h-[300px] bg-slate-200 rounded"></div>
+        <div className="bg-card rounded-2xl border border-card-border shadow-sm p-4 sm:p-6 mb-6 animate-pulse">
+          <div className="h-6 bg-surface-alt rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-surface-alt rounded w-1/2 mb-6"></div>
+          <div className="h-[200px] sm:h-[300px] bg-surface-alt rounded"></div>
         </div>
       )}
 
       {/* Profit per practice - Only show when data available */}
       {profitData?.practices?.length > 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 mb-6 hover:shadow-md transition-shadow duration-300 animate-slideUp stagger-4">
+        <div className="bg-card rounded-2xl border border-card-border shadow-sm p-4 sm:p-6 mb-6 hover:shadow-md transition-shadow duration-300 animate-slideUp stagger-4">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
             <div>
-              <h2 className="font-bold text-sm sm:text-lg text-slate-800 flex items-center gap-1.5">
+              <h2 className="font-bold text-sm sm:text-lg text-heading flex items-center gap-1.5">
                 Profit per practice
                 <InfoIcon 
                   title="Profit per Practice"
@@ -619,16 +619,16 @@ export default function Finance() {
                   calculations="Revenue is sum of invoices in last 30 days. EBITDA margin is calculated as: min(40, max(10, (revenue/1000) + 10)). Bubble size is based on patient volume (appointment count). Color indicates margin: green (≥20%), amber (15-20%), red (<15%)."
                 />
               </h2>
-              <p className="text-[10px] sm:text-sm text-slate-500 mt-1">
+              <p className="text-[10px] sm:text-sm text-muted mt-1">
                 revenue vs EBITDA margin, sized by patient volume
               </p>
             </div>
             <div className="flex gap-2">
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <Download className="w-4 h-4 text-slate-500" />
+              <button className="p-2 hover:bg-surface-alt rounded-lg transition-colors">
+                <Download className="w-4 h-4 text-muted" />
               </button>
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <Maximize2 className="w-4 h-4 text-slate-500" />
+              <button className="p-2 hover:bg-surface-alt rounded-lg transition-colors">
+                <Maximize2 className="w-4 h-4 text-muted" />
               </button>
             </div>
           </div>
@@ -636,15 +636,15 @@ export default function Finance() {
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-500"></span>
-              <span className="text-[10px] sm:text-xs text-slate-600 font-medium">Margin ≥ 20%</span>
+              <span className="text-[10px] sm:text-xs text-body font-medium">Margin ≥ 20%</span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-500"></span>
-              <span className="text-[10px] sm:text-xs text-slate-600 font-medium">15-20%</span>
+              <span className="text-[10px] sm:text-xs text-body font-medium">15-20%</span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-rose-500"></span>
-              <span className="text-[10px] sm:text-xs text-slate-600 font-medium">Below 15%</span>
+              <span className="text-[10px] sm:text-xs text-body font-medium">Below 15%</span>
             </div>
           </div>
 
@@ -683,7 +683,7 @@ export default function Finance() {
             </ResponsiveContainer>
           </div>
 
-          <div className="flex justify-between text-[10px] sm:text-xs text-slate-400 mt-2 px-2 sm:px-4">
+          <div className="flex justify-between text-[10px] sm:text-xs text-muted mt-2 px-2 sm:px-4">
             <span>£7.1k</span>
             <span>£10.5k</span>
             <span>£14.0k</span>

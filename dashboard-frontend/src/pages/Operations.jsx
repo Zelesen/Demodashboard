@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment, useCallback } from 'react';
+﻿import { useState, useEffect, Fragment, useCallback } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { RefreshCw, TrendingUp, TrendingDown, Activity, Building2, CalendarRange, AlertCircle, CheckCircle2, Cpu, MapPin, Layers, Target } from 'lucide-react';
 import InfoIcon from '../components/InfoIcon';
@@ -641,7 +641,7 @@ export default function Operations() {
           <div className="flex items-center gap-3">
             <div className="relative group/logo">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-2xl blur-md opacity-30 group-hover/logo:opacity-50 transition-opacity duration-500" />
-              <div className="relative w-10 h-10 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center shadow-sm">
+              <div className="relative w-10 h-10 rounded-2xl bg-card border border-card-border/80 flex items-center justify-center shadow-sm">
                 <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                   <Activity size={14} className="text-white" />
                 </div>
@@ -651,7 +651,7 @@ export default function Operations() {
 
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-[1.3rem] font-bold tracking-tight text-slate-900 leading-tight">
+                <h1 className="text-[1.3rem] font-bold tracking-tight text-heading leading-tight">
                   Operations
                 </h1>
                 <span className="inline-flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-600 rounded-md border border-indigo-100/50">
@@ -662,7 +662,7 @@ export default function Operations() {
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-100/60">
                   <Building2 size={10} /> 10 Practices Active
                 </span>
-                <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                <span className="text-[10px] font-medium text-muted flex items-center gap-1">
                   <CalendarRange size={10} />
                   {dateLabel}
                 </span>
@@ -674,11 +674,11 @@ export default function Operations() {
             <button 
               onClick={handleRefresh}
               disabled={isRefreshing || cooldownSecs > 0}
-              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-card border border-card-border/80 hover:border-card-border rounded-xl text-[10px] font-semibold text-body hover:text-heading hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
             >
               <RefreshCw 
                 size={11} 
-                className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-blue-500" : "text-slate-400"}`} 
+                className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-blue-500" : "text-muted"}`} 
               />
               {isRefreshing ? "Syncing..." : cooldownSecs > 0 ? `${Math.floor(cooldownSecs / 60)}:${String(cooldownSecs % 60).padStart(2, '0')} left` : "Refresh"}
             </button>
@@ -686,7 +686,7 @@ export default function Operations() {
         </div>
 
         {/* ================= FILTER TABS ================= */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
+        <div className="flex items-center gap-1 bg-card border border-card-border/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
           {filters.map((filter) => {
             const isSelected = activeFilter === filter;
             return (
@@ -696,7 +696,7 @@ export default function Operations() {
                 className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all duration-200 ${
                   isSelected
                     ? "bg-slate-900 text-white shadow-sm"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                    : "text-muted hover:text-heading hover:bg-surface"
                 }`}
               >
                 {filter}
@@ -707,45 +707,45 @@ export default function Operations() {
 
         {/* Custom Date Range Picker */}
         {activeFilter === "Custom" && (
-          <div className="flex items-center gap-2 bg-white border border-slate-200/60 rounded-lg p-2 shadow-sm w-fit">
+          <div className="flex items-center gap-2 bg-card border border-card-border/60 rounded-lg p-2 shadow-sm w-fit">
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">From:</label>
+              <label className="text-[10px] font-semibold text-body">From:</label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-[10px] font-semibold text-slate-600">To:</label>
+              <label className="text-[10px] font-semibold text-body">To:</label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
         )}
 
         {/* ================= KPI METRICS STRIP ================= */}
-        <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
           {!operationsData ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="p-3.5 flex flex-col justify-between">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-slate-200 animate-pulse" />
-                    <div className="h-2.5 w-14 bg-slate-200 rounded animate-pulse" />
+                    <div className="w-6 h-6 rounded-lg bg-surface-alt animate-pulse" />
+                    <div className="h-2.5 w-14 bg-surface-alt rounded animate-pulse" />
                   </div>
-                  <div className="h-7 w-16 bg-slate-200 rounded animate-pulse mb-1.5" />
-                  <div className="h-2.5 w-12 bg-slate-200 rounded animate-pulse" />
+                  <div className="h-7 w-16 bg-surface-alt rounded animate-pulse mb-1.5" />
+                  <div className="h-2.5 w-12 bg-surface-alt rounded animate-pulse" />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[
                 {
                   title: "Chair Utilisation",
@@ -809,14 +809,14 @@ export default function Operations() {
                 const textAccent = isPositive ? "text-emerald-600" : "text-rose-500";
                 
                 return (
-                  <div key={index} className="group p-3.5 hover:bg-slate-50/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
+                  <div key={index} className="group p-3.5 hover:bg-surface/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
                     {/* Header: icon + title + info */}
                     <div className="flex items-center gap-1.5 mb-2">
                       <div className={`w-6 h-6 rounded-md ${bgAccent} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200`}>
                         <Icon size={11} className={textAccent} />
                       </div>
                       <div className="flex items-center gap-1 min-w-0">
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none truncate">
+                        <span className="text-[9px] font-bold text-muted uppercase tracking-wider leading-none truncate">
                           {m.title}
                         </span>
                         <InfoIcon 
@@ -828,7 +828,7 @@ export default function Operations() {
 
                     {/* Value + badge */}
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-[1.25rem] font-bold tracking-tight text-slate-900 leading-none">
+                      <span className="text-[1.25rem] font-bold tracking-tight text-heading leading-none">
                         {m.value}
                       </span>
                       <span className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-bold shrink-0 ${
@@ -866,7 +866,7 @@ export default function Operations() {
                     </div>
 
                     {/* Footer */}
-                    <p className="text-[9px] font-medium text-slate-400 mt-1 truncate">
+                    <p className="text-[9px] font-medium text-muted mt-1 truncate">
                       {m.footer}
                     </p>
                   </div>
@@ -878,22 +878,22 @@ export default function Operations() {
 
         {/* ================= PRACTICE UTILISATION LEAGUE ================= */}
         {practiceLeague ? (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
             <div className="flex flex-col lg:flex-row">
               {/* League Table - ~50% width */}
               <div className="lg:w-[50%] relative">
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-card-border">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <MapPin size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <MapPin size={12} className="text-muted" />
                       Practice Utilisation League
                       <InfoIcon 
                         title="Practice Utilisation League"
                         additionalInfo="Every practice ranked on chair utilisation vs target"
                       />
                     </h3>
-                    <p className="text-[9px] text-slate-400 font-medium">Ranked by chair utilisation vs 85% target</p>
+                    <p className="text-[9px] text-muted font-medium">Ranked by chair utilisation vs 85% target</p>
                   </div>
                 </div>
 
@@ -908,29 +908,29 @@ export default function Operations() {
                     return (
                       <div
                         key={item.name}
-                        className="group flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-slate-200/70 hover:bg-white hover:shadow-sm hover:shadow-slate-200/40 active:scale-[0.99] transition-all duration-200 cursor-default"
+                        className="group flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-card-border/70 hover:bg-card hover:shadow-sm hover:shadow-card-border/40 active:scale-[0.99] transition-all duration-200 cursor-default"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold border shrink-0 transition-all duration-200 group-hover:scale-105 bg-slate-50 text-slate-700 border-slate-100">
+                          <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold border shrink-0 transition-all duration-200 group-hover:scale-105 bg-surface text-body border-card-border">
                             {index + 1}
                           </span>
                           <div className="relative">
                             <span className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full border-[1.5px] border-white shrink-0 ${statusDot}`} />
-                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-slate-700 bg-slate-100 border border-slate-200/60`}>
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-body bg-surface-alt border border-card-border/60`}>
                               {item.name.charAt(0)}
                             </div>
                           </div>
                           <div className="min-w-0">
-                            <p className="text-[12px] font-semibold text-slate-800 truncate group-hover:text-slate-900 transition-colors">
+                            <p className="text-[12px] font-semibold text-heading truncate group-hover:text-heading transition-colors">
                               {item.name}
                             </p>
-                            <p className="text-[10px] text-slate-400 font-medium truncate">
+                            <p className="text-[10px] text-muted font-medium truncate">
                               {item.appointments || 0} appointments · target 85%
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0 ml-3">
-                          <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="w-16 h-1.5 bg-surface-alt rounded-full overflow-hidden">
                             <div 
                               className="h-full rounded-full transition-all duration-500"
                               style={{ width: `${item.utilisation}%`, backgroundColor: getUtilisationColor(item.utilisation) }}
@@ -946,32 +946,32 @@ export default function Operations() {
                 </div>
 
                 {/* Subtle Vertical Divider */}
-                <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
+                <div className="hidden lg:block absolute right-0 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-card-border to-transparent" />
               </div>
 
               {/* White-space Heatmap - ~50% width */}
               <div className="lg:w-[50%] flex flex-col">
                 {/* Header */}
-                <div className="px-5 py-3 border-b border-slate-100">
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                <div className="px-5 py-3 border-b border-card-border">
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
                     White-space Heatmap
                     <InfoIcon 
                       title="White-space Heatmap"
                       additionalInfo="When the chairs sit empty across the estate - weekday by working hour"
                     />
                   </h3>
-                  <p className="text-[9px] text-slate-400 font-medium">Estate average fill: 70%</p>
+                  <p className="text-[9px] text-muted font-medium">Estate average fill: 70%</p>
                 </div>
 
                 {/* Heatmap Container */}
                 <div className="flex-1 px-2 pb-2">
-                  <div className="h-full rounded-xl bg-gradient-to-b from-slate-50 to-slate-100/50 border border-slate-200/50 overflow-hidden flex flex-col min-h-[200px]">
+                  <div className="h-full rounded-xl bg-gradient-to-b from-surface to-surface-alt/50 border border-card-border/50 overflow-hidden flex flex-col min-h-[200px]">
                     <div className="flex-1 overflow-x-auto">
                       <div className="grid grid-cols-13 gap-1.5 min-w-[500px] p-2">
                         {/* Header row with time labels */}
-                        <div className="text-[9px] text-slate-400 p-1"></div>
+                        <div className="text-[9px] text-muted p-1"></div>
                         {heatmapData.map((row) => (
-                          <div key={`time-${row.time}`} className="text-[9px] text-slate-500 font-medium p-1 text-center">{row.time}:00</div>
+                          <div key={`time-${row.time}`} className="text-[9px] text-muted font-medium p-1 text-center">{row.time}:00</div>
                         ))}
                         
                         {/* Day rows */}
@@ -981,7 +981,7 @@ export default function Operations() {
                           return (
                             <Fragment key={dayKey}>
                               {/* Day label */}
-                              <div className="text-[9px] text-slate-500 p-1 flex items-center font-semibold">{dayName}</div>
+                              <div className="text-[9px] text-muted p-1 flex items-center font-semibold">{dayName}</div>
                               
                               {/* Heatmap cells for each time slot */}
                               {heatmapData.map((row) => {
@@ -998,8 +998,8 @@ export default function Operations() {
                                       style={{ backgroundColor: color }}
                                     />
                                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 bg-slate-900 text-white text-[10px] rounded-lg p-2 shadow-xl whitespace-nowrap z-30 font-medium">
-                                      <div className="font-bold text-[11px] mb-1 text-slate-200">{dayName} {row.time}:00</div>
-                                      <div className="flex items-center gap-1.5 text-slate-300">
+                                      <div className="font-bold text-[11px] mb-1 text-muted">{dayName} {row.time}:00</div>
+                                      <div className="flex items-center gap-1.5 text-muted">
                                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
                                         {status === "full" ? "Full (>82%)" : status === "patchy" ? "Patchy (50-82%)" : "Empty (<50%)"}
                                       </div>
@@ -1016,17 +1016,17 @@ export default function Operations() {
                 </div>
 
                 {/* Legend */}
-                <div className="flex items-center gap-2 px-5 py-2 border-t border-slate-100 bg-slate-50/30">
-                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mr-0.5">Status</span>
-                  <span className="flex items-center gap-1 text-[9px] font-semibold text-slate-500">
+                <div className="flex items-center gap-2 px-5 py-2 border-t border-card-border bg-surface/30">
+                  <span className="text-[8px] font-bold text-muted uppercase tracking-wider mr-0.5">Status</span>
+                  <span className="flex items-center gap-1 text-[9px] font-semibold text-muted">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500/30" /> On Target
                   </span>
-                  <span className="w-px h-2.5 bg-slate-200" />
-                  <span className="flex items-center gap-1 text-[9px] font-semibold text-slate-500">
+                  <span className="w-px h-2.5 bg-surface-alt" />
+                  <span className="flex items-center gap-1 text-[9px] font-semibold text-muted">
                     <span className="w-1.5 h-1.5 bg-amber-400 rounded-full shadow-sm shadow-amber-400/30" /> Near Baseline
                   </span>
-                  <span className="w-px h-2.5 bg-slate-200" />
-                  <span className="flex items-center gap-1 text-[9px] font-semibold text-slate-500">
+                  <span className="w-px h-2.5 bg-surface-alt" />
+                  <span className="flex items-center gap-1 text-[9px] font-semibold text-muted">
                     <span className="w-1.5 h-1.5 bg-rose-500 rounded-full shadow-sm shadow-rose-500/30" /> Behind
                   </span>
                 </div>
@@ -1034,18 +1034,18 @@ export default function Operations() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
             <div className="flex flex-col lg:flex-row">
               <div className="lg:w-[50%] p-5 space-y-3">
-                <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse"></div>
-                <div className="h-3 bg-slate-200 rounded w-1/2 animate-pulse"></div>
+                <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse"></div>
+                <div className="h-3 bg-surface-alt rounded w-1/2 animate-pulse"></div>
                 {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="h-12 bg-slate-200 rounded animate-pulse"></div>
+                  <div key={i} className="h-12 bg-surface-alt rounded animate-pulse"></div>
                 ))}
               </div>
               <div className="lg:w-[50%] p-5">
-                <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3"></div>
-                <div className="h-[200px] bg-slate-200 rounded animate-pulse"></div>
+                <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3"></div>
+                <div className="h-[200px] bg-surface-alt rounded animate-pulse"></div>
               </div>
             </div>
           </div>
@@ -1053,36 +1053,36 @@ export default function Operations() {
 
         {/* ================= CAPACITY VS BOOKED VS ATTENDED ================= */}
         {capacityData ? (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-5 py-3 border-b border-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-card-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <Layers size={12} className="text-slate-400" />
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <Layers size={12} className="text-muted" />
                     Capacity vs Booked vs Attended
                     <InfoIcon 
                       title="Capacity Analysis"
                       additionalInfo="Chair hours attended against available capacity, with the leakage breakdown"
                     />
                   </h3>
-                  <p className="text-[9px] text-slate-400 font-medium">Chair hours attended against available capacity</p>
+                  <p className="text-[9px] text-muted font-medium">Chair hours attended against available capacity</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>
-                    <span className="text-[10px] text-slate-600">Attended</span>
+                    <span className="text-[10px] text-body">Attended</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-                    <span className="text-[10px] text-slate-600">FTA</span>
+                    <span className="text-[10px] text-body">FTA</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 bg-orange-500 rounded-full"></div>
-                    <span className="text-[10px] text-slate-600">Cancelled</span>
+                    <span className="text-[10px] text-body">Cancelled</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 bg-slate-300 rounded-full"></div>
-                    <span className="text-[10px] text-slate-600">Capacity</span>
+                    <div className="w-2.5 h-2.5 bg-muted rounded-full"></div>
+                    <span className="text-[10px] text-body">Capacity</span>
                   </div>
                 </div>
               </div>
@@ -1098,28 +1098,28 @@ export default function Operations() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden p-5">
-            <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3"></div>
-            <div className="h-3 bg-slate-200 rounded w-1/2 animate-pulse mb-6"></div>
-            <div className="h-[300px] bg-slate-200 rounded animate-pulse"></div>
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden p-5">
+            <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3"></div>
+            <div className="h-3 bg-surface-alt rounded w-1/2 animate-pulse mb-6"></div>
+            <div className="h-[300px] bg-surface-alt rounded animate-pulse"></div>
           </div>
         )}
 
         {/* ================= UDA CONTRACT PACE BOARD ================= */}
         {operationsData ? (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-5 py-3 border-b border-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-card-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <MapPin size={12} className="text-slate-400" />
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <MapPin size={12} className="text-muted" />
                     UDA Contract Pace Board (NHS)
                     <InfoIcon 
                       title="UDA Contract Pace Board"
                       additionalInfo="Delivery against the contract-year glidepath, by NHS practice"
                     />
                   </h3>
-                  <p className="text-[9px] text-slate-400 font-medium">Year-end clawback exposure: £60.5k</p>
+                  <p className="text-[9px] text-muted font-medium">Year-end clawback exposure: £60.5k</p>
                 </div>
               </div>
             </div>
@@ -1140,10 +1140,10 @@ export default function Operations() {
                     <div key={idx} className="flex items-center gap-3">
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-slate-700">{practice.name}</span>
-                          <span className="text-xs text-slate-500">{practice.delivered}</span>
+                          <span className="text-sm font-medium text-body">{practice.name}</span>
+                          <span className="text-xs text-muted">{practice.delivered}</span>
                         </div>
-                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-2 bg-surface-alt rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-blue-600 rounded-full transition-all duration-500"
                             style={{ width: `${practice.progress}%` }}
@@ -1160,20 +1160,20 @@ export default function Operations() {
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <div className="mt-4 pt-4 border-t border-card-border flex items-center justify-between text-xs text-muted">
                 <span>Bar = delivered to date · vertical mark = on-pace by today</span>
               </div>
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden p-5">
-            <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3"></div>
-            <div className="h-3 bg-slate-200 rounded w-1/2 animate-pulse mb-6"></div>
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden p-5">
+            <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3"></div>
+            <div className="h-3 bg-surface-alt rounded w-1/2 animate-pulse mb-6"></div>
             <div className="grid grid-cols-2 gap-6">
-              <div className="h-[280px] bg-slate-200 rounded animate-pulse"></div>
+              <div className="h-[280px] bg-surface-alt rounded animate-pulse"></div>
               <div className="space-y-3">
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="h-12 bg-slate-200 rounded animate-pulse"></div>
+                  <div key={i} className="h-12 bg-surface-alt rounded animate-pulse"></div>
                 ))}
               </div>
             </div>
@@ -1182,19 +1182,19 @@ export default function Operations() {
 
         {/* ================= RECALL REACTIVATION FUNNEL ================= */}
         {recallData ? (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-5 py-3 border-b border-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-card-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <Activity size={12} className="text-slate-400" />
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <Activity size={12} className="text-muted" />
                     Recall Reactivation Funnel
                     <InfoIcon 
                       title="Recall Reactivation Funnel"
                       additionalInfo="Due to attended, with the overdue backlog by age"
                     />
                   </h3>
-                  <p className="text-[9px] text-slate-400 font-medium">Reactivation value: £68.3k</p>
+                  <p className="text-[9px] text-muted font-medium">Reactivation value: £68.3k</p>
                 </div>
               </div>
             </div>
@@ -1202,7 +1202,7 @@ export default function Operations() {
             <div className="p-5">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-700 mb-3">Overdue backlog by age</h3>
+                  <h3 className="text-sm font-semibold text-body mb-3">Overdue backlog by age</h3>
                   <ReactApexChart
                     options={recallFunnelOptions}
                     series={recallFunnelOptions.series}
@@ -1212,13 +1212,13 @@ export default function Operations() {
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-700 mb-3">New-patient flow & front-desk conversion</h3>
-                  <p className="text-xs text-slate-500 mb-4">Enquiries to attended first visit, by source</p>
+                  <h3 className="text-sm font-semibold text-body mb-3">New-patient flow & front-desk conversion</h3>
+                  <p className="text-xs text-muted mb-4">Enquiries to attended first visit, by source</p>
                   
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="text-xs text-slate-500">Booking to attend</p>
-                      <p className="text-lg font-bold text-slate-800">70% - 79%</p>
+                      <p className="text-xs text-muted">Booking to attend</p>
+                      <p className="text-lg font-bold text-heading">70% - 79%</p>
                     </div>
                   </div>
 
@@ -1233,12 +1233,12 @@ export default function Operations() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden p-5">
-            <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3"></div>
-            <div className="h-3 bg-slate-200 rounded w-1/2 animate-pulse mb-6"></div>
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden p-5">
+            <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3"></div>
+            <div className="h-3 bg-surface-alt rounded w-1/2 animate-pulse mb-6"></div>
             <div className="grid grid-cols-2 gap-6">
-              <div className="h-[300px] bg-slate-200 rounded animate-pulse"></div>
-              <div className="h-[300px] bg-slate-200 rounded animate-pulse"></div>
+              <div className="h-[300px] bg-surface-alt rounded animate-pulse"></div>
+              <div className="h-[300px] bg-surface-alt rounded animate-pulse"></div>
             </div>
           </div>
         )}
@@ -1247,19 +1247,19 @@ export default function Operations() {
         {operationsData ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Where Time Leaks - Enhanced with ApexCharts */}
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-5 py-3 border-b border-slate-100">
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-card-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <TrendingDown size={12} className="text-slate-400" />
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <TrendingDown size={12} className="text-muted" />
                     Where Time Leaks: FTA & Cancellation
                     <InfoIcon 
                       title="Time Leaks Analysis"
                       additionalInfo="Bookable chair value leaked down to unrealised production"
                     />
                   </h3>
-                  <p className="text-[9px] text-slate-400 font-medium">Recoverable with reminders & deposits: £64.1k</p>
+                  <p className="text-[9px] text-muted font-medium">Recoverable with reminders & deposits: £64.1k</p>
                 </div>
               </div>
             </div>
@@ -1272,7 +1272,7 @@ export default function Operations() {
                 height={250}
               />
 
-              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-500">
+              <div className="mt-4 pt-4 border-t border-card-border flex items-center gap-2 text-xs text-muted">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                 <span>£237 average chair value per hour · £40.2k lost to FTA & cancellations this period.</span>
               </div>
@@ -1280,30 +1280,30 @@ export default function Operations() {
           </div>
 
           {/* Lost Chair Time League */}
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-5 py-3 border-b border-slate-100">
-              <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                <TrendingUp size={12} className="text-slate-400" />
+          <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-card-border">
+              <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                <TrendingUp size={12} className="text-muted" />
                 Lost-Chair-Time League (Top Practices)
                 <InfoIcon 
                   title="Lost Chair Time League"
                   additionalInfo="Top practices by recoverable lost chair time"
                 />
               </h3>
-              <p className="text-[9px] text-slate-400 font-medium">Recoverable with reminders & deposits</p>
+              <p className="text-[9px] text-muted font-medium">Recoverable with reminders & deposits</p>
             </div>
 
             <div className="p-5">
               <div className="space-y-2">
                 {lostChairLeague.map((practice) => (
-                  <div key={practice.rank} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-                    <span className="text-sm font-bold text-slate-500 w-6">{practice.rank}</span>
+                  <div key={practice.rank} className="flex items-center gap-3 p-3 bg-surface rounded-lg hover:bg-surface-alt transition-colors">
+                    <span className="text-sm font-bold text-muted w-6">{practice.rank}</span>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-slate-800">{practice.name}</span>
+                        <span className="text-sm font-semibold text-heading">{practice.name}</span>
                         <span className="text-sm font-bold text-rose-600">{practice.value}</span>
                       </div>
-                      <span className="text-xs text-slate-500">{practice.fta}</span>
+                      <span className="text-xs text-muted">{practice.fta}</span>
                     </div>
                   </div>
                 ))}
@@ -1313,17 +1313,17 @@ export default function Operations() {
         </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden p-5">
-              <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3"></div>
-              <div className="h-3 bg-slate-200 rounded w-1/2 animate-pulse mb-4"></div>
-              <div className="h-[250px] bg-slate-200 rounded animate-pulse"></div>
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden p-5">
+              <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3"></div>
+              <div className="h-3 bg-surface-alt rounded w-1/2 animate-pulse mb-4"></div>
+              <div className="h-[250px] bg-surface-alt rounded animate-pulse"></div>
             </div>
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden p-5">
-              <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3"></div>
-              <div className="h-3 bg-slate-200 rounded w-1/2 animate-pulse mb-4"></div>
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden p-5">
+              <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3"></div>
+              <div className="h-3 bg-surface-alt rounded w-1/2 animate-pulse mb-4"></div>
               <div className="space-y-2">
                 {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="h-12 bg-slate-200 rounded animate-pulse"></div>
+                  <div key={i} className="h-12 bg-surface-alt rounded animate-pulse"></div>
                 ))}
               </div>
             </div>
