@@ -155,7 +155,7 @@ export default function DashboardCreator() {
   };
 
   return (
-    <div className="bg-[#f7f9fd] font-sans antialiased min-h-screen">
+    <div className="font-sans antialiased min-h-screen">
       {/* Background decorations */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-to-br from-indigo-100/40 via-blue-50/20 to-transparent rounded-full blur-3xl" />
