@@ -42,7 +42,7 @@ export default function StartDashboard() {
   ];
 
   return (
-    <div className="bg-[#f8fafc] font-sans antialiased min-h-screen relative overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="font-sans antialiased min-h-screen relative overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
       {/* Ambient Background Graphics */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-to-br from-indigo-200/30 via-blue-100/10 to-transparent rounded-full blur-3xl" />
