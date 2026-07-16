@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { BarChart3, Calendar, CheckCircle2, XCircle, AlertTriangle, AlertCircle, Clock, Users, Building2, TrendingUp, CalendarRange, List, UserCheck, Grid3x3, Activity, Maximize2 } from "lucide-react";
 import { renderAppointmentWidget } from "./dashboard/WidgetRenderer";
 
@@ -33,22 +33,22 @@ export default function DashboardWidget({ widget, showControls = true, onFullscr
 
   return (
     <div
-      className="h-full w-full bg-white rounded-xl border border-slate-200/60 shadow-sm overflow-hidden group"
+      className="h-full w-full bg-card rounded-xl border border-card-border/60 shadow-sm overflow-hidden group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-slate-100 bg-slate-50/50">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-card-border bg-surface/50">
         <div className="flex items-center gap-1.5 min-w-0">
           <div className="w-5 h-5 rounded-md bg-indigo-50 flex items-center justify-center shrink-0">
             <Icon size={10} className="text-indigo-600" />
           </div>
-          <span className="text-[10px] font-semibold text-slate-700 truncate">{widget.title}</span>
+          <span className="text-[10px] font-semibold text-body truncate">{widget.title}</span>
         </div>
         {showControls && (
           <div className={`flex items-center gap-1 transition-opacity duration-200 ${isHovered ? "opacity-100" : "opacity-0"}`}>
             <button
               onClick={(e) => { e.stopPropagation(); onFullscreen?.(); }}
-              className="w-5 h-5 rounded-md flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+              className="w-5 h-5 rounded-md flex items-center justify-center text-muted hover:text-indigo-600 hover:bg-indigo-50 transition-all"
               title="Full screen"
             >
               <Maximize2 size={10} />

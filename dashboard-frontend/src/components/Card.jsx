@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown } from "lucide-react";
+﻿import { TrendingUp, TrendingDown } from "lucide-react";
 import InfoTooltip from "./InfoTooltip";
 
 const colorMap = {
@@ -33,8 +33,8 @@ function Card({ title, value, icon: Icon, color = "blue", trend, trendValue, sub
   const isUp = trend === "up";
 
   return (
-    <div className="group relative bg-white rounded-2xl border border-slate-200/80 p-5 hover:shadow-lg hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-0.5">
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-transparent via-transparent to-slate-50/50 pointer-events-none" />
+    <div className="group relative bg-card rounded-2xl border border-card-border/80 p-5 hover:shadow-lg hover:shadow-card-border/50 transition-all duration-300 hover:-translate-y-0.5">
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-transparent via-transparent to-surface/50 pointer-events-none" />
 
       <div className="flex items-start justify-between mb-4">
         <div className={`p-2.5 rounded-xl bg-gradient-to-br ${c.bg} ${c.shadow}`}>
@@ -53,15 +53,15 @@ function Card({ title, value, icon: Icon, color = "blue", trend, trendValue, sub
       </div>
 
       <div>
-        <p className="text-sm text-slate-400 font-medium mb-1">
+        <p className="text-sm text-muted font-medium mb-1">
           {title}
           {description && <InfoTooltip text={description} />}
         </p>
-        <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{value}</h2>
-        {subtitle && <p className="text-xs text-slate-400 mt-1.5">{subtitle}</p>}
+        <h2 className="text-2xl font-bold text-heading tracking-tight">{value}</h2>
+        {subtitle && <p className="text-xs text-muted mt-1.5">{subtitle}</p>}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-b-2xl bg-gradient-to-r from-transparent via-slate-200 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-b-2xl bg-gradient-to-r from-transparent via-card-border to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </div>
   );
 }

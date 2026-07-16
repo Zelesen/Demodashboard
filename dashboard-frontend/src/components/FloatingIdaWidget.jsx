@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { Brain, X, AlertCircle, CheckCircle2, ArrowUpRight } from 'lucide-react';
 
 export default function FloatingIdaWidget({ aiInsights = [] }) {
@@ -14,7 +14,7 @@ export default function FloatingIdaWidget({ aiInsights = [] }) {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {isExpanded && (
-        <div className="w-96 max-h-[500px] bg-white rounded-2xl border border-slate-200/80 shadow-2xl shadow-slate-900/20 overflow-hidden">
+        <div className="w-96 max-h-[500px] bg-card rounded-2xl border border-card-border/80 shadow-2xl shadow-heading/20 overflow-hidden">
           <div className="px-5 py-4 border-b border-indigo-100/60">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -22,13 +22,13 @@ export default function FloatingIdaWidget({ aiInsights = [] }) {
                   <Brain size={18} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">IDA AI Copilot</h3>
-                  <p className="text-[10px] text-slate-500 font-medium mt-0.5">
+                  <h3 className="text-sm font-bold text-heading">IDA AI Copilot</h3>
+                  <p className="text-[10px] text-muted font-medium mt-0.5">
                     {actionCount > 0 ? `${actionCount} action${actionCount > 1 ? 's' : ''} flagged` : "All clear"} · {insights.length} insights
                   </p>
                 </div>
               </div>
-              <button onClick={() => setIsExpanded(false)} className="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-all">
+              <button onClick={() => setIsExpanded(false)} className="w-8 h-8 rounded-lg hover:bg-surface-alt flex items-center justify-center text-muted hover:text-body transition-all">
                 <X size={16} />
               </button>
             </div>
@@ -37,15 +37,15 @@ export default function FloatingIdaWidget({ aiInsights = [] }) {
             {insights.map((card, index) => {
               const isActionRequired = card[0] === 'ACT';
               return (
-                <div key={index} className="p-4 rounded-xl hover:bg-slate-50/80 transition-all duration-200 border border-slate-100 hover:border-indigo-100 hover:shadow-sm cursor-pointer">
+                <div key={index} className="p-4 rounded-xl hover:bg-surface/80 transition-all duration-200 border border-card-border hover:border-indigo-100 hover:shadow-sm cursor-pointer">
                   <div className="flex items-center gap-2 mb-2">
                     <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md tracking-wider uppercase ${isActionRequired ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-blue-50 text-blue-700 border border-blue-200'}`}>
                       {isActionRequired ? 'Action' : 'Info'}
                     </span>
                     {isActionRequired ? <AlertCircle size={11} className="text-amber-500" /> : <CheckCircle2 size={11} className="text-blue-500" />}
                   </div>
-                  <h4 className="font-semibold text-[13px] text-slate-800 leading-snug mb-1">{card[1]}</h4>
-                  <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">{card[2]}</p>
+                  <h4 className="font-semibold text-[13px] text-heading leading-snug mb-1">{card[1]}</h4>
+                  <p className="text-[11px] text-muted leading-relaxed line-clamp-2">{card[2]}</p>
                   <div className="mt-2.5 flex items-center gap-1 text-[11px] font-medium text-indigo-600">
                     <span>Investigate</span>
                     <ArrowUpRight size={10} />

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+﻿import { useState, useRef } from 'react';
 import { Info, ExternalLink, Tag } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -37,7 +37,7 @@ export default function InfoIcon({ title, apiEndpoint, apiFields, databaseTables
         onMouseLeave={handleMouseLeave}
         className="inline-flex items-center justify-center cursor-help"
       >
-        <Info size={12} className="text-slate-400 hover:text-slate-600 transition-colors" />
+        <Info size={12} className="text-muted hover:text-body transition-colors" />
       </div>
 
       {isVisible && createPortal(
@@ -56,7 +56,7 @@ export default function InfoIcon({ title, apiEndpoint, apiFields, databaseTables
           {/* Dentally API Source + Fields */}
           {apiEndpoint && (
             <div className="mb-2.5">
-              <div className="text-slate-400 font-semibold mb-1 flex items-center gap-1">
+              <div className="text-muted font-semibold mb-1 flex items-center gap-1">
                 <ExternalLink size={9} className="text-indigo-400" />
                 Dentally API Source:
               </div>
@@ -82,7 +82,7 @@ export default function InfoIcon({ title, apiEndpoint, apiFields, databaseTables
               {/* API Response Fields table */}
               {apiFields && apiFields.length > 0 && (
                 <div className="mt-1">
-                  <div className="text-slate-400 font-semibold mb-1 flex items-center gap-1">
+                  <div className="text-muted font-semibold mb-1 flex items-center gap-1">
                     <Tag size={9} className="text-amber-400" />
                     Response Fields Used:
                   </div>
@@ -97,11 +97,11 @@ export default function InfoIcon({ title, apiEndpoint, apiFields, databaseTables
                         <span className="font-mono text-amber-300 text-[10px] whitespace-nowrap shrink-0 pt-px">
                           {f.field}
                         </span>
-                        <span className="text-slate-400 text-[9px] leading-relaxed">{f.role}</span>
+                        <span className="text-muted text-[9px] leading-relaxed">{f.role}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="text-slate-600 text-[9px] mt-1 text-right">
+                  <div className="text-body text-[9px] mt-1 text-right">
                     via developer.dentally.co
                   </div>
                 </div>
@@ -112,7 +112,7 @@ export default function InfoIcon({ title, apiEndpoint, apiFields, databaseTables
           {/* Database Tables */}
           {databaseTables && databaseTables.length > 0 && (
             <div className="mb-2">
-              <div className="text-slate-400 font-semibold mb-0.5">Database Tables:</div>
+              <div className="text-muted font-semibold mb-0.5">Database Tables:</div>
               <div className="text-blue-300 font-mono bg-slate-800 px-1.5 py-0.5 rounded text-[10px]">
                 {databaseTables.join(', ')}
               </div>
@@ -122,16 +122,16 @@ export default function InfoIcon({ title, apiEndpoint, apiFields, databaseTables
           {/* Calculations */}
           {calculations && (
             <div className="mb-2">
-              <div className="text-slate-400 font-semibold mb-0.5">Calculations:</div>
-              <div className="text-slate-200 leading-relaxed">{calculations}</div>
+              <div className="text-muted font-semibold mb-0.5">Calculations:</div>
+              <div className="text-muted leading-relaxed">{calculations}</div>
             </div>
           )}
 
           {/* Additional Info */}
           {additionalInfo && (
             <div>
-              <div className="text-slate-400 font-semibold mb-0.5">Additional Info:</div>
-              <div className="text-slate-200 leading-relaxed">{additionalInfo}</div>
+              <div className="text-muted font-semibold mb-0.5">Additional Info:</div>
+              <div className="text-muted leading-relaxed">{additionalInfo}</div>
             </div>
           )}
 
