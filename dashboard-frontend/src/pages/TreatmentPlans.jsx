@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { RefreshCw, TrendingUp, Activity, FileText, CheckCircle2, Clock, DollarSign, Target, UserCheck, Layers, Calendar, BarChart3, PieChart, ArrowRight } from 'lucide-react';
 import InfoIcon from '../components/InfoIcon';
@@ -348,7 +348,7 @@ export default function TreatmentPlans() {
           <div className="flex items-center gap-3">
             <div className="relative group/logo">
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-2xl blur-md opacity-30 group-hover/logo:opacity-50 transition-opacity duration-500" />
-              <div className="relative w-10 h-10 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center shadow-sm">
+              <div className="relative w-10 h-10 rounded-2xl bg-card border border-card-border/80 flex items-center justify-center shadow-sm">
                 <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm">
                   <FileText size={14} className="text-white" />
                 </div>
@@ -357,7 +357,7 @@ export default function TreatmentPlans() {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h1 className="text-[1.3rem] font-bold tracking-tight text-slate-900 leading-tight">
+                <h1 className="text-[1.3rem] font-bold tracking-tight text-heading leading-tight">
                   Treatment Plans
                 </h1>
                 <span className="inline-flex items-center gap-1 text-[8px] font-bold px-1.5 py-0.5 bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-600 rounded-md border border-indigo-100/50">
@@ -368,7 +368,7 @@ export default function TreatmentPlans() {
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-100/60">
                   <Layers size={10} /> Care Planning
                 </span>
-                <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
+                <span className="text-[10px] font-medium text-muted flex items-center gap-1">
                   <Clock size={10} />
                   {dateLabel}
                 </span>
@@ -377,21 +377,21 @@ export default function TreatmentPlans() {
           </div>
           <div className="flex items-center gap-2">
             <button onClick={handleRefresh} disabled={isRefreshing || cooldownSecs > 0}
-              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl text-[10px] font-semibold text-slate-600 hover:text-slate-900 hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none">
-              <RefreshCw size={11} className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-indigo-500" : "text-slate-400"}`} />
+              className="inline-flex items-center gap-1.5 px-3 h-[32px] bg-card border border-card-border/80 hover:border-card-border rounded-xl text-[10px] font-semibold text-body hover:text-heading hover:shadow-sm active:scale-[0.97] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none">
+              <RefreshCw size={11} className={`transition-transform duration-700 ease-out ${isRefreshing ? "rotate-180 text-indigo-500" : "text-muted"}`} />
               {isRefreshing ? "Syncing..." : cooldownSecs > 0 ? `${Math.floor(cooldownSecs / 60)}:${String(cooldownSecs % 60).padStart(2, '0')} left` : "Refresh"}
             </button>
           </div>
         </div>
 
         {/* ================= FILTERS ================= */}
-        <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
+        <div className="flex items-center gap-1 bg-card border border-card-border/60 rounded-lg p-0.5 w-fit shadow-sm sticky top-16 z-30">
           {filters.map((filter) => {
             const isSelected = activeFilter === filter;
             return (
               <button key={filter} onClick={() => setActiveFilter(filter)}
                 className={`px-2.5 h-7 text-[10px] font-semibold tracking-tight rounded-md transition-all duration-200 ${
-                  isSelected ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                  isSelected ? "bg-slate-900 text-white shadow-sm" : "text-muted hover:text-heading hover:bg-surface"
                 }`}>
                 {filter}
               </button>
@@ -402,36 +402,36 @@ export default function TreatmentPlans() {
           {activeFilter === "Custom" && (
             <div className="flex items-center gap-2 bg-transparent rounded-lg p-2">
               <div className="flex items-center gap-2">
-                <label className="text-[10px] font-semibold text-slate-600">From:</label>
+                <label className="text-[10px] font-semibold text-body">From:</label>
                 <input type="date" value={customStartDate} onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-[10px] font-semibold text-slate-600">To:</label>
+                <label className="text-[10px] font-semibold text-body">To:</label>
                 <input type="date" value={customEndDate} onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="px-2 py-1 text-[10px] border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="px-2 py-1 text-[10px] border border-card-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
             </div>
           )}
         </div>
 
         {/* ================= KPI STRIP ================= */}
-        <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
           {!currentKpiData ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="p-3.5 flex flex-col justify-between">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <div className="w-6 h-6 rounded-lg bg-slate-200 animate-pulse" />
-                    <div className="h-2.5 w-14 bg-slate-200 rounded animate-pulse" />
+                    <div className="w-6 h-6 rounded-lg bg-surface-alt animate-pulse" />
+                    <div className="h-2.5 w-14 bg-surface-alt rounded animate-pulse" />
                   </div>
-                  <div className="h-7 w-16 bg-slate-200 rounded animate-pulse mb-1.5" />
-                  <div className="h-2.5 w-12 bg-slate-200 rounded animate-pulse" />
+                  <div className="h-7 w-16 bg-surface-alt rounded animate-pulse mb-1.5" />
+                  <div className="h-2.5 w-12 bg-surface-alt rounded animate-pulse" />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-slate-100">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-card-border">
               {[
                 {
                   title: "Total Plans",
@@ -520,14 +520,14 @@ export default function TreatmentPlans() {
                 const textAccent = isPositive ? "text-emerald-600" : "text-rose-500";
 
                 return (
-                  <div key={index} className="group p-3.5 hover:bg-slate-50/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
+                  <div key={index} className="group p-3.5 hover:bg-surface/30 transition-colors duration-200 flex flex-col justify-between min-h-0">
                     <div className="flex items-center gap-1.5 mb-2">
                       <div className={`w-6 h-6 rounded-md ${bgAccent} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-200`}>
                         <Icon size={11} className={textAccent} />
                       </div>
                       <div className="flex items-center gap-1 min-w-0">
-                        <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-slate-200 text-[7px] font-bold text-slate-500 mr-1 shrink-0 self-center">{index + 44}</span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none truncate">{m.title}</span>
+                        <span className="flex items-center justify-center w-3.5 h-3.5 rounded-full bg-surface-alt text-[7px] font-bold text-muted mr-1 shrink-0 self-center">{index + 44}</span>
+                        <span className="text-[9px] font-bold text-muted uppercase tracking-wider leading-none truncate">{m.title}</span>
                         <InfoIcon
                           title={m.title}
                           additionalInfo={m.tooltip}
@@ -539,7 +539,7 @@ export default function TreatmentPlans() {
                       </div>
                     </div>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-[1.25rem] font-bold tracking-tight text-slate-900 leading-none">{m.value}</span>
+                      <span className="text-[1.25rem] font-bold tracking-tight text-heading leading-none">{m.value}</span>
                     </div>
                     <div className="mt-2 h-6 w-full">
                       {(() => {
@@ -570,7 +570,7 @@ export default function TreatmentPlans() {
                         );
                       })()}
                     </div>
-                    <p className="text-[9px] font-medium text-slate-400 mt-1 truncate">{m.footer}</p>
+                    <p className="text-[9px] font-medium text-muted mt-1 truncate">{m.footer}</p>
                   </div>
                 );
               })}
@@ -579,14 +579,14 @@ export default function TreatmentPlans() {
         </div>
 
         {/* ================= PLAN STATUS DONUT + PRACTITIONER LEAGUE ================= */}
-        <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
+        <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
           <div className="flex flex-col lg:flex-row">
             {/* Status Donut */}
-            <div className="lg:w-[45%] p-5 border-b lg:border-b-0 lg:border-r border-slate-100">
+            <div className="lg:w-[45%] p-5 border-b lg:border-b-0 lg:border-r border-card-border">
               <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">50</span>
-                    <Activity size={12} className="text-slate-400" />
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">50</span>
+                    <Activity size={12} className="text-muted" />
                     Plan Status Breakdown
                   <InfoIcon
                     title="Plan Status"
@@ -601,27 +601,27 @@ export default function TreatmentPlans() {
                     calculations="Determines status: completed=true → Completed, completed=false & start_date ≤ today → Active, completed=false & start_date > today → Proposed. Shown as a donut chart with percentages."
                   />
                 </h3>
-                <div className="flex bg-slate-100 rounded-lg p-0.5">
+                <div className="flex bg-surface-alt rounded-lg p-0.5">
                   {["All", "Active", "Completed", "Proposed"].map((tab) => (
                     <button key={tab} onClick={() => setDonutFilter(tab)}
                       className={`px-2 py-0.5 text-[9px] font-bold rounded-md transition-all duration-200 ${
-                        donutFilter === tab ? "bg-white text-slate-800 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                        donutFilter === tab ? "bg-card text-heading shadow-sm" : "text-muted hover:text-body"
                       }`}>
                       {tab}
                     </button>
                   ))}
                 </div>
               </div>
-              <p className="text-[9px] text-slate-400 font-medium mb-4">Current period snapshot</p>
+              <p className="text-[9px] text-muted font-medium mb-4">Current period snapshot</p>
               <ReactApexChart options={statusChartOptions} series={statusChartOptions.series} type="donut" height={280} />
             </div>
 
             {/* Practitioner League */}
             <div className="lg:w-[55%]">
-              <div className="px-5 py-3 border-b border-slate-100">
-                  <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">51</span>
-                    <UserCheck size={12} className="text-slate-400" />
+              <div className="px-5 py-3 border-b border-card-border">
+                  <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">51</span>
+                    <UserCheck size={12} className="text-muted" />
                     Plans by Practitioner
                   <InfoIcon
                     title="Practitioner Plans"
@@ -637,7 +637,7 @@ export default function TreatmentPlans() {
                     calculations="Groups treatment plans by practitioner_id, joins with practitioners for names. Counts total plans and completed plans per practitioner, computes completion rate as (completed / total) * 100."
                   />
                 </h3>
-                <p className="text-[9px] text-slate-400 font-medium">Ranked by total plans</p>
+                <p className="text-[9px] text-muted font-medium">Ranked by total plans</p>
               </div>
               <div className="px-2 py-1.5 space-y-0.5 max-h-[340px] overflow-y-auto">
                 {practitionerData ? (
@@ -647,16 +647,16 @@ export default function TreatmentPlans() {
                       : "text-rose-500 bg-rose-50 border-rose-100";
                     return (
                       <div key={item.practitionerId}
-                        className="group flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-slate-200/70 hover:bg-white hover:shadow-sm hover:shadow-slate-200/40 active:scale-[0.99] transition-all duration-200 cursor-default">
+                        className="group flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-card-border/70 hover:bg-card hover:shadow-sm hover:shadow-card-border/40 active:scale-[0.99] transition-all duration-200 cursor-default">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold border shrink-0 bg-slate-50 text-slate-700 border-slate-100">{index + 1}</span>
+                          <span className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold border shrink-0 bg-surface text-body border-card-border">{index + 1}</span>
                           <div className="min-w-0">
-                            <p className="text-[12px] font-semibold text-slate-800 truncate">{item.practitionerName}</p>
-                            <p className="text-[10px] text-slate-400 font-medium truncate">{item.role} · {item.totalPlans} plans</p>
+                            <p className="text-[12px] font-semibold text-heading truncate">{item.practitionerName}</p>
+                            <p className="text-[10px] text-muted font-medium truncate">{item.role} · {item.totalPlans} plans</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3 shrink-0 ml-3">
-                          <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="w-16 h-1.5 bg-surface-alt rounded-full overflow-hidden">
                             <div className="h-full rounded-full bg-indigo-500 transition-all duration-500" style={{ width: `${item.completionRate}%` }} />
                           </div>
                           <span className={`text-[11px] font-bold px-2 py-1 rounded-lg border shrink-0 ${rateColor}`}>
@@ -668,7 +668,7 @@ export default function TreatmentPlans() {
                   })
                 ) : (
                   <div className="p-5 space-y-3">
-                    {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-12 bg-slate-200 rounded animate-pulse" />)}
+                    {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-12 bg-surface-alt rounded animate-pulse" />)}
                   </div>
                 )}
               </div>
@@ -680,13 +680,13 @@ export default function TreatmentPlans() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Value Mix Chart */}
           {trendsData ? (
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-              <div className="px-5 py-3 border-b border-slate-100">
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+              <div className="px-5 py-3 border-b border-card-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">52</span>
-                      <DollarSign size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">52</span>
+                      <DollarSign size={12} className="text-muted" />
                       NHS vs Private Value
                       <InfoIcon
                         title="Value Mix"
@@ -709,21 +709,21 @@ export default function TreatmentPlans() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden p-5">
-              <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3" />
-              <div className="h-[300px] bg-slate-200 rounded animate-pulse" />
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden p-5">
+              <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3" />
+              <div className="h-[300px] bg-surface-alt rounded animate-pulse" />
             </div>
           )}
 
           {/* Plan Trend Chart */}
           {trendsData ? (
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-              <div className="px-5 py-3 border-b border-slate-100">
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+              <div className="px-5 py-3 border-b border-card-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">53</span>
-                      <TrendingUp size={12} className="text-slate-400" />
+                    <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">53</span>
+                      <TrendingUp size={12} className="text-muted" />
                       Plan Creation vs Completion Trend
                       <InfoIcon
                         title="Plan Trends"
@@ -746,9 +746,9 @@ export default function TreatmentPlans() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden p-5">
-              <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3" />
-              <div className="h-[280px] bg-slate-200 rounded animate-pulse" />
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden p-5">
+              <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3" />
+              <div className="h-[280px] bg-surface-alt rounded animate-pulse" />
             </div>
           )}
         </div>
@@ -757,11 +757,11 @@ export default function TreatmentPlans() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {/* Treatment Plan Funnel */}
           {funnelData ? (
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-              <div className="px-5 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">54</span>
-                  <BarChart3 size={12} className="text-slate-400" />
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+              <div className="px-5 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">54</span>
+                  <BarChart3 size={12} className="text-muted" />
                   Plan Conversion Funnel
                   <InfoIcon
                     title="Conversion Funnel"
@@ -800,43 +800,43 @@ export default function TreatmentPlans() {
                           </div>
                         )}
                         <div className="flex items-center gap-3 py-1.5">
-                          <div className="w-16 sm:w-20 shrink-0 text-[10px] sm:text-xs text-slate-600 font-medium text-right leading-tight">{stage.stage}</div>
-                          <div className="flex-1 h-7 sm:h-8 bg-slate-100/80 rounded-xl overflow-hidden shadow-inner">
+                          <div className="w-16 sm:w-20 shrink-0 text-[10px] sm:text-xs text-body font-medium text-right leading-tight">{stage.stage}</div>
+                          <div className="flex-1 h-7 sm:h-8 bg-surface-alt/80 rounded-xl overflow-hidden shadow-inner">
                             <div className={`h-full bg-gradient-to-r ${barColors[idx % barColors.length]} rounded-xl transition-all duration-700 ease-out flex items-center justify-end pr-2`}
                               style={{ width: `${width}%` }}>
                               {width > 12 && <span className="text-[9px] font-bold text-white drop-shadow-sm">{stage.percentage}%</span>}
                             </div>
                           </div>
                           <div className="w-14 sm:w-16 text-[10px] sm:text-xs text-right shrink-0">
-                            <span className="font-bold text-slate-800">{stage.count.toLocaleString()}</span>
+                            <span className="font-bold text-heading">{stage.count.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
-                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-400">
+                <div className="mt-3 pt-3 border-t border-card-border flex items-center justify-between text-[9px] text-muted">
                   <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-indigo-400" /> {funnelData.funnel.length} stages</span>
-                  <span className="font-medium text-slate-500">{funnelData.funnel[0]?.count.toLocaleString() || 0} total plans entering funnel</span>
+                  <span className="font-medium text-muted">{funnelData.funnel[0]?.count.toLocaleString() || 0} total plans entering funnel</span>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden p-5">
-              <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3" />
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden p-5">
+              <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3" />
               <div className="space-y-3">
-                {[1, 2, 3, 4].map(i => <div key={i} className="h-8 bg-slate-200 rounded animate-pulse" />)}
+                {[1, 2, 3, 4].map(i => <div key={i} className="h-8 bg-surface-alt rounded animate-pulse" />)}
               </div>
             </div>
           )}
 
           {/* Value Distribution */}
           {valueDistribution ? (
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-              <div className="px-5 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">55</span>
-                  <PieChart size={12} className="text-slate-400" />
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden">
+              <div className="px-5 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">55</span>
+                  <PieChart size={12} className="text-muted" />
                   Plan Value Distribution
                   <InfoIcon
                     title="Value Distribution"
@@ -932,9 +932,9 @@ export default function TreatmentPlans() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden p-5">
-              <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3" />
-              <div className="h-[280px] bg-slate-200 rounded animate-pulse" />
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden p-5">
+              <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3" />
+              <div className="h-[280px] bg-surface-alt rounded animate-pulse" />
             </div>
           )}
 
@@ -946,11 +946,11 @@ export default function TreatmentPlans() {
         <div>
           {/* Completion Heatmap */}
           {completionHeatmap ? (
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden lg:col-span-2">
-              <div className="px-5 py-3 border-b border-slate-100">
-                <h3 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-[8px] font-bold text-slate-500">60</span>
-                  <Calendar size={12} className="text-slate-400" />
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden lg:col-span-2">
+              <div className="px-5 py-3 border-b border-card-border">
+                <h3 className="font-bold text-xs text-heading flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-alt text-[8px] font-bold text-muted">60</span>
+                  <Calendar size={12} className="text-muted" />
                   Completion Heatmap
                   <InfoIcon
                     title="Completion Heatmap"
@@ -1041,9 +1041,9 @@ export default function TreatmentPlans() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden lg:col-span-2 p-5">
-              <div className="h-4 bg-slate-200 rounded w-1/3 animate-pulse mb-3" />
-              <div className="h-[280px] bg-slate-200 rounded animate-pulse" />
+            <div className="bg-card rounded-2xl border border-card-border/60 shadow-sm overflow-hidden lg:col-span-2 p-5">
+              <div className="h-4 bg-surface-alt rounded w-1/3 animate-pulse mb-3" />
+              <div className="h-[280px] bg-surface-alt rounded animate-pulse" />
             </div>
           )}
         </div>

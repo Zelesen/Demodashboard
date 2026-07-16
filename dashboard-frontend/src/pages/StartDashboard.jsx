@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Sparkles, LayoutTemplate, Plus, MessageSquareText, Cpu, ArrowRight } from "lucide-react";
 
 export default function StartDashboard() {
@@ -65,10 +65,10 @@ export default function StartDashboard() {
         <div className="mb-6 self-start">
           <button
             onClick={() => navigate("/dashboards")}
-            className="group inline-flex items-center gap-2.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors duration-200"
+            className="group inline-flex items-center gap-2.5 text-xs font-semibold text-muted hover:text-heading transition-colors duration-200"
           >
-            <div className="p-1.5 rounded-xl bg-white border border-slate-200 shadow-sm group-hover:border-slate-300 group-hover:shadow transition-all duration-200 group-hover:-translate-x-0.5">
-              <ArrowLeft size={13} className="text-slate-600" />
+            <div className="p-1.5 rounded-xl bg-card border border-card-border shadow-sm group-hover:border-card-border group-hover:shadow transition-all duration-200 group-hover:-translate-x-0.5">
+              <ArrowLeft size={13} className="text-body" />
             </div>
             Back to dashboards
           </button>
@@ -77,14 +77,14 @@ export default function StartDashboard() {
         {/* Header */}
         <div className="mb-8 backdrop-blur-[2px] py-2">
           <div className="flex items-center gap-2.5 mb-2">
-            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl">
+            <h1 className="text-3xl font-extrabold text-heading tracking-tight sm:text-4xl">
               Start a dashboard
             </h1>
             <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 bg-gradient-to-r from-indigo-500/10 to-blue-500/10 text-indigo-600 rounded-full border border-indigo-500/20 shadow-sm shadow-indigo-500/5">
               <Cpu size={10} className="animate-pulse" /> IDA
             </span>
           </div>
-          <p className="text-sm text-slate-500 font-medium max-w-md leading-relaxed">
+          <p className="text-sm text-muted font-medium max-w-md leading-relaxed">
             Choose how much help you want before your creation workspace setup opens.
           </p>
         </div>
@@ -103,7 +103,7 @@ export default function StartDashboard() {
                 <div className={`absolute -inset-[1px] bg-gradient-to-r ${option.accent} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-0`} />
 
                 {/* Main Card Body */}
-                <div className="relative bg-white rounded-[15px] border border-slate-200 p-5 sm:p-6 shadow-sm group-hover:shadow-xl group-hover:shadow-slate-200/40 transition-all duration-300 z-10 flex gap-4 sm:gap-5 items-start">
+                <div className="relative bg-card rounded-[15px] border border-card-border p-5 sm:p-6 shadow-sm group-hover:shadow-xl group-hover:shadow-card-border/40 transition-all duration-300 z-10 flex gap-4 sm:gap-5 items-start">
                   
                   {/* Icon Box */}
                   <div className={`relative w-12 h-12 min-w-[48px] rounded-xl bg-gradient-to-br ${option.accent} flex items-center justify-center text-white shadow-md transition-all duration-300 ${option.glow} group-hover:scale-105`}>
@@ -118,7 +118,7 @@ export default function StartDashboard() {
                   {/* Text Contents */}
                   <div className="flex-1 min-w-0 pr-4">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-950 transition-colors">
+                      <h3 className="text-base font-bold text-heading group-hover:text-indigo-950 transition-colors">
                         {option.title}
                       </h3>
                       {option.badge && (
@@ -131,14 +131,14 @@ export default function StartDashboard() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed font-medium">
+                    <p className="text-xs sm:text-[13px] text-muted leading-relaxed font-medium">
                       {option.description}
                     </p>
                   </div>
 
                   {/* Interactive Action Indicator */}
                   <div className="self-center ml-auto pl-2">
-                    <div className="w-8 h-8 rounded-full border border-slate-100 bg-slate-50 flex items-center justify-center text-slate-400 group-hover:text-slate-800 group-hover:bg-slate-900 group-hover:border-slate-900 transition-all duration-300 group-hover:translate-x-0.5">
+                    <div className="w-8 h-8 rounded-full border border-card-border bg-surface flex items-center justify-center text-muted group-hover:text-heading group-hover:bg-slate-900 group-hover:border-slate-900 transition-all duration-300 group-hover:translate-x-0.5">
                       <ArrowRight size={14} strokeWidth={2.5} className="group-hover:text-white transition-colors" />
                     </div>
                   </div>
@@ -151,7 +151,7 @@ export default function StartDashboard() {
 
         {/* Footer info hint */}
         <div className="mt-8 text-center max-w-sm mx-auto">
-          <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+          <p className="text-[11px] text-muted font-medium leading-relaxed">
             💡 You can always add, remove, or rearrange widgets freely inside the editor after initialization.
           </p>
         </div>
