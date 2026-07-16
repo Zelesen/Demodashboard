@@ -311,7 +311,7 @@ export default function Contracts() {
   };
 
   return (
-    <div className="bg-[#f4f6fb] font-sans antialiased min-h-screen">
+    <div className="font-sans antialiased min-h-screen">
       <div className="max-w-7xl mx-auto p-3 sm:p-4 lg:p-5 space-y-4 relative z-10">
 
         {/* ======= HEADER ======= */}
