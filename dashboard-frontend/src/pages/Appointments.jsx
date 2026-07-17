@@ -164,7 +164,7 @@ export default function Appointments() {
   const allPeriods = ['today', '7d', '30d', '90d', '1y', 'all'];
 
   const getPeriodParam = () => {
-    const map = { "Today": "today", "Last 7 days": "7d", "Last 30 days": "30d", "Last 90 days": "90d", "Last year": "1y", "All time": "all" };
+    const map = { "Today": "today", "Last 7 days": "7d", "Last 30 days": "30d", "Last 90 days": "90d", "Last year": "1y"};
     return map[activeFilter] || "7d";
   };
 
@@ -316,7 +316,7 @@ export default function Appointments() {
     }
   }, [activeFilter, customStartDate, customEndDate, applyCachedData]);
 
-  const filters = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "All time", "Custom"];
+  const filters = ["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "Custom"];
 
   const syncPageCache = async () => {
     try {
@@ -363,7 +363,6 @@ export default function Appointments() {
       case "Last 7 days": { const s = new Date(end); s.setDate(s.getDate()-6); return `${fmt(s)} – ${fmt(end)}`; }
       case "Last 30 days": { const s = new Date(end); s.setDate(s.getDate()-29); return `${fmt(s)} – ${fmt(end)}`; }
       case "Last 90 days": { const s = new Date(end); s.setDate(s.getDate()-89); return `${fmt(s)} – ${fmt(end)}`; }
-      case "Last year": { const s = new Date(end); s.setFullYear(s.getFullYear()-1); return `${fmt(s)} – ${fmt(end)}`; }
       case "All time": { const s = new Date('2020-01-01'); return `${fmt(s)} – ${fmt(end)}`; }
       case "Custom": {
         if (customStartDate && customEndDate) {
