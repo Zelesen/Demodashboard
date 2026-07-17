@@ -23,7 +23,7 @@ const ENDPOINT_MAP = {
   weeklyActivityHeatmap: "/api/dashboard/appointments-heatmap",
 };
 
-function buildQuery(period, startDate, endDate) {
+function buildQuery(period, startDate, endDate, filters = {}) {
   const params = new URLSearchParams();
   if (startDate && endDate) {
     params.set("start_date", startDate);
@@ -31,6 +31,8 @@ function buildQuery(period, startDate, endDate) {
   } else {
     params.set("period", period);
   }
+  if (filters.site_id) params.set("site_id", filters.site_id);
+  if (filters.practitioner_id) params.set("practitioner_id", filters.practitioner_id);
   return params.toString();
 }
 
@@ -38,14 +40,15 @@ function getWidgetKey(widgets) {
   return widgets.map(w => `${w.i}:${w.chartType}`).join("|");
 }
 
-export default function useDashboardData(widgets, period = "7d", startDate = null, endDate = null) {
+export default function useDashboardData(widgets, period = "7d", startDate = null, endDate = null, filters = {}) {
   const [dataMap, setDataMap] = useState({});
   const [loading, setLoading] = useState(false);
   const cache = useRef({});
   const widgetKeyRef = useRef("");
 
   const widgetKey = getWidgetKey(widgets);
-  const fetchKey = `${widgetKey}__${period}__${startDate || ""}__${endDate || ""}`;
+  const filterKey = `${filters.site_id || ""}_${filters.practitioner_id || ""}`;
+  const fetchKey = `${widgetKey}__${period}__${startDate || ""}__${endDate || ""}__${filterKey}`;
 
   useEffect(() => {
     if (!widgets.length) {
@@ -69,7 +72,7 @@ export default function useDashboardData(widgets, period = "7d", startDate = nul
     }
 
     setLoading(true);
-    const query = buildQuery(period, startDate, endDate);
+    const query = buildQuery(period, startDate, endDate, filters);
 
     const fetchPromises = uniqueEndpoints.map(async (endpoint) => {
       const url = `${API}${endpoint}?${query}`;
@@ -102,7 +105,7 @@ export default function useDashboardData(widgets, period = "7d", startDate = nul
     }).catch(() => {
       setLoading(false);
     });
-  }, [widgetKey, period, startDate, endDate]);
+  }, [widgetKey, period, startDate, endDate, filters.site_id, filters.practitioner_id]);
 
   return { dataMap, loading };
 }

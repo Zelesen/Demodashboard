@@ -2,7 +2,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft, CalendarRange, RefreshCw, LayoutDashboard, Edit3, X,
-  Database, Calculator, Tag, Info, Puzzle,
+  Database, Calculator, Tag, Info, Puzzle, Search, ArrowUpDown, ArrowUp, ArrowDown,
   Calendar, CheckCircle2, XCircle, AlertTriangle, Clock, AlertCircle,
   Building2, Users, TrendingUp, List, UserCheck, Activity, Grid3x3, BarChart3,
 } from "lucide-react";
@@ -34,241 +34,182 @@ const ICON_MAP = {
   Activity, Grid3x3, BarChart3, Puzzle,
 };
 
-const DATA_VIEW_CONFIG = {
-  totalAppointments: {
-    title: "Total Appointments",
-    description: "The total count of all scheduled appointments within the selected time period, regardless of their status (completed, cancelled, DNA, etc.).",
-    fields: (d) => [
-      { label: "Total Appointments", value: d?.totalAppointments ?? "—", desc: "All appointments booked in this period" },
-      { label: "Completed", value: d?.completedAppointments ?? "—", desc: "Appointments that were attended and completed" },
-      { label: "Cancelled", value: d?.cancelledAppointments ?? "—", desc: "Appointments that were cancelled before the visit" },
-      { label: "DNA Count", value: d?.dnaCount ?? "—", desc: "Patients who did not attend their appointment" },
-      { label: "DNA Rate", value: d?.dnaRate != null ? `${d.dnaRate}%` : "—", desc: "Percentage of no-shows out of total appointments" },
-      { label: "Avg Duration", value: d?.avgDuration != null ? `${d.avgDuration} min` : "—", desc: "Mean scheduled length per appointment" },
-      { label: "Total Minutes", value: d?.totalMinutes != null ? `${d.totalMinutes} min` : "—", desc: "Combined duration of all appointments" },
-      { label: "Completion Rate", value: d?.completionRate != null ? `${d.completionRate}%` : "—", desc: "Percentage of appointments that were completed" },
-    ],
-  },
-  completedAppointments: {
-    title: "Completed Appointments",
-    description: "Count of appointments that were successfully attended and marked as completed. This is a key indicator of practice productivity and patient engagement.",
-    fields: (d) => [
-      { label: "Completed", value: d?.completedAppointments ?? "—", desc: "Total completed appointments" },
-      { label: "Total Booked", value: d?.totalAppointments ?? "—", desc: "All appointments in the period (for context)" },
-      { label: "Completion Rate", value: d?.completionRate != null ? `${d.completionRate}%` : "—", desc: "Completed as a percentage of total" },
-      { label: "Avg Duration", value: d?.avgDuration != null ? `${d.avgDuration} min` : "—", desc: "Average length of completed appointments" },
-    ],
-  },
-  cancelledAppointments: {
-    title: "Cancelled Appointments",
-    description: "Number of appointments that were cancelled by the patient or practice before the scheduled date. High cancellation rates may indicate scheduling or communication issues.",
-    fields: (d) => [
-      { label: "Cancelled", value: d?.cancelledAppointments ?? "—", desc: "Total cancelled appointments" },
-      { label: "Total Booked", value: d?.totalAppointments ?? "—", desc: "All appointments in the period" },
-      { label: "Cancel Rate", value: d?.cancelledAppointments && d?.totalAppointments ? `${((d.cancelledAppointments / d.totalAppointments) * 100).toFixed(1)}%` : "—", desc: "Cancelled as a percentage of total" },
-    ],
-  },
-  dnaRate: {
-    title: "DNA Rate (Did Not Attend)",
-    description: "The percentage of appointments where the patient did not attend and did not cancel in advance. DNA is a critical metric — each DNA wastes chair time and revenue. Industry benchmark is typically under 5%.",
-    fields: (d) => [
-      { label: "DNA Rate", value: d?.dnaRate != null ? `${d.dnaRate}%` : "—", desc: "Percentage of no-shows" },
-      { label: "DNA Count", value: d?.dnaCount ?? "—", desc: "Absolute number of no-shows" },
-      { label: "Total Appointments", value: d?.totalAppointments ?? "—", desc: "Total appointments against which DNA is measured" },
-      { label: "Target", value: "< 5%", desc: "Industry benchmark for acceptable DNA rate" },
-    ],
-  },
-  avgDuration: {
-    title: "Average Appointment Duration",
-    description: "The mean actual time spent per appointment. Useful for understanding scheduling efficiency — if avg duration consistently exceeds the scheduled length, slots may need adjusting.",
-    fields: (d) => [
-      { label: "Avg Duration", value: d?.avgDuration != null ? `${d.avgDuration} min` : "—", desc: "Mean duration across all completed appointments" },
-      { label: "Total Minutes", value: d?.totalMinutes != null ? `${d.totalMinutes} min` : "—", desc: "Combined minutes of all appointments" },
-      { label: "Total Appointments", value: d?.totalAppointments ?? "—", desc: "Number of appointments used in the calculation" },
-    ],
-  },
-  dnaCount: {
-    title: "Did Not Attend Count",
-    description: "The absolute number of patients who missed their appointment without cancelling. Each DNA represents lost revenue and wasted clinical time. Track trends to identify problem areas.",
-    fields: (d) => [
-      { label: "DNA Count", value: d?.dnaCount ?? "—", desc: "Total no-shows" },
-      { label: "DNA Rate", value: d?.dnaRate != null ? `${d.dnaRate}%` : "—", desc: "Percentage of no-shows out of total" },
-      { label: "Total Appointments", value: d?.totalAppointments ?? "—", desc: "All appointments in the period" },
-    ],
-  },
-  outcomeBreakdown: {
-    title: "Outcome Breakdown",
-    description: "A breakdown of all appointments by their final status. This provides a comprehensive view of how appointments are resolved completed, cancelled, DNA, pending, etc.",
-    fields: (d) => {
-      if (!d?.statusBreakdown) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return Object.entries(d.statusBreakdown).map(([status, count]) => ({
-        label: status,
-        value: count,
-        desc: `Appointments with status: ${status}`,
-      }));
-    },
-  },
-  appointmentsByPractice: {
-    title: "Appointments by Practice (Site)",
-    description: "Appointment counts broken down by each practice location/site. Useful for comparing performance across multiple sites and identifying which locations are busiest or underperforming.",
-    fields: (d) => {
-      if (!d?.sites?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return d.sites.map(s => ({
-        label: s.name,
-        value: `${s.appointments} appointments (${s.completed} completed)`,
-        desc: `Completed: ${s.appointments ? ((s.completed / s.appointments) * 100).toFixed(1) : 0}% completion rate`,
-      }));
-    },
-  },
-  practitionerWorkload: {
-    title: "Practitioner Workload",
-    description: "Appointment distribution across practitioners. Shows who is busiest, who has the highest completion rate, and where there may be capacity or underutilisation issues.",
-    fields: (d) => {
-      if (!d?.practitioners?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return d.practitioners.slice(0, 15).map(p => ({
-        label: `${p.name} (${p.role || "N/A"})`,
-        value: `${p.appointments} appts | ${p.completed} completed | ${p.fta} DNA`,
-        desc: `Completion rate: ${p.completionRate}%`,
-      }));
-    },
-  },
-  dailyAppointmentVolume: {
-    title: "Daily Appointment Volume",
-    description: "Day-by-day trend of appointments showing total, completed, cancelled, and DNA counts. Useful for identifying patterns — e.g. Mondays being busier, end-of-month spikes, etc.",
-    fields: (d) => {
-      if (!d?.chart_data?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return d.chart_data.map(day => ({
-        label: day.date,
-        value: `${day.total} total | ${day.completed} done | ${day.cancelled} cancelled | ${day.fta} DNA`,
-        desc: `Day total: ${day.total} appointments`,
-      }));
-    },
-  },
-  appointmentsByReason: {
-    title: "Appointments by Reason",
-    description: "Breakdown of appointments by their stated reason (e.g. check-up, filling, consultation). Helps understand what types of treatments are driving demand.",
-    fields: (d) => {
-      if (!d?.reasons?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return d.reasons.map(r => ({
-        label: r.reason,
-        value: r.count,
-        desc: `${r.count} appointment(s) for this reason`,
-      }));
-    },
-  },
-  appointmentsByHour: {
-    title: "Appointments by Hour of Day",
-    description: "Distribution of appointments across hours of the working day. Shows peak times and quiet periods, useful for optimising scheduling templates and staffing.",
-    fields: (d) => {
-      if (!d?.hours?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return d.hours.map(h => ({
-        label: `${String(h.hour).padStart(2, "0")}:00`,
-        value: `${h.count} appointments`,
-        desc: `${h.count} appointment(s) scheduled at this hour`,
-      }));
-    },
-  },
-  appointmentsByDay: {
-    title: "Appointments by Day of Week",
-    description: "Shows which days of the week are busiest. Useful for understanding weekly patterns — e.g. Monday surges, Friday lulls — to optimise staffing and availability.",
-    fields: (d) => {
-      if (!d?.days?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return d.days.map(dy => ({
-        label: dy.day,
-        value: `${dy.count} appointments`,
-        desc: `${dy.count} appointment(s) on this day of the week`,
-      }));
-    },
-  },
-  practitionerCompletionRate: {
-    title: "Practitioner Completion Rate",
-    description: "The percentage of appointments each practitioner completes vs. total booked. High completion rates indicate good patient follow-through; low rates may suggest overbooking or communication gaps.",
-    fields: (d) => {
-      if (!d?.practitioners?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return d.practitioners.map(p => ({
-        label: p.name,
-        value: `${p.completionRate}% completion (${p.completed}/${p.appointments})`,
-        desc: `${p.fta} DNA, ${p.appointments - p.completed - p.fta} other`,
-      }));
-    },
-  },
-  cancelledByDay: {
-    title: "Cancelled by Day of Week",
-    description: "Number and rate of cancellations for each day of the week. Helps identify if certain days have higher cancellation rates — perhaps due to scheduling patterns or patient preferences.",
-    fields: (d) => {
-      if (!d?.days?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return d.days.map(dy => ({
-        label: dy.day,
-        value: `${dy.cancelled} cancelled out of ${dy.total} (${dy.rate}%)`,
-        desc: `Cancellation rate: ${dy.rate}%`,
-      }));
-    },
-  },
-  appointmentLifecycle: {
-    title: "Appointment Lifecycle",
-    description: "Shows how appointment duration varies by hour of day. The min/avg/max columns reveal scheduling patterns — e.g. morning slots may be shorter consultations, afternoon slots longer procedures.",
-    fields: (d) => {
-      if (!d?.hours?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return d.hours.map(h => ({
-        label: `${String(h.hour).padStart(2, "0")}:00`,
-        value: `Min: ${h.min} min | Avg: ${h.avg} min | Max: ${h.max} min (${h.count} appts)`,
-        desc: `Range: ${h.min}–${h.max} minutes, average ${h.avg} minutes`,
-      }));
-    },
-  },
-  appointmentDuration: {
-    title: "Appointment Duration Distribution",
-    description: "Buckets appointments by their actual duration. Shows where most appointments fall — helps validate whether scheduling templates match reality.",
-    fields: (d) => {
-      if (!d?.buckets?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      return d.buckets.map(b => ({
-        label: b.bucket,
-        value: `${b.count} appointments`,
-        desc: `${b.count} appointment(s) fell in this duration range`,
-      }));
-    },
-  },
-  weeklyActivityHeatmap: {
-    title: "Weekly Activity Heatmap",
-    description: "A grid showing appointment density by day of week and hour. Darker cells indicate busier periods. Useful for identifying the true peaks and valleys of practice activity.",
-    fields: (d) => {
-      if (!d?.heatmap?.length) return [{ label: "No data available", value: "—", desc: "Awaiting data" }];
-      const rows = [];
-      d.heatmap.forEach(day => {
-        day.data.forEach(h => {
-          rows.push({ label: `${day.day} ${String(h.hour).padStart(2, "0")}:00`, value: `${h.count} appointments`, desc: `${h.count} appointment(s) at this time slot` });
-        });
-      });
-      return rows;
-    },
-  },
-};
+function DataView({ chartType, data, title, period, filters }) {
+  const [rows, setRows] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sortKey, setSortKey] = useState("start_time");
+  const [sortDir, setSortDir] = useState("desc");
+  const pageSize = 50;
 
-function DataView({ chartType, data, title }) {
-  const config = DATA_VIEW_CONFIG[chartType];
-  if (!config) return <div className="text-xs fs-muted">Detailed data view is not available for this widget.</div>;
-  const fields = config.fields(data);
+  useEffect(() => { setPage(1); }, [period, filters]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    const params = new URLSearchParams({ period: period || "7d", page: String(page), page_size: String(pageSize), sort_by: sortKey, sort_dir: sortDir });
+    if (filters?.site_id) params.set("site_id", filters.site_id);
+    if (filters?.practitioner_id) params.set("practitioner_id", filters.practitioner_id);
+    if (filters?.status) params.set("status", filters.status);
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    fetch(`${API}/api/dashboard/appointments-raw?${params}`)
+      .then(r => r.json())
+      .then(d => {
+        if (cancelled) return;
+        setRows(d.rows || []);
+        setTotal(d.total || 0);
+        setTotalPages(d.totalPages || 0);
+        setLoading(false);
+      })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [period, filters, page, sortKey, sortDir, debouncedSearch]);
+
+  const columns = [
+    { key: "patientName", label: "Patient", align: "left" },
+    { key: "practitionerName", label: "Practitioner", align: "left" },
+    { key: "siteName", label: "Site", align: "left" },
+    { key: "status", label: "Status", align: "left" },
+    { key: "reason", label: "Reason", align: "left" },
+    { key: "startTime", label: "Date & Time", align: "left" },
+    { key: "duration", label: "Duration", align: "right" },
+  ];
+
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+    setPage(1);
+  };
+
+  const statusColor = (status) => {
+    const s = (status || "").toLowerCase();
+    if (s === "completed") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    if (s === "cancelled") return "bg-amber-50 text-amber-700 border-amber-200";
+    if (s === "dna") return "bg-rose-50 text-rose-700 border-rose-200";
+    if (s === "booked" || s === "confirmed") return "bg-blue-50 text-blue-700 border-blue-200";
+    if (s === "in surgery" || s === "arrived") return "bg-violet-50 text-violet-700 border-violet-200";
+    return "bg-slate-50 text-slate-600 border-slate-200";
+  };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-bold fs-heading mb-1">{config.title || title}</h3>
-        <p className="text-[11px] fs-body leading-relaxed">{config.description}</p>
-      </div>
-      <div className="rounded-xl border border-card-border/60 overflow-hidden">
-        <div className="grid grid-cols-[1fr_1fr_2fr] gap-0 text-[9px] font-bold uppercase tracking-wider fs-section-label px-3 py-2 fs-card-row-even border-b border-card-border/40">
-          <span>Metric</span>
-          <span>Value</span>
-          <span>Explanation</span>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-bold fs-heading">{title || "Appointments"}</h3>
+          <p className="text-[10px] fs-muted mt-0.5">Raw appointment records with all details</p>
         </div>
-        {fields.map((f, i) => (
-          <div key={i} className={`grid grid-cols-[1fr_1fr_2fr] gap-0 px-3 py-2.5 border-b border-card-border/30 last:border-b-0 ${i % 2 === 0 ? "fs-card-row-even" : "fs-card-row-odd"}`}>
-            <span className="text-[11px] font-semibold fs-heading truncate pr-2">{f.label}</span>
-            <span className="text-[11px] font-bold fs-heading truncate pr-2">{f.value}</span>
-            <span className="text-[10px] fs-muted leading-relaxed">{f.desc}</span>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 fs-muted" />
+            <input
+              type="text"
+              placeholder="Search patient, practitioner, reason..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="w-56 pl-7 pr-2 py-1.5 text-[10px] fs-input border border-card-border/60 rounded-lg bg-transparent focus:outline-none focus:ring-1 focus:ring-indigo-400/40"
+            />
           </div>
-        ))}
+          <span className="text-[9px] fs-muted font-medium whitespace-nowrap">{total.toLocaleString()} records</span>
+        </div>
       </div>
+
+      <div className="rounded-xl border border-card-border/60 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-[10px]">
+            <thead>
+              <tr className="fs-card-row-even border-b border-card-border/40">
+                {columns.map(col => (
+                  <th
+                    key={col.key}
+                    onClick={() => handleSort(col.key)}
+                    className={`px-3 py-2.5 font-bold uppercase tracking-wider fs-section-label cursor-pointer hover:opacity-80 transition-opacity select-none whitespace-nowrap ${col.align === "right" ? "text-right" : "text-left"}`}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {col.label}
+                      {sortKey === col.key ? (
+                        sortDir === "asc" ? <ArrowUp size={9} /> : <ArrowDown size={9} />
+                      ) : (
+                        <ArrowUpDown size={9} className="opacity-30" />
+                      )}
+                    </span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={columns.length} className="px-3 py-12 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-indigo-400/30 border-t-indigo-400 rounded-full animate-spin" />
+                      <span className="text-[10px] fs-muted">Loading appointments...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length} className="px-3 py-12 text-center fs-muted text-[11px]">
+                    No appointments found
+                  </td>
+                </tr>
+              ) : (
+                rows.map((row, i) => (
+                  <tr key={i} className={`border-b border-card-border/30 last:border-b-0 transition-colors hover:bg-indigo-500/5 ${i % 2 === 0 ? "fs-card-row-even" : "fs-card-row-odd"}`}>
+                    <td className="px-3 py-2.5 font-semibold fs-heading whitespace-nowrap">{row.patientName}</td>
+                    <td className="px-3 py-2.5 fs-body whitespace-nowrap">{row.practitionerName}</td>
+                    <td className="px-3 py-2.5 fs-body whitespace-nowrap">{row.siteName}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider border ${statusColor(row.status)}`}>
+                        {row.status}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 fs-body whitespace-nowrap">{row.reason}</td>
+                    <td className="px-3 py-2.5 fs-body whitespace-nowrap">{row.startTime}</td>
+                    <td className="px-3 py-2.5 text-right font-medium fs-heading whitespace-nowrap">{row.duration ? `${row.duration} min` : "—"}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] fs-muted">
+            Page {page} of {totalPages}
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page <= 1}
+              className="px-2.5 py-1 text-[9px] font-semibold fs-filter-pill border rounded-md disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="px-2.5 py-1 text-[9px] font-semibold fs-filter-pill border rounded-md disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -301,6 +242,8 @@ export default function DashboardViewer() {
   const [modalCustomStart, setModalCustomStart] = useState("");
   const [modalCustomEnd, setModalCustomEnd] = useState("");
   const [modalChartTab, setModalChartTab] = useState("chart");
+  const [modalFilters, setModalFilters] = useState({});
+  const [filterOptions, setFilterOptions] = useState({ sites: [], practitioners: [] });
 
   const period = activeFilter === "Custom" ? "all" : PERIOD_MAP[activeFilter];
   const startDate = activeFilter === "Custom" ? customStartDate : null;
@@ -320,7 +263,7 @@ export default function DashboardViewer() {
     return [{ i: "modal_main", chartType: fullscreenWidget.chartType }];
   }, [fullscreenWidgetId, fullscreenWidget?.chartType]);
 
-  const { dataMap: modalDataMap, loading: modalDataLoading } = useDashboardData(modalWidgetArr, modalPeriod, modalStartDate, modalEndDate);
+  const { dataMap: modalDataMap, loading: modalDataLoading } = useDashboardData(modalWidgetArr, modalPeriod, modalStartDate, modalEndDate, modalFilters);
 
   const [widgetMeta, setWidgetMeta] = useState([]);
   const [availableFilters, setAvailableFilters] = useState([]);
@@ -342,6 +285,15 @@ export default function DashboardViewer() {
         setAvailableFilters(["Today", "Last 7 days", "Last 30 days", "Last 90 days", "Last year", "Custom"]);
       });
   }, []);
+
+  useEffect(() => {
+    if (fullscreenWidgetId) {
+      fetch(`${API}/api/dashboard/filter-options`)
+        .then(r => r.json())
+        .then(d => setFilterOptions(d))
+        .catch(() => {});
+    }
+  }, [fullscreenWidgetId]);
 
   const modalWidgetData = fullscreenWidget ? {
     ...fullscreenWidget,
@@ -722,7 +674,7 @@ export default function DashboardViewer() {
                           <DashboardWidget
                             widget={widget}
                             showControls={true}
-                            onFullscreen={() => { setFullscreenWidgetId(widget.i); setModalFilter("Last 7 days"); setModalCustomStart(""); setModalCustomEnd(""); setModalChartTab("chart"); }}
+                            onFullscreen={() => { setFullscreenWidgetId(widget.i); setModalFilter("Last 7 days"); setModalCustomStart(""); setModalCustomEnd(""); setModalChartTab("chart"); setModalFilters({}); }}
                           />
                         </WidgetFrame>
                       </div>
@@ -894,9 +846,69 @@ export default function DashboardViewer() {
                               </div>
                             </div>
 
+                            {(() => {
+                              const chartType = modalWidgetData.chartType;
+                              const FILTER_META_LOCAL = {
+                                site:          { key: "site_id",          label: "All Sites",          optKey: "sites" },
+                                practitioner:  { key: "practitioner_id",  label: "All Practitioners",  optKey: "practitioners" },
+                                status:        { key: "status",           label: "All Statuses",       optKey: "statuses" },
+                                type:          { key: "appointment_type", label: "All Types",          optKey: "appointment_types" },
+                              };
+                              const FILTER_KEYS = {
+                                totalAppointments:          ["site", "practitioner", "status", "type"],
+                                completedAppointments:      ["site", "practitioner", "status", "type"],
+                                cancelledAppointments:      ["site", "practitioner", "status", "type"],
+                                dnaRate:                    ["site", "practitioner"],
+                                dnaCount:                   ["site", "practitioner"],
+                                avgDuration:                ["site", "practitioner", "type"],
+                                dailyAppointmentVolume:     ["site", "practitioner", "status", "type"],
+                                appointmentsByReason:       ["site", "practitioner", "status"],
+                                appointmentsByHour:         ["site", "practitioner", "status", "type"],
+                                appointmentsByDay:          ["site", "practitioner", "status", "type"],
+                                cancelledByDay:             ["site", "practitioner"],
+                                appointmentLifecycle:       ["site", "practitioner", "status", "type"],
+                                appointmentDuration:        ["site", "practitioner", "type"],
+                                weeklyActivityHeatmap:      ["site", "practitioner", "status", "type"],
+                                practitionerWorkload:       ["site"],
+                                practitionerCompletionRate: ["site"],
+                                outcomeBreakdown:           ["site", "practitioner", "status", "type"],
+                              };
+                              const activeKeys = FILTER_KEYS[chartType] || [];
+                              if (!activeKeys.length || !filterOptions) return null;
+                              return (
+                                <div className="absolute top-10 left-3 right-3 z-10">
+                                  <div className="flex items-center gap-1.5 px-2 py-1.5 fs-filter-bar border rounded-lg backdrop-blur-sm flex-wrap">
+                                    <span className="text-[8px] font-bold uppercase tracking-wider fs-muted shrink-0">Filters</span>
+                                    {activeKeys.map((fk) => {
+                                      const meta = FILTER_META_LOCAL[fk];
+                                      if (!meta) return null;
+                                      const opts = filterOptions[meta.optKey] || [];
+                                      const value = modalFilters?.[meta.key] || "";
+                                      return (
+                                        <div key={fk} className="relative min-w-[100px] max-w-[170px] flex-1">
+                                          <select
+                                            className="w-full px-2 py-1 text-[9px] font-medium bg-white/80 border border-gray-200/60 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-400/40 appearance-none truncate cursor-pointer"
+                                            value={value}
+                                            onChange={(e) => setModalFilters({ ...modalFilters, [meta.key]: e.target.value || undefined })}
+                                          >
+                                            <option value="">{meta.label}</option>
+                                            {opts.map((o) => (
+                                              <option key={typeof o === "string" ? o : o.id} value={typeof o === "string" ? o : o.id}>
+                                                {typeof o === "string" ? o : o.name}
+                                              </option>
+                                            ))}
+                                          </select>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              );
+                            })()}
+
                             {modalChartTab === "chart" ? (
                               modalMeta?.type === "metric" ? (
-                                <div className="p-5 pt-10">
+                                <div className="p-5 pt-10 min-h-[340px]">
                                   <AppointmentMetricCard
                                     title={modalWidgetData.title}
                                     value={(() => {
@@ -919,17 +931,21 @@ export default function DashboardViewer() {
                                   />
                                 </div>
                               ) : (
-                                <div className="pt-10">
+                                <div className="pt-20">
                                   <EnhancedWidgetChart
                                     chartType={modalWidgetData.chartType}
                                     data={modalWidgetData.data}
                                     height={480}
+                                    filters={modalFilters}
+                                    onFilterChange={setModalFilters}
+                                    filterOptions={filterOptions}
+                                    hideFilters
                                   />
                                 </div>
                               )
                             ) : (
-                              <div className="p-5 pt-14 min-h-[480px]">
-                                <DataView chartType={modalWidgetData.chartType} data={modalWidgetData.data} title={modalWidgetData.title} />
+                              <div className="p-5 pt-20 min-h-[480px]">
+                                <DataView chartType={modalWidgetData.chartType} data={modalWidgetData.data} title={modalWidgetData.title} period={modalPeriod} filters={modalFilters} />
                               </div>
                             )}
                           </div>
