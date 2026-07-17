@@ -673,7 +673,7 @@ def get_clinicians_league(period: str = "7d", start_date: str = None, end_date: 
                    COALESCE(SUM(CASE WHEN a.did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END), 0) as fta_count
             FROM dentally_practitioners p
             LEFT JOIN dentally_sites s ON p.site_id = s.id::text
-            LEFT JOIN dentally_appointments a ON p.id = a.practitioner_id 
+            LEFT JOIN dentally_appointments a ON p.id::text = a.practitioner_id 
                 AND {w_cl_appt}
             LEFT JOIN dentally_invoices i ON s.id::text = i.site_id
                 AND {w_cl_inv}
@@ -3016,25 +3016,28 @@ def get_treatment_plan_duration_distribution(period: str = "90d", start_date: st
 # ==================== APPOINTMENTS ====================
 
 @app.get("/api/dashboard/appointments-kpis")
-def get_appointments_kpis(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_kpis(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get appointments KPI metrics"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_kpis", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
-        cur.execute(f"SELECT COUNT(*) as total, SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN LOWER(status) = 'cancelled' THEN 1 ELSE 0 END) as cancelled, SUM(length_minutes) as total_minutes FROM dentally_appointments WHERE {w}", p)
+        rf, rp = build_relation_clauses(site_id, practitioner_id)
+        full_w = w + rf
+        full_p = p + rp
+        cur.execute(f"SELECT COUNT(*) as total, SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN LOWER(status) = 'cancelled' THEN 1 ELSE 0 END) as cancelled, SUM(length_minutes) as total_minutes FROM dentally_appointments WHERE {full_w}", full_p)
         stats = cur.fetchone()
         total = stats["total"] or 0
         completed = stats["completed"] or 0
         cancelled = stats["cancelled"] or 0
         total_minutes = float(stats["total_minutes"] or 0)
-        cur.execute(f"SELECT COUNT(*) as fta FROM dentally_appointments WHERE {w} AND did_not_attend_at IS NOT NULL", p)
+        cur.execute(f"SELECT COUNT(*) as fta FROM dentally_appointments WHERE {full_w} AND did_not_attend_at IS NOT NULL", full_p)
         fta = cur.fetchone()["fta"] or 0
-        cur.execute(f"SELECT status, COUNT(*) as count FROM dentally_appointments WHERE {w} GROUP BY status ORDER BY count DESC", p)
+        cur.execute(f"SELECT status, COUNT(*) as count FROM dentally_appointments WHERE {full_w} GROUP BY status ORDER BY count DESC", full_p)
         status_breakdown = {r["status"]: r["count"] for r in cur.fetchall()}
         avg_duration = round(total_minutes / total, 0) if total > 0 else 0
         fta_rate = round((fta / total) * 100, 1) if total > 0 else 0
@@ -3054,17 +3057,19 @@ def get_appointments_kpis(period: str = "7d", start_date: str = None, end_date: 
 
 
 @app.get("/api/dashboard/appointments-trend")
-def get_appointments_trend(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_trend(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get appointments trend over time"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_trend", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
+        rf, rp = build_relation_clauses(site_id, practitioner_id)
         if start_date and end_date:
-            cur.execute(f"SELECT start_time::date as appt_date, COUNT(*) as total, SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN LOWER(status) = 'cancelled' THEN 1 ELSE 0 END) as cancelled, SUM(CASE WHEN did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END) as fta FROM dentally_appointments WHERE {build_date_clause(period, start_date, end_date, ts('start_time'))[0]} GROUP BY appt_date ORDER BY appt_date", build_date_clause(period, start_date, end_date, ts('start_time'))[1])
+            w, p = build_date_clause(period, start_date, end_date, ts('start_time'))
+            cur.execute(f"SELECT start_time::date as appt_date, COUNT(*) as total, SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN LOWER(status) = 'cancelled' THEN 1 ELSE 0 END) as cancelled, SUM(CASE WHEN did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END) as fta FROM dentally_appointments WHERE {w}{rf} GROUP BY appt_date ORDER BY appt_date", p + rp)
             rows = cur.fetchall()
         else:
             period_map = {"today": 0, "7d": 6, "30d": 29, "90d": 89, "1y": 364, "all": 364}
@@ -3072,7 +3077,8 @@ def get_appointments_trend(period: str = "7d", start_date: str = None, end_date:
             date_points = [(datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(days_back, -1, -1)]
             rows = []
             for date_str in date_points:
-                cur.execute("SELECT COUNT(*) as total, SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN LOWER(status) = 'cancelled' THEN 1 ELSE 0 END) as cancelled, SUM(CASE WHEN did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END) as fta FROM dentally_appointments WHERE start_time::date = %s::date", (date_str,))
+                w2, p2 = build_date_clause(period, start_date, end_date, ts('start_time'))
+                cur.execute(f"SELECT COUNT(*) as total, SUM(CASE WHEN LOWER(status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN LOWER(status) = 'cancelled' THEN 1 ELSE 0 END) as cancelled, SUM(CASE WHEN did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END) as fta FROM dentally_appointments WHERE {w2}{rf} AND start_time::date = %s::date", p2 + rp + (date_str,))
                 row = cur.fetchone()
                 rows.append({"date": date_str, "total": row["total"] or 0, "completed": row["completed"] or 0, "cancelled": row["cancelled"] or 0, "fta": row["fta"] or 0})
         conn.close()
@@ -3086,21 +3092,22 @@ def get_appointments_trend(period: str = "7d", start_date: str = None, end_date:
 
 
 @app.get("/api/dashboard/appointments-by-site")
-def get_appointments_by_site(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_by_site(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get appointments by site"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_by_site", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("a.start_time"))
+        rf, rp = build_relation_clauses(site_id, practitioner_id, "a")
         try:
-            cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.id::text = a.site_id AND {w} WHERE s.active = 1 GROUP BY s.id, s.name ORDER BY total_appointments DESC", p)
+            cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.id::text = a.site_id AND {w}{rf} WHERE s.active = 1 GROUP BY s.id, s.name ORDER BY total_appointments DESC", p + rp)
         except Exception:
             conn.rollback()
-            cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.id::text = a.site_id AND {w} WHERE s.active = true GROUP BY s.id, s.name ORDER BY total_appointments DESC", p)
+            cur.execute(f"SELECT s.name as site_name, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed FROM dentally_sites s LEFT JOIN dentally_appointments a ON s.id::text = a.site_id AND {w}{rf} WHERE s.active = true GROUP BY s.id, s.name ORDER BY total_appointments DESC", p + rp)
         sites = [{"name": r["site_name"], "appointments": r["total_appointments"] or 0, "completed": r["completed"] or 0} for r in cur.fetchall()]
         conn.close()
         result = {"sites": sites}
@@ -3112,17 +3119,18 @@ def get_appointments_by_site(period: str = "7d", start_date: str = None, end_dat
 
 
 @app.get("/api/dashboard/appointments-by-practitioner")
-def get_appointments_by_practitioner(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_by_practitioner(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get appointments by practitioner"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_by_practitioner", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("a.start_time"))
-        cur.execute(f"SELECT p.dentally_id as practitioner_id, p.first_name || ' ' || p.last_name as practitioner_name, p.role, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN a.did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END) as fta FROM dentally_practitioners p LEFT JOIN dentally_appointments a ON p.dentally_id = a.practitioner_id AND {w} WHERE p.active = true GROUP BY p.dentally_id, p.first_name, p.last_name, p.role ORDER BY total_appointments DESC LIMIT 15", p)
+        rf, rp = build_relation_clauses(site_id, practitioner_id, "a")
+        cur.execute(f"SELECT p.dentally_id as practitioner_id, p.first_name || ' ' || p.last_name as practitioner_name, p.role, COUNT(DISTINCT a.id) as total_appointments, SUM(CASE WHEN LOWER(a.status) = 'completed' THEN 1 ELSE 0 END) as completed, SUM(CASE WHEN a.did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END) as fta FROM dentally_practitioners p LEFT JOIN dentally_appointments a ON p.dentally_id = a.practitioner_id AND {w}{rf} WHERE p.active = true GROUP BY p.dentally_id, p.first_name, p.last_name, p.role ORDER BY total_appointments DESC LIMIT 15", p + rp)
         practitioners = []
         for row in cur.fetchall():
             total_a = row["total_appointments"] or 0
@@ -3186,18 +3194,135 @@ def get_recent_appointments(period: str = "7d", start_date: str = None, end_date
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/dashboard/appointments-raw")
+def get_appointments_raw(
+    period: str = "7d", start_date: str = None, end_date: str = None,
+    site_id: str = None, practitioner_id: str = None, status: str = None,
+    search: str = None, sort_by: str = "start_time", sort_dir: str = "desc",
+    page: int = 1, page_size: int = 50,
+):
+    """Return raw appointment rows with practitioner/site names for the Data View table."""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        w_date, p_date = build_date_clause(period, start_date, end_date, ts("a.start_time"))
+        w_rel, p_rel = build_relation_clauses(site_id=site_id, practitioner_id=practitioner_id, table_alias="a")
+
+        full_w = w_date + w_rel
+        full_p = list(p_date) + list(p_rel)
+
+        if status:
+            full_w += " AND LOWER(a.status) = %s"
+            full_p.append(status.lower())
+
+        if search:
+            full_w += " AND (LOWER(a.patient_name) LIKE %s OR LOWER(a.reason) LIKE %s OR LOWER(pr.first_name || ' ' || pr.last_name) LIKE %s)"
+            s = f"%{search.lower()}%"
+            full_p.extend([s, s, s])
+
+        allowed_sorts = {
+            "patient_name": "a.patient_name",
+            "practitioner_name": "pr.first_name || ' ' || pr.last_name",
+            "site_name": "s.name",
+            "status": "a.status",
+            "reason": "a.reason",
+            "start_time": "a.start_time",
+            "duration": "COALESCE(a.duration, a.length_minutes)",
+        }
+        order_col = allowed_sorts.get(sort_by, "a.start_time")
+        order_dir = "ASC" if sort_dir.lower() == "asc" else "DESC"
+
+        count_sql = f"""
+            SELECT COUNT(*) as total
+            FROM dentally_appointments a
+            LEFT JOIN dentally_practitioners pr ON pr.id::text = a.practitioner_id
+            LEFT JOIN dentally_sites s ON s.id::text = a.site_id
+            WHERE {full_w}
+        """
+        cur.execute(count_sql, tuple(full_p))
+        total = cur.fetchone()["total"]
+
+        offset = (page - 1) * page_size
+        query_sql = f"""
+            SELECT
+                a.patient_name,
+                COALESCE(pr.first_name || ' ' || pr.last_name, a.practitioner_name, 'Unknown') as practitioner_name,
+                COALESCE(s.name, 'Unknown') as site_name,
+                a.status as raw_status,
+                CASE
+                    WHEN a.did_not_attend_at IS NOT NULL THEN 'DNA'
+                    WHEN LOWER(a.status) = 'completed' THEN 'Completed'
+                    WHEN LOWER(a.status) = 'cancelled' THEN 'Cancelled'
+                    WHEN LOWER(a.status) = 'booked' THEN 'Booked'
+                    WHEN LOWER(a.status) = 'confirmed' THEN 'Confirmed'
+                    WHEN LOWER(a.status) = 'arrived' THEN 'Arrived'
+                    WHEN LOWER(a.status) = 'in_surgery' THEN 'In Surgery'
+                    WHEN LOWER(a.status) = 'pending' THEN 'Pending'
+                    ELSE INITCAP(COALESCE(a.status, 'Unknown'))
+                END as status,
+                COALESCE(a.reason, 'N/A') as reason,
+                a.start_time,
+                COALESCE(a.duration, a.length_minutes) as duration,
+                CASE WHEN a.did_not_attend_at IS NOT NULL THEN true ELSE false END as is_dna
+            FROM dentally_appointments a
+            LEFT JOIN dentally_practitioners pr ON pr.id::text = a.practitioner_id
+            LEFT JOIN dentally_sites s ON s.id::text = a.site_id
+            WHERE {full_w}
+            ORDER BY {order_col} {order_dir} NULLS LAST
+            LIMIT %s OFFSET %s
+        """
+        cur.execute(query_sql, tuple(full_p) + (page_size, offset))
+
+        rows = []
+        for row in cur.fetchall():
+            formatted_time = ""
+            if row["start_time"]:
+                try:
+                    dt_val = datetime.strptime(str(row["start_time"])[:19], "%Y-%m-%d %H:%M:%S")
+                    formatted_time = dt_val.strftime("%d %b %Y, %H:%M")
+                except ValueError:
+                    try:
+                        dt_val = datetime.strptime(str(row["start_time"])[:19], "%Y-%m-%dT%H:%M:%S")
+                        formatted_time = dt_val.strftime("%d %b %Y, %H:%M")
+                    except ValueError:
+                        formatted_time = str(row["start_time"])[:16]
+            rows.append({
+                "patientName": row["patient_name"] or "Unknown",
+                "practitionerName": row["practitioner_name"],
+                "siteName": row["site_name"],
+                "status": row["status"],
+                "reason": row["reason"],
+                "startTime": formatted_time,
+                "duration": row["duration"],
+                "isDna": row["is_dna"],
+            })
+
+        conn.close()
+        return {
+            "rows": rows,
+            "total": total,
+            "page": page,
+            "pageSize": page_size,
+            "totalPages": (total + page_size - 1) // page_size if total else 0,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/dashboard/appointments-by-reason")
-def get_appointments_by_reason(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_by_reason(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get appointments by reason"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_by_reason", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
-        cur.execute(f"SELECT reason, COUNT(*) as count FROM dentally_appointments WHERE {w} AND reason IS NOT NULL AND reason != '' GROUP BY reason ORDER BY count DESC", p)
+        rf, rp = build_relation_clauses(site_id, practitioner_id)
+        cur.execute(f"SELECT reason, COUNT(*) as count FROM dentally_appointments WHERE {w}{rf} AND reason IS NOT NULL AND reason != '' GROUP BY reason ORDER BY count DESC", p + rp)
         reasons = [{"reason": r["reason"], "count": r["count"]} for r in cur.fetchall()]
         conn.close()
         result = {"reasons": reasons}
@@ -3209,17 +3334,18 @@ def get_appointments_by_reason(period: str = "7d", start_date: str = None, end_d
 
 
 @app.get("/api/dashboard/appointments-by-hour")
-def get_appointments_by_hour(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_by_hour(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get appointments by hour of day"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_by_hour", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
-        cur.execute(f"SELECT EXTRACT(HOUR FROM start_time)::int as hour, COUNT(*) as count FROM dentally_appointments WHERE {w} GROUP BY hour ORDER BY hour", p)
+        rf, rp = build_relation_clauses(site_id, practitioner_id)
+        cur.execute(f"SELECT EXTRACT(HOUR FROM start_time)::int as hour, COUNT(*) as count FROM dentally_appointments WHERE {w}{rf} GROUP BY hour ORDER BY hour", p + rp)
         hours = [{"hour": r["hour"], "count": r["count"]} for r in cur.fetchall()]
         conn.close()
         result = {"hours": hours}
@@ -3231,17 +3357,18 @@ def get_appointments_by_hour(period: str = "7d", start_date: str = None, end_dat
 
 
 @app.get("/api/dashboard/appointments-by-day")
-def get_appointments_by_day(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_by_day(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get appointments by day of week"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_by_day", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
-        cur.execute(f"SELECT TO_CHAR(start_time, 'Day') as day, COUNT(*) as count FROM dentally_appointments WHERE {w} GROUP BY day ORDER BY MIN(EXTRACT(DOW FROM start_time))", p)
+        rf, rp = build_relation_clauses(site_id, practitioner_id)
+        cur.execute(f"SELECT TO_CHAR(start_time, 'Day') as day, COUNT(*) as count FROM dentally_appointments WHERE {w}{rf} GROUP BY day ORDER BY MIN(EXTRACT(DOW FROM start_time))", p + rp)
         days = [{"day": r["day"].strip(), "count": r["count"]} for r in cur.fetchall()]
         conn.close()
         result = {"days": days}
@@ -3253,17 +3380,18 @@ def get_appointments_by_day(period: str = "7d", start_date: str = None, end_date
 
 
 @app.get("/api/dashboard/appointments-cancellation-by-day")
-def get_appointments_cancellation_by_day(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_cancellation_by_day(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get cancellation rate by day of week"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_cancellation_by_day", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
-        cur.execute(f"SELECT TO_CHAR(start_time, 'Day') as day, COUNT(*) as total, COUNT(*) FILTER (WHERE status = 'Cancelled') as cancelled, ROUND(COUNT(*) FILTER (WHERE status = 'Cancelled') * 100.0 / GREATEST(COUNT(*), 1), 1) as rate FROM dentally_appointments WHERE {w} GROUP BY day ORDER BY MIN(EXTRACT(DOW FROM start_time))", p)
+        rf, rp = build_relation_clauses(site_id, practitioner_id)
+        cur.execute(f"SELECT TO_CHAR(start_time, 'Day') as day, COUNT(*) as total, COUNT(*) FILTER (WHERE status = 'Cancelled') as cancelled, ROUND(COUNT(*) FILTER (WHERE status = 'Cancelled') * 100.0 / GREATEST(COUNT(*), 1), 1) as rate FROM dentally_appointments WHERE {w}{rf} GROUP BY day ORDER BY MIN(EXTRACT(DOW FROM start_time))", p + rp)
         days = [{"day": r["day"].strip(), "total": r["total"], "cancelled": r["cancelled"], "rate": r["rate"]} for r in cur.fetchall()]
         conn.close()
         result = {"days": days}
@@ -3275,17 +3403,18 @@ def get_appointments_cancellation_by_day(period: str = "7d", start_date: str = N
 
 
 @app.get("/api/dashboard/appointments-lifecycle")
-def get_appointments_lifecycle(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_lifecycle(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get appointment lifecycle (duration by hour)"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_lifecycle", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
-        cur.execute(f"SELECT EXTRACT(HOUR FROM start_time)::int as hour, ROUND(MIN(EXTRACT(EPOCH FROM (completed_at - start_time)) / 60), 1) as min_min, ROUND(AVG(EXTRACT(EPOCH FROM (completed_at - start_time)) / 60), 1) as avg_min, ROUND(MAX(EXTRACT(EPOCH FROM (completed_at - start_time)) / 60), 1) as max_min, COUNT(*) as count FROM dentally_appointments WHERE {w} AND completed_at IS NOT NULL  AND start_time IS NOT NULL GROUP BY hour ORDER BY hour", p)
+        rf, rp = build_relation_clauses(site_id, practitioner_id)
+        cur.execute(f"SELECT EXTRACT(HOUR FROM start_time)::int as hour, ROUND(MIN(EXTRACT(EPOCH FROM (completed_at - start_time)) / 60), 1) as min_min, ROUND(AVG(EXTRACT(EPOCH FROM (completed_at - start_time)) / 60), 1) as avg_min, ROUND(MAX(EXTRACT(EPOCH FROM (completed_at - start_time)) / 60), 1) as max_min, COUNT(*) as count FROM dentally_appointments WHERE {w}{rf} AND completed_at IS NOT NULL  AND start_time IS NOT NULL GROUP BY hour ORDER BY hour", p + rp)
         hours = [{"hour": r["hour"], "min": r["min_min"], "avg": r["avg_min"], "max": r["max_min"], "count": r["count"]} for r in cur.fetchall()]
         conn.close()
         result = {"hours": hours}
@@ -3297,17 +3426,18 @@ def get_appointments_lifecycle(period: str = "7d", start_date: str = None, end_d
 
 
 @app.get("/api/dashboard/appointments-duration")
-def get_appointments_duration(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_duration(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get appointment actual duration distribution"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_duration", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
-        cur.execute(f"SELECT CASE WHEN completed_at - start_time <= INTERVAL '15 minutes' THEN '<15 min' WHEN completed_at - start_time <= INTERVAL '30 minutes' THEN '15-30 min' WHEN completed_at - start_time <= INTERVAL '45 minutes' THEN '30-45 min' WHEN completed_at - start_time <= INTERVAL '60 minutes' THEN '45-60 min' ELSE '60+ min' END as bucket, COUNT(*) as count FROM dentally_appointments WHERE {w} AND completed_at IS NOT NULL  AND start_time IS NOT NULL GROUP BY bucket ORDER BY MIN(completed_at - start_time)", p)
+        rf, rp = build_relation_clauses(site_id, practitioner_id)
+        cur.execute(f"SELECT CASE WHEN completed_at - start_time <= INTERVAL '15 minutes' THEN '<15 min' WHEN completed_at - start_time <= INTERVAL '30 minutes' THEN '15-30 min' WHEN completed_at - start_time <= INTERVAL '45 minutes' THEN '30-45 min' WHEN completed_at - start_time <= INTERVAL '60 minutes' THEN '45-60 min' ELSE '60+ min' END as bucket, COUNT(*) as count FROM dentally_appointments WHERE {w}{rf} AND completed_at IS NOT NULL  AND start_time IS NOT NULL GROUP BY bucket ORDER BY MIN(completed_at - start_time)", p + rp)
         buckets = [{"bucket": r["bucket"], "count": r["count"]} for r in cur.fetchall()]
         conn.close()
         result = {"buckets": buckets}
@@ -3319,17 +3449,18 @@ def get_appointments_duration(period: str = "7d", start_date: str = None, end_da
 
 
 @app.get("/api/dashboard/appointments-heatmap")
-def get_appointments_heatmap(period: str = "7d", start_date: str = None, end_date: str = None):
+def get_appointments_heatmap(period: str = "7d", start_date: str = None, end_date: str = None, site_id: str = None, practitioner_id: str = None):
     """Get appointment day-hour heatmap"""
     if not start_date and not end_date:
         cached = get_cache("dashboard_appointments_heatmap", period)
-        if cached:
+        if cached and not site_id and not practitioner_id:
             return cached
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         w, p = build_date_clause(period, start_date, end_date, ts("start_time"))
-        cur.execute(f"SELECT TO_CHAR(start_time, 'Day') as day_name, EXTRACT(HOUR FROM start_time)::int as hour, COUNT(*) as count FROM dentally_appointments WHERE {w} GROUP BY day_name, hour ORDER BY MIN(EXTRACT(DOW FROM start_time)), hour", p)
+        rf, rp = build_relation_clauses(site_id, practitioner_id)
+        cur.execute(f"SELECT TO_CHAR(start_time, 'Day') as day_name, EXTRACT(HOUR FROM start_time)::int as hour, COUNT(*) as count FROM dentally_appointments WHERE {w}{rf} GROUP BY day_name, hour ORDER BY MIN(EXTRACT(DOW FROM start_time)), hour", p + rp)
         heatmap = []
         current_day = None
         for r in cur.fetchall():
@@ -3345,6 +3476,56 @@ def get_appointments_heatmap(period: str = "7d", start_date: str = None, end_dat
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== FILTER OPTIONS ====================
+
+@app.get("/api/dashboard/filter-options")
+def get_filter_options():
+    """Get available filter options for chart filters"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        try:
+            cur.execute("SELECT id, name FROM dentally_sites WHERE active = 1 ORDER BY name")
+        except Exception:
+            conn.rollback()
+            cur.execute("SELECT id, name FROM dentally_sites WHERE active = true ORDER BY name")
+        sites = [{"id": str(r["id"]), "name": r["name"]} for r in cur.fetchall()]
+        
+        cur.execute("""
+            SELECT dentally_id as id, first_name || ' ' || last_name as name, role
+            FROM dentally_practitioners WHERE active = true ORDER BY first_name, last_name
+        """)
+        practitioners = [{"id": r["id"], "name": r["name"], "role": r["role"]} for r in cur.fetchall()]
+        
+        conn.close()
+        return {
+            "sites": sites,
+            "practitioners": practitioners,
+            "statuses": ["Booked", "Completed", "Cancelled", "Arrived", "In Surgery", "Did Not Attend", "Pending", "Confirmed"],
+            "appointment_types": ["Check-up", "Consultation", "Treatment", "Emergency", "Hygiene", "Orthodontics", "Implant", "Extraction", "Root Canal", "Crown"]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def build_relation_clauses(site_id=None, practitioner_id=None, table_alias=""):
+    """Build extra WHERE clauses and params for site/practitioner filtering."""
+    prefix = f"{table_alias}." if table_alias else ""
+    extra_clauses = []
+    extra_params = []
+    
+    if site_id:
+        extra_clauses.append(f"{prefix}site_id = %s")
+        extra_params.append(site_id)
+    if practitioner_id:
+        extra_clauses.append(f"{prefix}practitioner_id = %s")
+        extra_params.append(practitioner_id)
+    
+    extra_where = (" AND " + " AND ".join(extra_clauses)) if extra_clauses else ""
+    return extra_where, tuple(extra_params)
 
 
 # ==================== PAGE SYNC ====================
@@ -3810,10 +3991,22 @@ def seed_widgets():
         print(f"Warning: Could not seed widgets: {e}")
 
 # Run on startup
+PRESET_DASHBOARDS = [
+    {"name": "Home", "type": "System", "description": "High-level clinic performance summary with KPIs, health score, and practice league.", "status": "Live", "managed_by": "Intellident", "path": "/", "user_id": None},
+    {"name": "Appointments", "type": "System", "description": "Daily appointments, no-shows, booking trends, and practitioner schedules.", "status": "Live", "managed_by": "Intellident", "path": "/appointments", "user_id": None},
+    {"name": "Invoices", "type": "System", "description": "Payment tracking, overdue invoices, and revenue breakdown by treatment.", "status": "Live", "managed_by": "Intellident", "path": "/invoices", "user_id": None},
+    {"name": "Invoices Dated On", "type": "System", "description": "Invoice KPIs and trends filtered by the date they were raised.", "status": "Live", "managed_by": "Intellident", "path": "/invoices-datedon", "user_id": None},
+    {"name": "Treatment Plans", "type": "System", "description": "Treatment plan KPIs, case acceptance, and completion heatmaps.", "status": "Live", "managed_by": "Intellident", "path": "/treatment-plans", "user_id": None},
+    {"name": "Payments", "type": "System", "description": "Payment KPIs, trends, breakdown by method, site, and practitioner.", "status": "Live", "managed_by": "Intellident", "path": "/payments", "user_id": None},
+    {"name": "Clinicians", "type": "System", "description": "Clinician performance league, UDA delivery, and production metrics.", "status": "Live", "managed_by": "Intellident", "path": "/clinicians", "user_id": None},
+    {"name": "Finance", "type": "System", "description": "Financial metrics including profit per practice, revenue by stream, and cash position.", "status": "Live", "managed_by": "Intellident", "path": "/finance", "user_id": None},
+    {"name": "Sales", "type": "System", "description": "Sales KPIs including treatment plan value, conversion rates, and pipeline.", "status": "Live", "managed_by": "Intellident", "path": "/sales", "user_id": None},
+    {"name": "Contracts", "type": "System", "description": "NHS contract management, UDA delivery tracking, and contract timelines.", "status": "Live", "managed_by": "Intellident", "path": "/contracts", "user_id": None},
+]
+
 ensure_dashboards_table()
 ensure_widgets_table()
 seed_widgets()
-# Auto-seed built-in pages (idempotent — skips existing)
 try:
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -3828,19 +4021,6 @@ try:
     conn.close()
 except Exception as e:
     print(f"Warning: Could not seed preset dashboards: {e}")
-
-PRESET_DASHBOARDS = [
-    {"name": "Home", "type": "System", "description": "High-level clinic performance summary with KPIs, health score, and practice league.", "status": "Live", "managed_by": "Intellident", "path": "/", "user_id": None},
-    {"name": "Appointments", "type": "System", "description": "Daily appointments, no-shows, booking trends, and practitioner schedules.", "status": "Live", "managed_by": "Intellident", "path": "/appointments", "user_id": None},
-    {"name": "Invoices", "type": "System", "description": "Payment tracking, overdue invoices, and revenue breakdown by treatment.", "status": "Live", "managed_by": "Intellident", "path": "/invoices", "user_id": None},
-    {"name": "Invoices Dated On", "type": "System", "description": "Invoice KPIs and trends filtered by the date they were raised.", "status": "Live", "managed_by": "Intellident", "path": "/invoices-datedon", "user_id": None},
-    {"name": "Treatment Plans", "type": "System", "description": "Treatment plan KPIs, case acceptance, and completion heatmaps.", "status": "Live", "managed_by": "Intellident", "path": "/treatment-plans", "user_id": None},
-    {"name": "Payments", "type": "System", "description": "Payment KPIs, trends, breakdown by method, site, and practitioner.", "status": "Live", "managed_by": "Intellident", "path": "/payments", "user_id": None},
-    {"name": "Clinicians", "type": "System", "description": "Clinician performance league, UDA delivery, and production metrics.", "status": "Live", "managed_by": "Intellident", "path": "/clinicians", "user_id": None},
-    {"name": "Finance", "type": "System", "description": "Financial metrics including profit per practice, revenue by stream, and cash position.", "status": "Live", "managed_by": "Intellident", "path": "/finance", "user_id": None},
-    {"name": "Sales", "type": "System", "description": "Sales KPIs including treatment plan value, conversion rates, and pipeline.", "status": "Live", "managed_by": "Intellident", "path": "/sales", "user_id": None},
-    {"name": "Contracts", "type": "System", "description": "NHS contract management, UDA delivery tracking, and contract timelines.", "status": "Live", "managed_by": "Intellident", "path": "/contracts", "user_id": None},
-]
 
 @app.post("/api/dashboards/seed")
 def seed_preset_dashboards():
