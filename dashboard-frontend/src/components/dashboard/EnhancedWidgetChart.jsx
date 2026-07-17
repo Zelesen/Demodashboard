@@ -1,4 +1,5 @@
 ﻿import ReactECharts from "echarts-for-react";
+import { MapPin, User, Tag, Activity } from "lucide-react";
 
 const FONT = "Inter, system-ui, sans-serif";
 
@@ -12,6 +13,33 @@ const PALETTE = {
   cyan: ["#06b6d4", "#22d3ee", "#67e8f9", "#cffafe"],
   sky: ["#0ea5e9", "#38bdf8", "#7dd3fc", "#e0f2fe"],
   slate: ["#64748b", "#94a3b8", "#cbd5e1", "#f1f5f9"],
+};
+
+const CHART_FILTERS = {
+  totalAppointments:          ["site", "practitioner", "status", "type"],
+  completedAppointments:      ["site", "practitioner", "status", "type"],
+  cancelledAppointments:      ["site", "practitioner", "status", "type"],
+  dnaRate:                    ["site", "practitioner"],
+  dnaCount:                   ["site", "practitioner"],
+  avgDuration:                ["site", "practitioner", "type"],
+  dailyAppointmentVolume:     ["site", "practitioner", "status", "type"],
+  appointmentsByReason:       ["site", "practitioner", "status"],
+  appointmentsByHour:         ["site", "practitioner", "status", "type"],
+  appointmentsByDay:          ["site", "practitioner", "status", "type"],
+  cancelledByDay:             ["site", "practitioner"],
+  appointmentLifecycle:       ["site", "practitioner", "status", "type"],
+  appointmentDuration:        ["site", "practitioner", "type"],
+  weeklyActivityHeatmap:      ["site", "practitioner", "status", "type"],
+  practitionerWorkload:       ["site"],
+  practitionerCompletionRate: ["site"],
+  outcomeBreakdown:           ["site", "practitioner", "status", "type"],
+};
+
+const FILTER_META = {
+  site:          { key: "site_id",          label: "All Sites",          icon: MapPin,     optKey: "sites" },
+  practitioner:  { key: "practitioner_id",  label: "All Practitioners",  icon: User,       optKey: "practitioners" },
+  status:        { key: "status",           label: "All Statuses",       icon: Activity,   optKey: "statuses" },
+  type:          { key: "appointment_type", label: "All Types",          icon: Tag,        optKey: "appointment_types" },
 };
 
 function ttBg() {
@@ -28,10 +56,60 @@ function gridOvr(overrides = {}) {
   return { left: 10, right: 10, top: 30, bottom: 40, containLabel: true, ...overrides };
 }
 
-export default function EnhancedWidgetChart({ chartType, data, height = 340 }) {
+export default function EnhancedWidgetChart({ chartType, data, height = 340, filters, onFilterChange, filterOptions, hideFilters }) {
   const opt = buildOption(chartType, data);
   if (!opt) return <div className="h-full flex items-center justify-center text-muted text-xs">No data available</div>;
-  return <ReactECharts option={opt} style={{ height }} opts={{ renderer: "canvas" }} notMerge={true} />;
+
+  const activeFilterKeys = CHART_FILTERS[chartType] || [];
+  const showFilters = !hideFilters && onFilterChange && filterOptions && activeFilterKeys.length > 0;
+
+  return (
+    <div className="flex flex-col h-full">
+      {showFilters && (
+        <FilterBar
+          filters={filters}
+          onFilterChange={onFilterChange}
+          filterOptions={filterOptions}
+          activeFilterKeys={activeFilterKeys}
+        />
+      )}
+      <div className="flex-1 min-h-0">
+        <ReactECharts option={opt} style={{ height }} opts={{ renderer: "canvas" }} notMerge={true} />
+      </div>
+    </div>
+  );
+}
+
+function FilterBar({ filters, onFilterChange, filterOptions, activeFilterKeys }) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 bg-gray-50/50 rounded-t-lg shrink-0 flex-wrap">
+      <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 shrink-0">Filter:</span>
+      {activeFilterKeys.map((fk) => {
+        const meta = FILTER_META[fk];
+        if (!meta) return null;
+        const Icon = meta.icon;
+        const opts = filterOptions[meta.optKey] || [];
+        const value = filters?.[meta.key] || "";
+        return (
+          <div key={fk} className="relative flex-1 min-w-[120px] max-w-[200px]">
+            <Icon size={11} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <select
+              className="w-full pl-6 pr-2 py-1 text-[10px] font-medium bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 appearance-none truncate cursor-pointer"
+              value={value}
+              onChange={(e) => onFilterChange({ ...filters, [meta.key]: e.target.value || undefined })}
+            >
+              <option value="">{meta.label}</option>
+              {opts.map((o) => (
+                <option key={typeof o === "string" ? o : o.id} value={typeof o === "string" ? o : o.id}>
+                  {typeof o === "string" ? o : o.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 function buildOption(chartType, data) {
