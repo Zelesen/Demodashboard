@@ -1,0 +1,212 @@
+export default {
+  title: "Appointments V2",
+  userId: "621570ae-2f71-4899-8ec2-5c7e82197910",
+  dashboardId: 33,
+  createdAt: "2026-07-17T13:53:06.606461",
+  widgets: [
+  {
+    "i": "widget-1",
+    "x": 0,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "totalAppointments",
+    "title": "Total Appointments"
+  },
+  {
+    "i": "widget-2",
+    "x": 2,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "completedAppointments",
+    "title": "Completed"
+  },
+  {
+    "i": "widget-3",
+    "x": 4,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "cancelledAppointments",
+    "title": "Cancelled"
+  },
+  {
+    "i": "widget-4",
+    "x": 6,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "dnaRate",
+    "title": "DNA Rate"
+  },
+  {
+    "i": "widget-5",
+    "x": 8,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "avgDuration",
+    "title": "Avg Duration"
+  },
+  {
+    "i": "widget-6",
+    "x": 10,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "dnaCount",
+    "title": "Did Not Attend"
+  },
+  {
+    "i": "widget-7",
+    "x": 0,
+    "y": 1,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "outcomeBreakdown",
+    "title": "Outcome Breakdown"
+  },
+  {
+    "i": "widget-8",
+    "x": 5,
+    "y": 1,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "appointmentsByPractice",
+    "title": "By Practice"
+  },
+  {
+    "i": "widget-9",
+    "x": 0,
+    "y": 3,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "practitionerWorkload",
+    "title": "Practitioner Workload"
+  },
+  {
+    "i": "widget-10",
+    "x": 5,
+    "y": 3,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "dailyAppointmentVolume",
+    "title": "Daily Volume"
+  },
+  {
+    "i": "widget-11",
+    "x": 0,
+    "y": 5,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "appointmentsByReason",
+    "title": "By Reason"
+  },
+  {
+    "i": "widget-12",
+    "x": 5,
+    "y": 5,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "appointmentsByHour",
+    "title": "By Hour"
+  },
+  {
+    "i": "widget-13",
+    "x": 0,
+    "y": 7,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "appointmentsByDay",
+    "title": "By Day"
+  },
+  {
+    "i": "widget-14",
+    "x": 5,
+    "y": 7,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "practitionerCompletionRate",
+    "title": "Completion Rate"
+  },
+  {
+    "i": "widget-15",
+    "x": 0,
+    "y": 11,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "cancelledByDay",
+    "title": "Cancelled by Day"
+  },
+  {
+    "i": "widget-16",
+    "x": 5,
+    "y": 9,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "appointmentLifecycle",
+    "title": "Lifecycle"
+  },
+  {
+    "i": "widget-17",
+    "x": 0,
+    "y": 9,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "appointmentDuration",
+    "title": "Duration Dist."
+  },
+  {
+    "i": "widget-18",
+    "x": 5,
+    "y": 11,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "weeklyActivityHeatmap",
+    "title": "Activity Heatmap"
+  }
+]
+};

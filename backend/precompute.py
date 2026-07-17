@@ -402,7 +402,7 @@ def cache_clinicians_league(period):
                    COALESCE(SUM(CASE WHEN a.did_not_attend_at IS NOT NULL THEN 1 ELSE 0 END), 0) as fta_count
             FROM dentally_practitioners p
             LEFT JOIN dentally_sites s ON p.site_id = s.id::text
-            LEFT JOIN dentally_appointments a ON p.id = a.practitioner_id AND {w_cl_appt}
+            LEFT JOIN dentally_appointments a ON p.id::text = a.practitioner_id AND {w_cl_appt}
             LEFT JOIN dentally_invoices i ON s.id::text = i.site_id AND {w_cl_inv}
             WHERE p.active = true
             GROUP BY p.id, p.first_name, p.last_name, p.role, s.name
