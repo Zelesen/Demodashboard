@@ -1,0 +1,212 @@
+export default {
+  title: "Google Analytics",
+  userId: "621570ae-2f71-4899-8ec2-5c7e82197910",
+  dashboardId: null,
+  createdAt: "2026-07-20T17:31:02.737978",
+  widgets: [
+  {
+    "i": "widget-1",
+    "x": 0,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "ga4TotalUsers",
+    "title": "Total Users"
+  },
+  {
+    "i": "widget-2",
+    "x": 2,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "ga4ActiveUsers",
+    "title": "Active Users"
+  },
+  {
+    "i": "widget-3",
+    "x": 4,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "ga4NewUsers",
+    "title": "New Users"
+  },
+  {
+    "i": "widget-4",
+    "x": 6,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "ga4Sessions",
+    "title": "Sessions"
+  },
+  {
+    "i": "widget-5",
+    "x": 8,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "ga4BounceRate",
+    "title": "Bounce Rate"
+  },
+  {
+    "i": "widget-6",
+    "x": 10,
+    "y": 0,
+    "w": 2,
+    "h": 1,
+    "minH": 1,
+    "minW": 1,
+    "type": "metric",
+    "chartType": "ga4AvgSessionDuration",
+    "title": "Avg Session Duration"
+  },
+  {
+    "i": "widget-11",
+    "x": 5,
+    "y": 1,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4TrafficOverTime",
+    "title": "Traffic Over Time"
+  },
+  {
+    "i": "widget-12",
+    "x": 0,
+    "y": 1,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4TrafficSources",
+    "title": "Traffic Sources"
+  },
+  {
+    "i": "widget-13",
+    "x": 0,
+    "y": 3,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4PagesPerSession",
+    "title": "Pages by Views"
+  },
+  {
+    "i": "widget-14",
+    "x": 0,
+    "y": 11,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4DeviceBreakdown",
+    "title": "Device Breakdown"
+  },
+  {
+    "i": "widget-15",
+    "x": 5,
+    "y": 5,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4TopLandingPages",
+    "title": "Top Landing Pages"
+  },
+  {
+    "i": "widget-16",
+    "x": 5,
+    "y": 3,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4EngagementRate",
+    "title": "Engagement Rate"
+  },
+  {
+    "i": "widget-17",
+    "x": 5,
+    "y": 7,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4ConversionsOverTime",
+    "title": "Conversions Over Time"
+  },
+  {
+    "i": "widget-18",
+    "x": 5,
+    "y": 11,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4RevenueOverTime",
+    "title": "Revenue Over Time"
+  },
+  {
+    "i": "widget-19",
+    "x": 0,
+    "y": 9,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4UserAge",
+    "title": "User Age Distribution"
+  },
+  {
+    "i": "widget-20",
+    "x": 0,
+    "y": 5,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4UserGender",
+    "title": "User Gender Split"
+  },
+  {
+    "i": "widget-21",
+    "x": 0,
+    "y": 7,
+    "w": 5,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4GeoBreakdown",
+    "title": "Top Countries"
+  },
+  {
+    "i": "widget-22",
+    "x": 5,
+    "y": 9,
+    "w": 7,
+    "h": 2,
+    "minH": 2,
+    "minW": 1,
+    "chartType": "ga4EventCount",
+    "title": "Event Count by Category"
+  }
+]
+};
