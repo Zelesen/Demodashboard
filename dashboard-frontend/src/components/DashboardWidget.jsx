@@ -9,6 +9,13 @@ const APPOINTMENT_CHART_TYPES = new Set([
   "appointmentsByReason", "appointmentsByHour", "appointmentsByDay",
   "practitionerCompletionRate", "cancelledByDay", "appointmentLifecycle",
   "appointmentDuration", "weeklyActivityHeatmap",
+  "ga4TotalUsers", "ga4ActiveUsers", "ga4NewUsers", "ga4Sessions",
+  "ga4BounceRate", "ga4AvgSessionDuration", "ga4PageViews",
+  "ga4ConversionRate", "ga4Revenue", "ga4Transactions",
+  "ga4TrafficOverTime", "ga4TrafficSources", "ga4PagesPerSession",
+  "ga4DeviceBreakdown", "ga4TopLandingPages", "ga4EngagementRate",
+  "ga4ConversionsOverTime", "ga4RevenueOverTime", "ga4UserAge",
+  "ga4UserGender", "ga4GeoBreakdown", "ga4EventCount",
 ]);
 
 export default function DashboardWidget({ widget, showControls = true, onFullscreen }) {
