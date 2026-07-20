@@ -4,7 +4,8 @@ import {
   BarChart3, Activity,
   GripVertical, Search, X, Calendar, Clock, Users,
   CheckCircle2, XCircle, AlertTriangle, AlertCircle, UserCheck,
-  Building2, TrendingUp, CalendarRange, List, Grid3x3
+  Building2, TrendingUp, CalendarRange, List, Grid3x3,
+  Globe, Smartphone
 } from "lucide-react";
 
 // ===================== SAMPLE DATA =====================
@@ -165,6 +166,132 @@ const sampleStatusBreakdown = {
   confirmed: 32,
   "in surgery": 8,
   arrived: 12,
+};
+
+const ga4TrafficData = {
+  chart_data: [
+    { date: "2024-01-01", sessions: 1250, users: 980 },
+    { date: "2024-01-02", sessions: 1380, users: 1050 },
+    { date: "2024-01-03", sessions: 1520, users: 1180 },
+    { date: "2024-01-04", sessions: 1340, users: 1020 },
+    { date: "2024-01-05", sessions: 1680, users: 1290 },
+    { date: "2024-01-06", sessions: 920, users: 750 },
+    { date: "2024-01-07", sessions: 1100, users: 870 },
+  ]
+};
+
+const ga4SourcesData = {
+  sources: [
+    { source: "Direct", sessions: 14200 },
+    { source: "Organic Search", sessions: 11800 },
+    { source: "Referral", sessions: 6400 },
+    { source: "Social", sessions: 5200 },
+    { source: "Email", sessions: 3100 },
+    { source: "Paid Search", sessions: 1867 },
+  ]
+};
+
+const ga4PagesData = {
+  pages: [
+    { page: "/home", views: 8420, avgTime: 45 },
+    { page: "/pricing", views: 5230, avgTime: 62 },
+    { page: "/features", views: 4180, avgTime: 38 },
+    { page: "/blog", views: 3650, avgTime: 55 },
+    { page: "/contact", views: 2890, avgTime: 28 },
+    { page: "/about", views: 2340, avgTime: 35 },
+    { page: "/docs", views: 1980, avgTime: 72 },
+    { page: "/signup", views: 1650, avgTime: 18 },
+  ]
+};
+
+const ga4DeviceData = {
+  devices: [
+    { device: "Desktop", sessions: 18420 },
+    { device: "Mobile", sessions: 16850 },
+    { device: "Tablet", sessions: 7297 },
+  ]
+};
+
+const ga4LandingPagesData = {
+  pages: [
+    { page: "/home", sessions: 8420, bounceRate: 28.5 },
+    { page: "/blog/seo-tips", sessions: 4830, bounceRate: 35.2 },
+    { page: "/pricing", sessions: 3650, bounceRate: 22.1 },
+    { page: "/features", sessions: 3200, bounceRate: 31.8 },
+    { page: "/docs/getting-started", sessions: 2750, bounceRate: 18.4 },
+    { page: "/blog/analytics", sessions: 2400, bounceRate: 42.6 },
+    { page: "/signup", sessions: 1980, bounceRate: 15.3 },
+    { page: "/contact", sessions: 1520, bounceRate: 25.7 },
+  ]
+};
+
+const ga4EngagementData = {
+  chart_data: [
+    { date: "2024-01-01", engagementRate: 62.3, avgEngagementTime: 185 },
+    { date: "2024-01-02", engagementRate: 64.8, avgEngagementTime: 192 },
+    { date: "2024-01-03", engagementRate: 61.2, avgEngagementTime: 178 },
+    { date: "2024-01-04", engagementRate: 67.5, avgEngagementTime: 205 },
+    { date: "2024-01-05", engagementRate: 65.1, avgEngagementTime: 198 },
+    { date: "2024-01-06", engagementRate: 58.9, avgEngagementTime: 165 },
+    { date: "2024-01-07", engagementRate: 63.7, avgEngagementTime: 188 },
+  ]
+};
+
+const ga4ConversionsData = {
+  chart_data: [
+    { date: "2024-01-01", conversions: 42, revenue: 8200 },
+    { date: "2024-01-02", conversions: 48, revenue: 9400 },
+    { date: "2024-01-03", conversions: 55, revenue: 7800 },
+    { date: "2024-01-04", conversions: 50, revenue: 10200 },
+    { date: "2024-01-05", conversions: 58, revenue: 8900 },
+    { date: "2024-01-06", conversions: 35, revenue: 5600 },
+    { date: "2024-01-07", conversions: 44, revenue: 6800 },
+  ]
+};
+
+const ga4AgeData = {
+  ageGroups: [
+    { group: "18-24", users: 3200 },
+    { group: "25-34", users: 6800 },
+    { group: "35-44", users: 5400 },
+    { group: "45-54", users: 3800 },
+    { group: "55-64", users: 2100 },
+    { group: "65+", users: 1200 },
+  ]
+};
+
+const ga4GenderData = {
+  genders: [
+    { gender: "Male", users: 11400 },
+    { gender: "Female", users: 10800 },
+    { gender: "Unknown", users: 2631 },
+  ]
+};
+
+const ga4GeoData = {
+  countries: [
+    { country: "United States", sessions: 15200 },
+    { country: "United Kingdom", sessions: 8400 },
+    { country: "Germany", sessions: 5200 },
+    { country: "Canada", sessions: 4100 },
+    { country: "Australia", sessions: 3600 },
+    { country: "France", sessions: 2800 },
+    { country: "India", sessions: 2400 },
+    { country: "Japan", sessions: 1800 },
+  ]
+};
+
+const ga4EventData = {
+  events: [
+    { event: "page_view", count: 128432 },
+    { event: "click", count: 45280 },
+    { event: "scroll", count: 32150 },
+    { event: "form_submit", count: 8420 },
+    { event: "video_play", count: 5630 },
+    { event: "file_download", count: 3280 },
+    { event: "add_to_cart", count: 2150 },
+    { event: "purchase", count: 1847 },
+  ]
 };
 
 // ===================== HELPER: gradient color for donut slices =====================
@@ -895,6 +1022,575 @@ export function WeeklyActivityHeatmapChart({ data = sampleHeatmapData, height })
   return <ReactECharts option={option} style={{ height: chartHeight }} />;
 }
 
+export function GATrafficOverTimeChart({ data = ga4TrafficData, height, onChartReady }) {
+  const chartHeight = height || 240;
+  const chartData = data.chart_data || [];
+  const dates = chartData.map(d => {
+    const p = d.date?.split("-");
+    return p ? `${parseInt(p[2])}/${parseInt(p[1])}` : d.date;
+  });
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      formatter: (params) => {
+        let html = `<div style="font-family:Inter,sans-serif;font-size:10px"><b>${params[0].axisValue}</b><br/>`;
+        params.forEach(p => { html += `${p.marker} ${p.seriesName}: ${p.value.toLocaleString()}<br/>`; });
+        html += "</div>";
+        return html;
+      }
+    },
+    legend: {
+      data: ["Sessions", "Users"],
+      top: 0, right: 0,
+      textStyle: { fontSize: 10, color: "#64748b", fontFamily: "Inter,sans-serif" },
+      itemWidth: 8, itemHeight: 8,
+    },
+    grid: { left: 10, right: 10, top: 30, bottom: 10, containLabel: true },
+    xAxis: {
+      type: "category", data: dates,
+      axisLabel: { color: "#94a3b8", fontSize: 9, fontWeight: 500, rotate: 30 },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { color: "#94a3b8", fontSize: 9, fontWeight: 500 },
+      splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+    },
+    series: [
+      {
+        name: "Sessions", type: "line", smooth: true,
+        data: chartData.map(d => d.sessions),
+        itemStyle: { color: "#3b82f6" },
+        areaStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: "rgba(59,130,246,0.25)" },
+              { offset: 1, color: "rgba(59,130,246,0.02)" },
+            ]
+          }
+        },
+        lineStyle: { width: 1.5 }, symbol: "none",
+      },
+      {
+        name: "Users", type: "line", smooth: true,
+        data: chartData.map(d => d.users),
+        itemStyle: { color: "#10b981" },
+        areaStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: "rgba(16,185,129,0.25)" },
+              { offset: 1, color: "rgba(16,185,129,0.02)" },
+            ]
+          }
+        },
+        lineStyle: { width: 1.5 }, symbol: "none",
+      }
+    ]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GATrafficSourcesChart({ data = ga4SourcesData, height, onChartReady }) {
+  const chartHeight = height || 260;
+  const sources = data.sources || [];
+  const total = sources.reduce((s, r) => s + r.sessions, 0);
+  const colors = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#06b6d4"];
+  const option = {
+    tooltip: {
+      trigger: "item",
+      formatter: ({ name, value, percent }) =>
+        `<div style="font-family:Inter,sans-serif;font-size:11px">${name}: <b>${value.toLocaleString()}</b> sessions (${percent}%)</div>`
+    },
+    series: [{
+      type: "pie",
+      radius: ["45%", "68%"],
+      avoidLabelOverlap: true,
+      itemStyle: { borderRadius: 6, borderColor: "#fff", borderWidth: 3 },
+      label: { show: false },
+      emphasis: {
+        label: { show: true, fontSize: 12, fontWeight: "bold" },
+        itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,0.15)" }
+      },
+      data: sources.map((s, i) => ({
+        value: s.sessions,
+        name: s.source,
+        itemStyle: { color: donutGradient(colors[i % colors.length]) }
+      })),
+    }],
+    graphic: [{
+      type: "text", left: "center", top: "44%",
+      style: { text: total.toLocaleString(), textAlign: "center", fill: "#1e293b", fontSize: 18, fontWeight: 700, fontFamily: "Inter,sans-serif" }
+    }, {
+      type: "text", left: "center", top: "56%",
+      style: { text: "Sessions", textAlign: "center", fill: "#64748b", fontSize: 10, fontWeight: 500, fontFamily: "Inter,sans-serif" }
+    }]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GAPagesPerSessionChart({ data = ga4PagesData, height, onChartReady }) {
+  const chartHeight = height || 260;
+  const pages = data.pages?.slice(0, 8) || [];
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+      formatter: ({ 0: { value, name } }) =>
+        `<div style="font-family:Inter,sans-serif;font-size:11px">${name}: <b>${value.toLocaleString()}</b> views</div>`
+    },
+    grid: { left: 10, right: 10, top: 10, bottom: 10, containLabel: true },
+    xAxis: {
+      type: "value",
+      axisLabel: { color: "#64748b", fontSize: 10 },
+      splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+    },
+    yAxis: {
+      type: "category",
+      data: pages.map(p => p.page),
+      axisLabel: { color: "#64748b", fontSize: 10, fontWeight: 500 },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    series: [{
+      type: "bar",
+      data: pages.map(p => ({
+        value: p.views,
+        itemStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 1, y2: 0,
+            colorStops: [{ offset: 0, color: "#60a5fa" }, { offset: 1, color: "#3b82f6" }]
+          },
+          borderRadius: [0, 4, 4, 0],
+        }
+      })),
+      barWidth: "55%",
+      label: { show: true, position: "right", fontSize: 9, color: "#64748b", fontFamily: "Inter,sans-serif" },
+    }]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GADeviceBreakdownChart({ data = ga4DeviceData, height, onChartReady }) {
+  const chartHeight = height || 260;
+  const devices = data.devices || [];
+  const total = devices.reduce((s, d) => s + d.sessions, 0);
+  const colorMap = { Desktop: "#3b82f6", Mobile: "#10b981", Tablet: "#f59e0b" };
+  const option = {
+    tooltip: {
+      trigger: "item",
+      formatter: ({ name, value, percent }) =>
+        `<div style="font-family:Inter,sans-serif;font-size:11px">${name}: <b>${value.toLocaleString()}</b> sessions (${percent}%)</div>`
+    },
+    series: [{
+      type: "pie",
+      radius: ["45%", "68%"],
+      avoidLabelOverlap: true,
+      itemStyle: { borderRadius: 6, borderColor: "#fff", borderWidth: 3 },
+      label: { show: false },
+      emphasis: {
+        label: { show: true, fontSize: 12, fontWeight: "bold" },
+        itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,0.15)" }
+      },
+      data: devices.map(d => ({
+        value: d.sessions,
+        name: d.device,
+        itemStyle: { color: donutGradient(colorMap[d.device] || "#94a3b8") }
+      })),
+    }],
+    graphic: [{
+      type: "text", left: "center", top: "44%",
+      style: { text: total.toLocaleString(), textAlign: "center", fill: "#1e293b", fontSize: 18, fontWeight: 700, fontFamily: "Inter,sans-serif" }
+    }, {
+      type: "text", left: "center", top: "56%",
+      style: { text: "Total", textAlign: "center", fill: "#64748b", fontSize: 10, fontWeight: 500, fontFamily: "Inter,sans-serif" }
+    }]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GATopLandingPagesChart({ data = ga4LandingPagesData, height, onChartReady }) {
+  const chartHeight = height || 280;
+  const pages = data.pages?.slice(0, 8) || [];
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+      formatter: (params) => {
+        const p = params[0];
+        const page = pages[p.dataIndex];
+        return `<div style="font-family:Inter,sans-serif;font-size:11px"><b>${p.name}</b><br/>Sessions: ${p.value.toLocaleString()}<br/>Bounce Rate: ${page?.bounceRate ?? "-"}%</div>`;
+      }
+    },
+    grid: { left: 10, right: 40, top: 10, bottom: 10, containLabel: true },
+    xAxis: {
+      type: "value",
+      axisLabel: { color: "#64748b", fontSize: 10 },
+      splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+    },
+    yAxis: {
+      type: "category",
+      data: pages.map(p => p.page),
+      axisLabel: { color: "#64748b", fontSize: 10, fontWeight: 500 },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    series: [{
+      type: "bar",
+      data: pages.map(p => ({
+        value: p.sessions,
+        itemStyle: {
+          color: {
+            type: "linear", x: 0, y: 0, x2: 1, y2: 0,
+            colorStops: p.bounceRate > 35
+              ? [{ offset: 0, color: "#fb7185" }, { offset: 1, color: "#f43f5e" }]
+              : [{ offset: 0, color: "#60a5fa" }, { offset: 1, color: "#3b82f6" }]
+          },
+          borderRadius: [0, 4, 4, 0],
+        }
+      })),
+      barWidth: "55%",
+      label: {
+        show: true, position: "right", fontSize: 9, fontFamily: "Inter,sans-serif",
+        formatter: (params) => {
+          const page = pages[params.dataIndex];
+          return page ? `${page.bounceRate}% bounce` : "";
+        },
+        color: "#94a3b8",
+      },
+    }]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GAEngagementRateChart({ data = ga4EngagementData, height, onChartReady }) {
+  const chartHeight = height || 240;
+  const chartData = data.chart_data || [];
+  const dates = chartData.map(d => {
+    const p = d.date?.split("-");
+    return p ? `${parseInt(p[2])}/${parseInt(p[1])}` : d.date;
+  });
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      formatter: (params) => {
+        let html = `<div style="font-family:Inter,sans-serif;font-size:10px"><b>${params[0].axisValue}</b><br/>`;
+        params.forEach(p => {
+          const unit = p.seriesName === "Engagement Rate" ? "%" : "s";
+          html += `${p.marker} ${p.seriesName}: ${p.value}${unit}<br/>`;
+        });
+        html += "</div>";
+        return html;
+      }
+    },
+    legend: {
+      data: ["Engagement Rate", "Avg Engagement Time"],
+      top: 0, right: 0,
+      textStyle: { fontSize: 10, color: "#64748b", fontFamily: "Inter,sans-serif" },
+      itemWidth: 8, itemHeight: 8,
+    },
+    grid: { left: 10, right: 40, top: 30, bottom: 10, containLabel: true },
+    xAxis: {
+      type: "category", data: dates,
+      axisLabel: { color: "#94a3b8", fontSize: 9, fontWeight: 500, rotate: 30 },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    yAxis: [
+      {
+        type: "value", name: "Rate %",
+        nameTextStyle: { fontSize: 9, color: "#94a3b8" },
+        axisLabel: { color: "#94a3b8", fontSize: 9, formatter: "{value}%" },
+        splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+      },
+      {
+        type: "value", name: "Seconds",
+        nameTextStyle: { fontSize: 9, color: "#94a3b8" },
+        axisLabel: { color: "#94a3b8", fontSize: 9, formatter: "{value}s" },
+        splitLine: { show: false },
+      }
+    ],
+    series: [
+      {
+        name: "Engagement Rate", type: "line", smooth: true, yAxisIndex: 0,
+        data: chartData.map(d => d.engagementRate),
+        itemStyle: { color: "#8b5cf6" },
+        areaStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [
+              { offset: 0, color: "rgba(139,92,246,0.25)" },
+              { offset: 1, color: "rgba(139,92,246,0.02)" },
+            ]
+          }
+        },
+        lineStyle: { width: 1.5 }, symbol: "none",
+      },
+      {
+        name: "Avg Engagement Time", type: "bar", yAxisIndex: 1,
+        data: chartData.map(d => d.avgEngagementTime),
+        itemStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [{ offset: 0, color: "#60a5fa" }, { offset: 1, color: "#93c5fd" }]
+          },
+          borderRadius: [3, 3, 0, 0],
+        },
+        barWidth: "40%",
+      }
+    ]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GAConversionsOverTimeChart({ data = ga4ConversionsData, height, onChartReady }) {
+  const chartHeight = height || 240;
+  const chartData = data.chart_data || [];
+  const dates = chartData.map(d => {
+    const p = d.date?.split("-");
+    return p ? `${parseInt(p[2])}/${parseInt(p[1])}` : d.date;
+  });
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      formatter: (params) => {
+        let html = `<div style="font-family:Inter,sans-serif;font-size:10px"><b>${params[0].axisValue}</b><br/>`;
+        params.forEach(p => { html += `${p.marker} ${p.seriesName}: ${p.value.toLocaleString()}<br/>`; });
+        html += "</div>";
+        return html;
+      }
+    },
+    legend: {
+      data: ["Conversions"],
+      top: 0, right: 0,
+      textStyle: { fontSize: 10, color: "#64748b", fontFamily: "Inter,sans-serif" },
+      itemWidth: 8, itemHeight: 8,
+    },
+    grid: { left: 10, right: 10, top: 30, bottom: 10, containLabel: true },
+    xAxis: {
+      type: "category", data: dates,
+      axisLabel: { color: "#94a3b8", fontSize: 9, fontWeight: 500, rotate: 30 },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { color: "#94a3b8", fontSize: 9, fontWeight: 500 },
+      splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+    },
+    series: [{
+      name: "Conversions", type: "line", smooth: true,
+      data: chartData.map(d => d.conversions),
+      itemStyle: { color: "#10b981" },
+      areaStyle: {
+        color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: "rgba(16,185,129,0.25)" },
+            { offset: 1, color: "rgba(16,185,129,0.02)" },
+          ]
+        }
+      },
+      lineStyle: { width: 1.5 }, symbol: "none",
+    }]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GARevenueOverTimeChart({ data = ga4ConversionsData, height, onChartReady }) {
+  const chartHeight = height || 240;
+  const chartData = data.chart_data || [];
+  const dates = chartData.map(d => {
+    const p = d.date?.split("-");
+    return p ? `${parseInt(p[2])}/${parseInt(p[1])}` : d.date;
+  });
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      formatter: (params) => {
+        let html = `<div style="font-family:Inter,sans-serif;font-size:10px"><b>${params[0].axisValue}</b><br/>`;
+        params.forEach(p => { html += `${p.marker} ${p.seriesName}: $${p.value.toLocaleString()}<br/>`; });
+        html += "</div>";
+        return html;
+      }
+    },
+    grid: { left: 10, right: 10, top: 10, bottom: 10, containLabel: true },
+    xAxis: {
+      type: "category", data: dates,
+      axisLabel: { color: "#94a3b8", fontSize: 9, fontWeight: 500, rotate: 30 },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { color: "#94a3b8", fontSize: 9, fontWeight: 500, formatter: "${value}" },
+      splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+    },
+    series: [{
+      type: "bar",
+      data: chartData.map(d => ({
+        value: d.revenue,
+        itemStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [{ offset: 0, color: "#34d399" }, { offset: 1, color: "#10b981" }]
+          },
+          borderRadius: [4, 4, 0, 0],
+        }
+      })),
+      barWidth: "55%",
+    }]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GAUserAgeChart({ data = ga4AgeData, height, onChartReady }) {
+  const chartHeight = height || 260;
+  const groups = data.ageGroups || [];
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+      formatter: ({ 0: { value, name } }) =>
+        `<div style="font-family:Inter,sans-serif;font-size:11px">${name}: <b>${value.toLocaleString()}</b> users</div>`
+    },
+    grid: { left: 10, right: 10, top: 10, bottom: 20, containLabel: true },
+    xAxis: {
+      type: "category",
+      data: groups.map(g => g.group),
+      axisLabel: { color: "#64748b", fontSize: 10, fontWeight: 500 },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { color: "#64748b", fontSize: 9, fontWeight: 500 },
+      splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+    },
+    series: [{
+      type: "bar",
+      data: groups.map(g => ({
+        value: g.users,
+        itemStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [{ offset: 0, color: "#818cf8" }, { offset: 1, color: "#6366f1" }]
+          },
+          borderRadius: [4, 4, 0, 0],
+        }
+      })),
+      barWidth: "55%",
+      label: { show: true, position: "top", fontSize: 9, color: "#64748b", fontFamily: "Inter,sans-serif" },
+    }]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GAUserGenderChart({ data = ga4GenderData, height, onChartReady }) {
+  const chartHeight = height || 260;
+  const genders = data.genders || [];
+  const total = genders.reduce((s, g) => s + g.users, 0);
+  const colorMap = { male: "#3b82f6", female: "#ec4899", unknown: "#94a3b8" };
+  const option = {
+    tooltip: {
+      trigger: "item",
+      formatter: ({ name, value, percent }) =>
+        `<div style="font-family:Inter,sans-serif;font-size:11px">${name}: <b>${value.toLocaleString()}</b> users (${percent}%)</div>`
+    },
+    series: [{
+      type: "pie",
+      radius: ["45%", "68%"],
+      avoidLabelOverlap: true,
+      itemStyle: { borderRadius: 6, borderColor: "#fff", borderWidth: 3 },
+      label: { show: false },
+      emphasis: {
+        label: { show: true, fontSize: 12, fontWeight: "bold" },
+        itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,0.15)" }
+      },
+      data: genders.map(g => ({
+        value: g.users,
+        name: g.gender,
+        itemStyle: { color: donutGradient(colorMap[g.gender.toLowerCase()] || "#94a3b8") }
+      })),
+    }],
+    graphic: [{
+      type: "text", left: "center", top: "44%",
+      style: { text: total.toLocaleString(), textAlign: "center", fill: "#1e293b", fontSize: 18, fontWeight: 700, fontFamily: "Inter,sans-serif" }
+    }, {
+      type: "text", left: "center", top: "56%",
+      style: { text: "Users", textAlign: "center", fill: "#64748b", fontSize: 10, fontWeight: 500, fontFamily: "Inter,sans-serif" }
+    }]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GAGeoBreakdownChart({ data = ga4GeoData, height, onChartReady }) {
+  const chartHeight = height || 280;
+  const countries = data.countries?.slice(0, 8) || [];
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+      formatter: ({ 0: { value, name } }) =>
+        `<div style="font-family:Inter,sans-serif;font-size:11px">${name}: <b>${value.toLocaleString()}</b> sessions</div>`
+    },
+    grid: { left: 10, right: 10, top: 10, bottom: 10, containLabel: true },
+    xAxis: {
+      type: "value",
+      axisLabel: { color: "#64748b", fontSize: 10 },
+      splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+    },
+    yAxis: {
+      type: "category",
+      data: countries.map(c => c.country),
+      axisLabel: { color: "#64748b", fontSize: 10, fontWeight: 500 },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    series: [{
+      type: "bar",
+      data: countries.map(c => ({
+        value: c.sessions,
+        itemStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 1, y2: 0,
+            colorStops: [{ offset: 0, color: "#60a5fa" }, { offset: 1, color: "#3b82f6" }]
+          },
+          borderRadius: [0, 4, 4, 0],
+        }
+      })),
+      barWidth: "55%",
+      label: { show: true, position: "right", fontSize: 9, color: "#64748b", fontFamily: "Inter,sans-serif" },
+    }]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
+export function GAEventCountChart({ data = ga4EventData, height, onChartReady }) {
+  const chartHeight = height || 280;
+  const events = data.events?.slice(0, 8) || [];
+  const option = {
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+      formatter: ({ 0: { value, name } }) =>
+        `<div style="font-family:Inter,sans-serif;font-size:11px">${name}: <b>${value.toLocaleString()}</b> events</div>`
+    },
+    grid: { left: 10, right: 10, top: 10, bottom: 10, containLabel: true },
+    xAxis: {
+      type: "value",
+      axisLabel: { color: "#64748b", fontSize: 10 },
+      splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+    },
+    yAxis: {
+      type: "category",
+      data: events.map(e => e.event),
+      axisLabel: { color: "#64748b", fontSize: 10, fontWeight: 500 },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    series: [{
+      type: "bar",
+      data: events.map(e => ({
+        value: e.count,
+        itemStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 1, y2: 0,
+            colorStops: [{ offset: 0, color: "#a78bfa" }, { offset: 1, color: "#8b5cf6" }]
+          },
+          borderRadius: [0, 4, 4, 0],
+        }
+      })),
+      barWidth: "55%",
+      label: { show: true, position: "right", fontSize: 9, color: "#64748b", fontFamily: "Inter,sans-serif" },
+    }]
+  };
+  return <ReactECharts option={option} style={{ height: chartHeight }} onChartReady={onChartReady} />;
+}
+
 // ===================== RENDER ROUTER =====================
 export function renderAppointmentWidget(widget) {
   const trendVals = widget.data?.chartData?.map(d => d.total) || null;
@@ -936,6 +1632,50 @@ export function renderAppointmentWidget(widget) {
       return <AppointmentDurationChart data={widget.data || sampleDurationData} />;
     case "weeklyActivityHeatmap":
       return <WeeklyActivityHeatmapChart data={widget.data || sampleHeatmapData} />;
+    case "ga4TotalUsers":
+      return <AppointmentMetricCard title="Total Users" value={(widget.data?.totalUsers || 24831).toLocaleString()} change="+12.4%" icon={Users} footer="this period" sparklineValues={widget.data?.chartData?.map(d => d.users) || [980, 1050, 1180, 1020, 1290, 750, 870]} />;
+    case "ga4ActiveUsers":
+      return <AppointmentMetricCard title="Active Users" value={(widget.data?.activeUsers || 18429).toLocaleString()} change="+8.7%" icon={UserCheck} footer="last 7 days" sparklineValues={widget.data?.chartData?.map(d => d.users) || [720, 780, 890, 760, 980, 580, 650]} />;
+    case "ga4NewUsers":
+      return <AppointmentMetricCard title="New Users" value={(widget.data?.newUsers || 9214).toLocaleString()} change="+15.2%" icon={Globe} footer="this period" sparklineValues={widget.data?.chartData?.map(d => d.newUsers) || [350, 420, 380, 410, 520, 280, 340]} />;
+    case "ga4Sessions":
+      return <AppointmentMetricCard title="Sessions" value={(widget.data?.sessions || 42567).toLocaleString()} change="+6.3%" icon={Activity} footer="this period" sparklineValues={widget.data?.chartData?.map(d => d.sessions) || [1250, 1380, 1520, 1340, 1680, 920, 1100]} />;
+    case "ga4BounceRate":
+      return <AppointmentMetricCard title="Bounce Rate" value={(widget.data?.bounceRate || 38.2) + "%"} change="-2.1pp" positive={true} icon={TrendingUp} footer="target < 40%" />;
+    case "ga4AvgSessionDuration":
+      return <AppointmentMetricCard title="Avg Session Duration" value={widget.data?.avgSessionDuration || "3m 42s"} change="+4.8%" icon={Clock} footer="per session" />;
+    case "ga4TrafficOverTime":
+      return <GATrafficOverTimeChart data={widget.data || ga4TrafficData} />;
+    case "ga4TrafficSources":
+      return <GATrafficSourcesChart data={widget.data || ga4SourcesData} />;
+    case "ga4PagesPerSession":
+      return <GAPagesPerSessionChart data={widget.data || ga4PagesData} />;
+    case "ga4DeviceBreakdown":
+      return <GADeviceBreakdownChart data={widget.data || ga4DeviceData} />;
+    case "ga4TopLandingPages":
+      return <GATopLandingPagesChart data={widget.data || ga4LandingPagesData} />;
+    case "ga4EngagementRate":
+      return <GAEngagementRateChart data={widget.data || ga4EngagementData} />;
+    case "ga4PageViews":
+      return <AppointmentMetricCard title="Page Views" value={(widget.data?.pageViews || 128432).toLocaleString()} change="+9.1%" icon={BarChart3} footer="this period" sparklineValues={widget.data?.chartData?.map(d => d.views) || [4200, 4800, 5100, 4600, 5400]} />;
+    case "ga4ConversionRate":
+      return <AppointmentMetricCard title="Conversion Rate" value={(widget.data?.conversionRate || 3.8) + "%"} change="+0.5pp" icon={CheckCircle2} footer="target > 3%" />;
+    case "ga4Revenue":
+      return <AppointmentMetricCard title="Revenue" value={`$${(widget.data?.revenue || 48295).toLocaleString()}`} change="+18.3%" icon={TrendingUp} footer="this period" sparklineValues={widget.data?.chartData?.map(d => d.revenue) || [8200, 9400, 7800, 10200, 8900]} />;
+    case "ga4Transactions":
+      return <AppointmentMetricCard title="Transactions" value={(widget.data?.transactions || 1847).toLocaleString()} change="+11.2%" icon={List} footer="completed orders" sparklineValues={widget.data?.chartData?.map(d => d.transactions) || [320, 380, 290, 410, 350]} />;
+    case "ga4ConversionsOverTime":
+      return <GAConversionsOverTimeChart data={widget.data || ga4ConversionsData} />;
+    case "ga4RevenueOverTime":
+      return <GARevenueOverTimeChart data={widget.data || ga4ConversionsData} />;
+    case "ga4UserAge":
+      return <GAUserAgeChart data={widget.data || ga4AgeData} />;
+    case "ga4UserGender":
+      return <GAUserGenderChart data={widget.data || ga4GenderData} />;
+    case "ga4GeoBreakdown":
+      return <GAGeoBreakdownChart data={widget.data || ga4GeoData} />;
+    case "ga4EventCount":
+      return <GAEventCountChart data={widget.data || ga4EventData} />;
     default:
       return <div className="h-full flex items-center justify-center text-muted text-xs">Unknown widget</div>;
   }
