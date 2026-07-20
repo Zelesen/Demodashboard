@@ -132,6 +132,22 @@ function buildOption(chartType, data) {
     appointmentLifecycle: () => lifecycleRange(data),
     appointmentDuration: () => durationHistogram(data),
     weeklyActivityHeatmap: () => heatmapCalendar(data),
+    ga4TrafficOverTime: () => ga4TrafficOverTime(data),
+    ga4TrafficSources: () => ga4TrafficSources(data),
+    ga4PagesPerSession: () => ga4PagesPerSession(data),
+    ga4DeviceBreakdown: () => ga4DeviceBreakdown(data),
+    ga4TopLandingPages: () => ga4TopLandingPages(data),
+    ga4EngagementRate: () => ga4EngagementRate(data),
+    ga4PageViews: () => metricSparkline("ga4PageViews", data, "#0ea5e9", "Page Views"),
+    ga4ConversionRate: () => metricSparkline("ga4ConversionRate", data, PALETTE.emerald, "Conversion Rate"),
+    ga4Revenue: () => metricSparkline("ga4Revenue", data, PALETTE.emerald, "Revenue"),
+    ga4Transactions: () => metricSparkline("ga4Transactions", data, "#6366f1", "Transactions"),
+    ga4ConversionsOverTime: () => ga4ConversionsOverTime(data),
+    ga4RevenueOverTime: () => ga4RevenueOverTime(data),
+    ga4UserAge: () => ga4UserAge(data),
+    ga4UserGender: () => ga4UserGender(data),
+    ga4GeoBreakdown: () => ga4GeoBreakdown(data),
+    ga4EventCount: () => ga4EventCount(data),
   };
   const fn = map[chartType];
   return fn ? fn() : null;
@@ -1123,5 +1139,473 @@ function heatmapCalendar(data) {
         itemStyle: { borderColor: "#fff", borderWidth: 2, borderRadius: 4 },
       },
     ],
+  };
+}
+
+/* ─── 15. GA4 Traffic Over Time — dual area chart ─── */
+function ga4TrafficOverTime(data) {
+  const trend = data?.chart_data || [
+    { date: "2024-01-01", sessions: 1250, users: 980 },
+    { date: "2024-01-02", sessions: 1380, users: 1050 },
+    { date: "2024-01-03", sessions: 1520, users: 1180 },
+    { date: "2024-01-04", sessions: 1340, users: 1020 },
+    { date: "2024-01-05", sessions: 1680, users: 1290 },
+    { date: "2024-01-06", sessions: 920, users: 750 },
+    { date: "2024-01-07", sessions: 1100, users: 870 },
+  ];
+  const dates = trend.map(d => {
+    const p = d.date?.split("-");
+    return p ? `${p[2]}/${p[1]}` : d.date;
+  });
+
+  return {
+    animation: true,
+    animationDuration: 1000,
+    tooltip: {
+      ...ttBg(),
+      trigger: "axis",
+      axisPointer: { type: "cross", crossStyle: { color: "#cbd5e1" } },
+      formatter: (params) => {
+        let s = `<div style="font-weight:700;margin-bottom:4px">${params[0].axisValue}</div>`;
+        params.forEach(p => {
+          s += `<div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="width:8px;height:4px;border-radius:2px;background:${p.color}"></span><span style="color:#64748b">${p.seriesName}</span><span style="font-weight:700;margin-left:auto">${p.value?.toLocaleString()}</span></div>`;
+        });
+        return s;
+      },
+    },
+    legend: {
+      data: ["Sessions", "Users"],
+      top: 2, right: 4,
+      textStyle: { fontSize: 10, color: "#64748b", fontFamily: FONT },
+      itemWidth: 14, itemHeight: 6, itemGap: 12, icon: "roundRect",
+    },
+    grid: gridOvr(),
+    xAxis: {
+      type: "category", data: dates,
+      axisLabel: { color: "#94a3b8", fontSize: 9, rotate: 30, fontFamily: FONT },
+      axisLine: { lineStyle: { color: "#e2e8f0" } },
+      axisTick: { show: false },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: { color: "#94a3b8", fontSize: 9 },
+      splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+    },
+    series: [
+      {
+        name: "Sessions", type: "line", smooth: 0.3, symbol: "circle", symbolSize: 4,
+        data: trend.map(d => d.sessions),
+        itemStyle: { color: "#3b82f6" },
+        lineStyle: { width: 2.5, color: "#3b82f6" },
+        areaStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [{ offset: 0, color: "rgba(59,130,246,0.2)" }, { offset: 1, color: "rgba(59,130,246,0.02)" }],
+          },
+        },
+        emphasis: { itemStyle: { shadowBlur: 8, shadowColor: "rgba(59,130,246,0.4)" } },
+      },
+      {
+        name: "Users", type: "line", smooth: 0.3, symbol: "circle", symbolSize: 4,
+        data: trend.map(d => d.users),
+        itemStyle: { color: "#10b981" },
+        lineStyle: { width: 2, color: "#10b981" },
+        areaStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [{ offset: 0, color: "rgba(16,185,129,0.15)" }, { offset: 1, color: "rgba(16,185,129,0.02)" }],
+          },
+        },
+        emphasis: { itemStyle: { shadowBlur: 8, shadowColor: "rgba(16,185,129,0.4)" } },
+      },
+    ],
+  };
+}
+
+/* ─── 16. GA4 Traffic Sources — donut with legend ─── */
+function ga4TrafficSources(data) {
+  const sources = data?.sources || [
+    { source: "Direct", sessions: 14200 },
+    { source: "Organic Search", sessions: 11800 },
+    { source: "Referral", sessions: 6400 },
+    { source: "Social", sessions: 5200 },
+    { source: "Email", sessions: 3100 },
+    { source: "Paid Search", sessions: 1867 },
+  ];
+  const total = sources.reduce((s, r) => s + r.sessions, 0);
+  const palette = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ef4444", "#06b6d4"];
+  const colorMap = { direct: "#3b82f6", "organic search": "#10b981", referral: "#f59e0b", social: "#8b5cf6", email: "#ef4444", "paid search": "#06b6d4" };
+
+  return {
+    tooltip: {
+      ...ttBg(),
+      trigger: "item",
+      formatter: ({ name, value, percent }) => `<div style="font-weight:700;margin-bottom:4px">${name}</div><div style="font-size:18px;font-weight:800;color:${colorMap[name.toLowerCase()] || "#64748b"}">${value.toLocaleString()}</div><div style="color:#94a3b8;font-size:11px">${percent}% of traffic</div>`,
+    },
+    legend: {
+      orient: "vertical", right: 8, top: "middle",
+      textStyle: { fontSize: 10, color: "#475569", fontFamily: FONT, rich: { name: { fontSize: 11, fontWeight: 600, color: "#334155", fontFamily: FONT, lineHeight: 16 }, pct: { fontSize: 9, color: "#94a3b8", fontFamily: FONT, lineHeight: 14 } } },
+      itemWidth: 12, itemHeight: 12, itemGap: 10, icon: "roundRect",
+      formatter: (name) => {
+        const entry = sources.find(s => s.source === name);
+        const pct = entry ? ((entry.sessions / total) * 100).toFixed(1) : 0;
+        return `{name|${name}}\n{pct|${pct}%}`;
+      },
+    },
+    series: [{
+      type: "pie", radius: ["48%", "72%"], center: ["33%", "50%"],
+      avoidLabelOverlap: true,
+      itemStyle: { borderRadius: 10, borderColor: "#fff", borderWidth: 4 },
+      label: { show: false },
+      emphasis: {
+        scaleSize: 10,
+        label: { show: true, fontSize: 13, fontWeight: "bold", fontFamily: FONT, formatter: "{b}\n{d}%", lineHeight: 18 },
+        itemStyle: { shadowBlur: 20, shadowColor: "rgba(0,0,0,0.15)" },
+      },
+      animationType: "scale", animationEasing: "elasticOut",
+      data: sources.map((s, i) => ({
+        value: s.sessions, name: s.source,
+        itemStyle: { color: palette[i % palette.length] },
+      })),
+    }],
+    graphic: [{
+      type: "group", left: "29%", top: "48%",
+      children: [
+        { type: "text", top: -12, style: { text: total.toLocaleString(), textAlign: "center", fill: "#0f172a", fontSize: 22, fontWeight: 800, fontFamily: FONT } },
+        { type: "text", top: 14, style: { text: "Sessions", textAlign: "center", fill: "#94a3b8", fontSize: 10, fontWeight: 600, fontFamily: FONT } },
+      ],
+    }],
+  };
+}
+
+/* ─── 17. GA4 Pages by Views — horizontal bar ─── */
+function ga4PagesPerSession(data) {
+  const pages = data?.pages?.slice(0, 8) || [
+    { page: "/home", views: 8420 }, { page: "/pricing", views: 5230 },
+    { page: "/features", views: 4180 }, { page: "/blog", views: 3650 },
+    { page: "/contact", views: 2890 }, { page: "/about", views: 2340 },
+  ];
+
+  return {
+    animation: true, animationDuration: 800,
+    tooltip: {
+      ...ttBg(), trigger: "axis",
+      axisPointer: { type: "shadow", shadowStyle: { color: "rgba(59,130,246,0.04)" } },
+      formatter: ({ 0: { value, name } }) => `<div style="font-weight:700;margin-bottom:2px">${name}</div><div style="font-size:16px;font-weight:800;color:#3b82f6">${value.toLocaleString()} views</div>`,
+    },
+    grid: gridOvr({ right: 45 }),
+    xAxis: { type: "value", axisLabel: { color: "#94a3b8", fontSize: 9 }, splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } } },
+    yAxis: {
+      type: "category", data: pages.map(p => p.page),
+      axisLabel: { color: "#334155", fontSize: 11, fontWeight: 600, fontFamily: FONT },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    series: [{
+      type: "bar",
+      data: pages.map(p => ({
+        value: p.views,
+        itemStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: "#60a5fa" }, { offset: 1, color: "#3b82f6" }] },
+          borderRadius: [0, 8, 8, 0],
+          shadowColor: "rgba(59,130,246,0.15)", shadowBlur: 6, shadowOffsetX: 2,
+        },
+      })),
+      barWidth: "55%",
+      label: { show: true, position: "right", fontSize: 10, color: "#64748b", fontFamily: FONT, fontWeight: 600 },
+    }],
+  };
+}
+
+/* ─── 18. GA4 Device Breakdown — donut ─── */
+function ga4DeviceBreakdown(data) {
+  const devices = data?.devices || [
+    { device: "Desktop", sessions: 18420 },
+    { device: "Mobile", sessions: 16850 },
+    { device: "Tablet", sessions: 7297 },
+  ];
+  const total = devices.reduce((s, d) => s + d.sessions, 0);
+  const colorMap = { desktop: "#3b82f6", mobile: "#10b981", tablet: "#f59e0b" };
+
+  return {
+    tooltip: {
+      ...ttBg(), trigger: "item",
+      formatter: ({ name, value, percent }) => `<div style="font-weight:700;margin-bottom:4px">${name}</div><div style="font-size:18px;font-weight:800;color:${colorMap[name.toLowerCase()] || "#64748b"}">${value.toLocaleString()}</div><div style="color:#94a3b8;font-size:11px">${percent}% of sessions</div>`,
+    },
+    legend: {
+      orient: "vertical", right: 8, top: "middle",
+      textStyle: { fontSize: 10, color: "#475569", fontFamily: FONT, rich: { name: { fontSize: 11, fontWeight: 600, color: "#334155", fontFamily: FONT, lineHeight: 16 }, pct: { fontSize: 9, color: "#94a3b8", fontFamily: FONT, lineHeight: 14 } } },
+      itemWidth: 12, itemHeight: 12, itemGap: 12, icon: "roundRect",
+      formatter: (name) => {
+        const entry = devices.find(d => d.device === name);
+        const pct = entry ? ((entry.sessions / total) * 100).toFixed(1) : 0;
+        return `{name|${name}}\n{pct|${pct}%}`;
+      },
+    },
+    series: [{
+      type: "pie", radius: ["48%", "72%"], center: ["33%", "50%"],
+      avoidLabelOverlap: true,
+      itemStyle: { borderRadius: 10, borderColor: "#fff", borderWidth: 4 },
+      label: { show: false },
+      emphasis: {
+        scaleSize: 10,
+        label: { show: true, fontSize: 13, fontWeight: "bold", fontFamily: FONT, formatter: "{b}\n{d}%", lineHeight: 18 },
+        itemStyle: { shadowBlur: 20, shadowColor: "rgba(0,0,0,0.15)" },
+      },
+      animationType: "scale", animationEasing: "elasticOut",
+      data: devices.map(d => ({
+        value: d.sessions, name: d.device,
+        itemStyle: { color: colorMap[d.device.toLowerCase()] || "#94a3b8" },
+      })),
+    }],
+    graphic: [{
+      type: "group", left: "29%", top: "48%",
+      children: [
+        { type: "text", top: -12, style: { text: total.toLocaleString(), textAlign: "center", fill: "#0f172a", fontSize: 22, fontWeight: 800, fontFamily: FONT } },
+        { type: "text", top: 14, style: { text: "Sessions", textAlign: "center", fill: "#94a3b8", fontSize: 10, fontWeight: 600, fontFamily: FONT } },
+      ],
+    }],
+  };
+}
+
+/* ─── 19. GA4 Top Landing Pages — horizontal bar with bounce rate ─── */
+function ga4TopLandingPages(data) {
+  const pages = data?.pages?.slice(0, 8) || [
+    { page: "/home", sessions: 8420, bounceRate: 28.5 },
+    { page: "/blog/seo-tips", sessions: 4830, bounceRate: 35.2 },
+    { page: "/pricing", sessions: 3650, bounceRate: 22.1 },
+    { page: "/features", sessions: 3200, bounceRate: 31.8 },
+    { page: "/docs/getting-started", sessions: 2750, bounceRate: 18.4 },
+    { page: "/blog/analytics", sessions: 2400, bounceRate: 42.6 },
+  ];
+
+  return {
+    animation: true, animationDuration: 800,
+    tooltip: {
+      ...ttBg(), trigger: "axis",
+      axisPointer: { type: "shadow", shadowStyle: { color: "rgba(59,130,246,0.04)" } },
+      formatter: (params) => {
+        const p = params[0];
+        const page = pages[p.dataIndex];
+        return `<div style="font-weight:700;margin-bottom:4px">${p.name}</div><div style="margin:2px 0;color:#64748b">Sessions: <span style="font-weight:700">${p.value.toLocaleString()}</span></div><div style="margin:2px 0;color:#64748b">Bounce Rate: <span style="font-weight:700;color:${page?.bounceRate > 35 ? "#f43f5e" : "#10b981"}">${page?.bounceRate ?? "-"}%</span></div>`;
+      },
+    },
+    grid: gridOvr({ right: 50 }),
+    xAxis: { type: "value", axisLabel: { color: "#94a3b8", fontSize: 9 }, splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } } },
+    yAxis: {
+      type: "category", data: pages.map(p => p.page),
+      axisLabel: { color: "#334155", fontSize: 11, fontWeight: 600, fontFamily: FONT },
+      axisLine: { show: false }, axisTick: { show: false },
+    },
+    series: [{
+      type: "bar",
+      data: pages.map(p => ({
+        value: p.sessions,
+        itemStyle: {
+          color: {
+            type: "linear", x: 0, y: 0, x2: 1, y2: 0,
+            colorStops: p.bounceRate > 35
+              ? [{ offset: 0, color: "#fb7185" }, { offset: 1, color: "#f43f5e" }]
+              : [{ offset: 0, color: "#60a5fa" }, { offset: 1, color: "#3b82f6" }],
+          },
+          borderRadius: [0, 8, 8, 0],
+          shadowColor: p.bounceRate > 35 ? "rgba(244,63,94,0.15)" : "rgba(59,130,246,0.15)",
+          shadowBlur: 6,
+        },
+      })),
+      barWidth: "55%",
+      label: {
+        show: true, position: "right", fontSize: 10, fontFamily: FONT, fontWeight: 600,
+        formatter: (params) => {
+          const page = pages[params.dataIndex];
+          return page ? `${page.bounceRate}%` : "";
+        },
+        color: "#94a3b8",
+      },
+    }],
+  };
+}
+
+/* ─── 20. GA4 Engagement Rate — dual-axis line + bar ─── */
+function ga4EngagementRate(data) {
+  const trend = data?.chart_data || [
+    { date: "2024-01-01", engagementRate: 62.3, avgEngagementTime: 185 },
+    { date: "2024-01-02", engagementRate: 64.8, avgEngagementTime: 192 },
+    { date: "2024-01-03", engagementRate: 61.2, avgEngagementTime: 178 },
+    { date: "2024-01-04", engagementRate: 67.5, avgEngagementTime: 205 },
+    { date: "2024-01-05", engagementRate: 65.1, avgEngagementTime: 198 },
+    { date: "2024-01-06", engagementRate: 58.9, avgEngagementTime: 165 },
+    { date: "2024-01-07", engagementRate: 63.7, avgEngagementTime: 188 },
+  ];
+  const dates = trend.map(d => {
+    const p = d.date?.split("-");
+    return p ? `${p[2]}/${p[1]}` : d.date;
+  });
+
+  return {
+    animation: true, animationDuration: 1000,
+    tooltip: {
+      ...ttBg(), trigger: "axis",
+      axisPointer: { type: "cross", crossStyle: { color: "#cbd5e1" } },
+      formatter: (params) => {
+        let s = `<div style="font-weight:700;margin-bottom:4px">${params[0].axisValue}</div>`;
+        params.forEach(p => {
+          const unit = p.seriesName === "Engagement Rate" ? "%" : "s";
+          s += `<div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="width:8px;height:4px;border-radius:2px;background:${p.color}"></span><span style="color:#64748b">${p.seriesName}</span><span style="font-weight:700;margin-left:auto">${p.value}${unit}</span></div>`;
+        });
+        return s;
+      },
+    },
+    legend: {
+      data: ["Engagement Rate", "Avg Engagement Time"],
+      top: 2, right: 4,
+      textStyle: { fontSize: 10, color: "#64748b", fontFamily: FONT },
+      itemWidth: 14, itemHeight: 6, itemGap: 12, icon: "roundRect",
+    },
+    grid: gridOvr({ right: 45 }),
+    xAxis: {
+      type: "category", data: dates,
+      axisLabel: { color: "#94a3b8", fontSize: 9, rotate: 30, fontFamily: FONT },
+      axisLine: { lineStyle: { color: "#e2e8f0" } },
+      axisTick: { show: false },
+    },
+    yAxis: [
+      {
+        type: "value", name: "Rate %", max: 100,
+        nameTextStyle: { fontSize: 9, color: "#94a3b8", fontFamily: FONT },
+        axisLabel: { color: "#94a3b8", fontSize: 9, formatter: "{value}%", fontFamily: FONT },
+        splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } },
+      },
+      {
+        type: "value", name: "Seconds",
+        nameTextStyle: { fontSize: 9, color: "#94a3b8", fontFamily: FONT },
+        axisLabel: { color: "#94a3b8", fontSize: 9, formatter: "{value}s", fontFamily: FONT },
+        splitLine: { show: false },
+      },
+    ],
+    series: [
+      {
+        name: "Engagement Rate", type: "line", smooth: 0.3, yAxisIndex: 0,
+        symbol: "circle", symbolSize: 6,
+        data: trend.map(d => d.engagementRate),
+        itemStyle: { color: "#8b5cf6", borderColor: "#fff", borderWidth: 2 },
+        lineStyle: { width: 2.5, color: "#8b5cf6" },
+        areaStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [{ offset: 0, color: "rgba(139,92,246,0.2)" }, { offset: 1, color: "rgba(139,92,246,0.02)" }],
+          },
+        },
+        emphasis: { itemStyle: { shadowBlur: 8, shadowColor: "rgba(139,92,246,0.4)" } },
+      },
+      {
+        name: "Avg Engagement Time", type: "bar", yAxisIndex: 1,
+        data: trend.map(d => d.avgEngagementTime),
+        itemStyle: {
+          color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "#60a5fa" }, { offset: 1, color: "#93c5fd" }] },
+          borderRadius: [6, 6, 0, 0],
+        },
+        barWidth: "40%",
+      },
+    ],
+  };
+}
+
+/* ─── GA4 — Conversions Over Time ─── */
+function ga4ConversionsOverTime(data) {
+  const trend = data?.chart_data || [];
+  const dates = trend.map(d => { const p = d.date?.split("-"); return p ? `${p[2]}/${p[1]}` : d.date; });
+  return {
+    tooltip: { trigger: "axis", backgroundColor: "rgba(255,255,255,0.96)", borderColor: "#e2e8f0", borderWidth: 1, textStyle: { fontFamily: "Inter,sans-serif", fontSize: 11 } },
+    grid: { left: 10, right: 10, top: 30, bottom: 10, containLabel: true },
+    xAxis: { type: "category", data: dates, axisLabel: { color: "#94a3b8", fontSize: 9, rotate: 30 }, axisLine: { show: false }, axisTick: { show: false } },
+    yAxis: { type: "value", axisLabel: { color: "#94a3b8", fontSize: 9 }, splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } } },
+    series: [{
+      name: "Conversions", type: "line", smooth: true,
+      data: trend.map(d => d.conversions),
+      itemStyle: { color: "#10b981" },
+      areaStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "rgba(16,185,129,0.25)" }, { offset: 1, color: "rgba(16,185,129,0.02)" }] } },
+      lineStyle: { width: 1.5 }, symbol: "none",
+    }],
+  };
+}
+
+/* ─── GA4 — Revenue Over Time ─── */
+function ga4RevenueOverTime(data) {
+  const trend = data?.chart_data || [];
+  const dates = trend.map(d => { const p = d.date?.split("-"); return p ? `${p[2]}/${p[1]}` : d.date; });
+  return {
+    tooltip: { trigger: "axis", backgroundColor: "rgba(255,255,255,0.96)", borderColor: "#e2e8f0", borderWidth: 1, textStyle: { fontFamily: "Inter,sans-serif", fontSize: 11 } },
+    grid: { left: 10, right: 10, top: 10, bottom: 10, containLabel: true },
+    xAxis: { type: "category", data: dates, axisLabel: { color: "#94a3b8", fontSize: 9, rotate: 30 }, axisLine: { show: false }, axisTick: { show: false } },
+    yAxis: { type: "value", axisLabel: { color: "#94a3b8", fontSize: 9 }, splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } } },
+    series: [{
+      type: "bar",
+      data: trend.map(d => ({ value: d.revenue, itemStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "#34d399" }, { offset: 1, color: "#10b981" }] }, borderRadius: [4, 4, 0, 0] } })),
+      barWidth: "55%",
+    }],
+  };
+}
+
+/* ─── GA4 — User Age Distribution ─── */
+function ga4UserAge(data) {
+  const groups = data?.ageGroups || [];
+  return {
+    tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, backgroundColor: "rgba(255,255,255,0.96)", borderColor: "#e2e8f0", borderWidth: 1, textStyle: { fontFamily: "Inter,sans-serif", fontSize: 11 } },
+    grid: { left: 10, right: 10, top: 10, bottom: 20, containLabel: true },
+    xAxis: { type: "category", data: groups.map(g => g.group), axisLabel: { color: "#64748b", fontSize: 10, fontWeight: 500 }, axisLine: { show: false }, axisTick: { show: false } },
+    yAxis: { type: "value", axisLabel: { color: "#64748b", fontSize: 9 }, splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } } },
+    series: [{
+      type: "bar",
+      data: groups.map(g => ({ value: g.users, itemStyle: { color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "#818cf8" }, { offset: 1, color: "#6366f1" }] }, borderRadius: [4, 4, 0, 0] } })),
+      barWidth: "55%",
+      label: { show: true, position: "top", fontSize: 9, color: "#64748b" },
+    }],
+  };
+}
+
+/* ─── GA4 — User Gender Split ─── */
+function ga4UserGender(data) {
+  const genders = data?.genders || [];
+  const colorMap = { male: "#3b82f6", female: "#ec4899", unknown: "#94a3b8" };
+  return {
+    tooltip: { trigger: "item", backgroundColor: "rgba(255,255,255,0.96)", borderColor: "#e2e8f0", borderWidth: 1, textStyle: { fontFamily: "Inter,sans-serif", fontSize: 11 } },
+    series: [{
+      type: "pie", radius: ["45%", "68%"],
+      itemStyle: { borderRadius: 6, borderColor: "#fff", borderWidth: 3 },
+      label: { show: false },
+      emphasis: { label: { show: true, fontSize: 12, fontWeight: "bold" }, itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,0.15)" } },
+      data: genders.map(g => ({ value: g.users, name: g.gender, itemStyle: { color: colorMap[g.gender.toLowerCase()] || "#94a3b8" } })),
+    }],
+  };
+}
+
+/* ─── GA4 — Top Countries ─── */
+function ga4GeoBreakdown(data) {
+  const countries = data?.countries || [];
+  return {
+    tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, backgroundColor: "rgba(255,255,255,0.96)", borderColor: "#e2e8f0", borderWidth: 1, textStyle: { fontFamily: "Inter,sans-serif", fontSize: 11 } },
+    grid: { left: 10, right: 10, top: 10, bottom: 10, containLabel: true },
+    xAxis: { type: "value", axisLabel: { color: "#64748b", fontSize: 10 }, splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } } },
+    yAxis: { type: "category", data: countries.map(c => c.country), axisLabel: { color: "#64748b", fontSize: 10, fontWeight: 500 }, axisLine: { show: false }, axisTick: { show: false } },
+    series: [{
+      type: "bar",
+      data: countries.map(c => ({ value: c.sessions, itemStyle: { color: { type: "linear", x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: "#60a5fa" }, { offset: 1, color: "#3b82f6" }] }, borderRadius: [0, 4, 4, 0] } })),
+      barWidth: "55%",
+      label: { show: true, position: "right", fontSize: 9, color: "#64748b" },
+    }],
+  };
+}
+
+/* ─── GA4 — Event Count by Category ─── */
+function ga4EventCount(data) {
+  const events = data?.events || [];
+  return {
+    tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, backgroundColor: "rgba(255,255,255,0.96)", borderColor: "#e2e8f0", borderWidth: 1, textStyle: { fontFamily: "Inter,sans-serif", fontSize: 11 } },
+    grid: { left: 10, right: 10, top: 10, bottom: 10, containLabel: true },
+    xAxis: { type: "value", axisLabel: { color: "#64748b", fontSize: 10 }, splitLine: { lineStyle: { color: "#f1f5f9", type: "dashed" } } },
+    yAxis: { type: "category", data: events.map(e => e.event), axisLabel: { color: "#64748b", fontSize: 10, fontWeight: 500 }, axisLine: { show: false }, axisTick: { show: false } },
+    series: [{
+      type: "bar",
+      data: events.map(e => ({ value: e.count, itemStyle: { color: { type: "linear", x: 0, y: 0, x2: 1, y2: 0, colorStops: [{ offset: 0, color: "#a78bfa" }, { offset: 1, color: "#8b5cf6" }] }, borderRadius: [0, 4, 4, 0] } })),
+      barWidth: "55%",
+      label: { show: true, position: "right", fontSize: 9, color: "#64748b" },
+    }],
   };
 }
