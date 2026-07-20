@@ -808,7 +808,7 @@ export default function DashboardViewer() {
               ) : (
                 <div className="p-4 lg:p-5">
                   <div className="flex flex-col lg:flex-row gap-4 lg:gap-5 h-full">
-                    <div className={`flex-1 min-w-0 ${modalMeta?.type === "metric" ? "lg:max-w-[45%]" : ""}`}>
+                    <div className="flex-1 min-w-0">
                       <div className="relative group/chart rounded-2xl overflow-hidden" style={{ animation: "pulseGlow 4s ease-in-out infinite" }}>
                         <div
                           className="absolute -inset-px rounded-2xl opacity-25 group-hover/chart:opacity-50 transition-opacity duration-700"
@@ -953,7 +953,7 @@ export default function DashboardViewer() {
                       </div>
                     </div>
 
-                    <div className={`lg:w-[340px] shrink-0 space-y-3 ${modalMeta?.type === "metric" ? "lg:w-full" : ""}`}>
+                    <div className="lg:w-[340px] shrink-0 space-y-3">
                       {modalMeta?.api && (
                         <div className="fs-modal-card rounded-xl fs-card border p-4 transition-colors duration-300">
                           <h4 className="text-[9px] font-bold fs-section-label uppercase tracking-[0.15em] mb-2.5 flex items-center gap-1.5">
